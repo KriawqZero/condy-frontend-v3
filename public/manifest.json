@@ -1,0 +1,52 @@
+{
+  "name": "CONDY - Sistema de Gestão Condominial",
+  "short_name": "CONDY",
+  "description": "Sistema completo para gestão de condomínios, chamados e ativos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563EB",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "utilities"],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512x512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Novo Chamado",
+      "short_name": "Novo",
+      "description": "Abrir um novo chamado",
+      "url": "/sindico/chamados/novo",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Consultar Chamado",
+      "short_name": "Consulta",
+      "description": "Consultar status de chamado",
+      "url": "/consulta",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+} 
