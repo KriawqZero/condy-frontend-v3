@@ -155,6 +155,14 @@ export interface Chamado {
   updated_at: string;
 }
 
+// Tipos específicos para criação de chamado manual
+export interface AtivoManual {
+  descricao_ativo: string;
+  marca: string;
+  modelo: string;
+  local_instalacao: string;
+}
+
 export type Prioridade = 'NORMAL' | 'URGENCIA' | 'EMERGENCIA';
 export type Escopo = 'ORCAMENTO' | 'SERVICO_IMEDIATO';
 export type StatusChamado = 'ABERTO' | 'EM_ANDAMENTO' | 'CONCLUIDO';
@@ -167,7 +175,8 @@ export interface PrestadorChamado {
 
 export interface CreateChamadoRequest {
   condominio_id: string;
-  ativo_id: string;
+  ativo_id?: string; // Opcional quando usar ativo manual
+  ativo_manual?: AtivoManual; // Para inserção manual
   descricao_ocorrido: string;
   arquivos_anexos: string[];
   informacoes_adicionais?: string;

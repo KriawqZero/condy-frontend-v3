@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
-import Layout from '@/components/layout/Layout';
+import CondyLayout from '@/components/layout/CondyLayout';
 import SindicoDashboard from './SindicoDashboard';
 
 export default async function SindicoPage() {
@@ -16,8 +16,13 @@ export default async function SindicoPage() {
   }
 
   return (
-    <Layout user={session.user} title="Dashboard do Síndico">
+    <CondyLayout 
+      user={session.user}
+      title="Dashboard"
+      maxWidth="full"
+      background="gray"
+    >
       <SindicoDashboard user={session.user} />
-    </Layout>
+    </CondyLayout>
   );
 } 

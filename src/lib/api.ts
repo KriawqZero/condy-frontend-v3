@@ -167,6 +167,61 @@ export async function deleteAtivo(imovelId: string, ativoId: string) {
   }
 }
 
+// Chamados API
+export async function getChamados() {
+  try {
+    const response = await apiClient.get('/chamados');
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Erro ao obter chamados');
+  }
+}
+
+export async function getChamadoById(id: string) {
+  try {
+    const response = await apiClient.get(`/chamados/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Erro ao obter chamado');
+  }
+}
+
+export async function createChamado(chamadoData: any) {
+  try {
+    const response = await apiClient.post('/chamados', chamadoData);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Erro ao criar chamado');
+  }
+}
+
+export async function updateChamado(id: string, chamadoData: any) {
+  try {
+    const response = await apiClient.patch(`/chamados/${id}`, chamadoData);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Erro ao atualizar chamado');
+  }
+}
+
+export async function deleteChamado(id: string) {
+  try {
+    const response = await apiClient.delete(`/chamados/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Erro ao deletar chamado');
+  }
+}
+
+export async function getChamadosByStatus(status: string) {
+  try {
+    const response = await apiClient.get(`/chamados?status=${status}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Erro ao obter chamados por status');
+  }
+}
+
 // Sistema API
 export async function healthCheck() {
   try {
