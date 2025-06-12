@@ -1,5 +1,5 @@
+import { AuthResponse, LoginRequest, RegisterRequest } from '@/types';
 import axios, { AxiosResponse } from 'axios';
-import { ApiResponse, LoginRequest, RegisterRequest, AuthResponse } from '@/types';
 import { getSession } from './session';
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:3000/api';
@@ -57,18 +57,18 @@ export async function getCurrentUser() {
   }
 }
 
-export async function checkEmail(email: string): Promise<{ available: boolean }> {
+export async function checkEmail(email: string): Promise<{ exists: boolean }> {
   try {
-    const response = await apiClient.post('/auth/check-email', { email });
+    const response = await apiClient.get('/auth/check-email', { params: { query: email } });
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'Erro ao verificar email');
   }
 }
 
-export async function checkCpfCnpj(cpf_cnpj: string): Promise<{ available: boolean }> {
+export async function checkCpfCnpj(cpfCnpj: string): Promise<{ exists: boolean }> {
   try {
-    const response = await apiClient.post('/auth/check-cpf-cnpj', { cpf_cnpj });
+    const response = await apiClient.get('/auth/check-cpf-cnpj', { params: { query: cpfCnpj } });
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'Erro ao verificar CPF/CNPJ');

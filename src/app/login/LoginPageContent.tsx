@@ -1,30 +1,36 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Head from 'next/head';
-import Footer from '@/components/Footer';
-import LoginForm from '@/components/auth/LoginForm';
+import Footer from "@/components/Footer";
+import LoginForm from "@/components/auth/LoginForm";
+import Head from "next/head";
+import { useState } from "react";
 
 export default function LoginPageContent() {
   const [showError, setShowError] = useState(false);
-  const [errorTitle, setErrorTitle] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorTitle, setErrorTitle] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleShowError = (error: { errorTitle: string; errorMessage: string }) => {
+  const handleShowError = (error: {
+    errorTitle: string;
+    errorMessage: string;
+  }) => {
     setShowError(true);
     setErrorTitle(error.errorTitle);
     setErrorMessage(error.errorMessage);
   };
 
   const handleWhatsAppClick = () => {
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5511999999999';
-    const message = encodeURIComponent('Esqueci minha senha ou email de cadastro. Preciso de ajuda para acessar minha conta no sistema CONDY.');
+    const whatsappNumber =
+      process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5511999999999";
+    const message = encodeURIComponent(
+      "Esqueci minha senha ou email de cadastro. Preciso de ajuda para acessar minha conta no sistema CONDY."
+    );
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex bg-white flex-col min-h-screen">
       <Head>
         <title>Condy - Login</title>
         <meta
@@ -50,8 +56,8 @@ export default function LoginPageContent() {
                   Bem-vindo à Condy, sua nova central de gestão condominial.
                 </h1>
                 <p className="text-gray-600">
-                  Gerencie chamados, acompanhe serviços e facilite a rotina do seu
-                  condomínio.
+                  Gerencie chamados, acompanhe serviços e facilite a rotina do
+                  seu condomínio.
                 </p>
               </div>
 
@@ -156,4 +162,4 @@ export default function LoginPageContent() {
       )}
     </div>
   );
-} 
+}

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { loginAction } from '@/app/actions/auth';
+import { loginAction } from "@/app/actions/auth";
+import { useState } from "react";
 
 interface LoginFormProps {
   onShowError: (error: { errorTitle: string; errorMessage: string }) => void;
@@ -9,8 +9,8 @@ interface LoginFormProps {
 
 export default function LoginForm({ onShowError }: LoginFormProps) {
   const [formData, setFormData] = useState({
-    email: '',
-    senha: '',
+    email: "",
+    senha: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!isValidEmail() || !formData.senha) {
       return;
     }
@@ -37,22 +37,24 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('password', formData.senha);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("password", formData.senha);
 
       const result = await loginAction(formDataToSend);
 
       if (result && !result.success) {
         onShowError({
-          errorTitle: 'Dados incorretos',
-          errorMessage: 'Email ou senha incorretos. Verifique seus dados e tente novamente.'
+          errorTitle: "Dados incorretos",
+          errorMessage:
+            "Email ou senha incorretos. Verifique seus dados e tente novamente.",
         });
       }
     } catch (error) {
-      console.error('Erro ao fazer login:', error);
+      console.error("Erro ao fazer login:", error);
       onShowError({
-        errorTitle: 'Erro de conexão',
-        errorMessage: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.'
+        errorTitle: "Erro de conexão",
+        errorMessage:
+          "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.",
       });
     } finally {
       setLoading(false);
@@ -185,15 +187,21 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
             <input
               id="email-input"
               value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
+              }
               type="email"
-              className={`form-input ${formData.email && !isValidEmail() ? 'error' : ''}`}
+              className={`form-input ${
+                formData.email && !isValidEmail() ? "error" : ""
+              }`}
               placeholder=" "
               required
             />
             <label
               htmlFor="email-input"
-              className={`floating-label ${formData.email && !isValidEmail() ? 'text-red-500' : ''}`}
+              className={`floating-label ${
+                formData.email && !isValidEmail() ? "text-red-500" : ""
+              }`}
             >
               Email de cadastro
             </label>
@@ -227,8 +235,10 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
             <input
               id="senha-input"
               value={formData.senha}
-              onChange={(e) => setFormData(prev => ({ ...prev, senha: e.target.value }))}
-              type={mostrarSenha ? 'text' : 'password'}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, senha: e.target.value }))
+              }
+              type={mostrarSenha ? "text" : "password"}
               className="form-input"
               placeholder=" "
               required
@@ -241,7 +251,7 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
               onClick={alternarVisibilidadeSenha}
             >
               <img
-                src={mostrarSenha ? '/svg/eye_off.svg' : '/svg/eye.svg'}
+                src={mostrarSenha ? "/svg/eye_off.svg" : "/svg/eye.svg"}
                 alt="Mostrar/Ocultar senha"
                 className="w-5 h-5"
               />
@@ -252,7 +262,11 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
         {/* Loading ou Botão de login */}
         {loading ? (
           <span className="flex items-center justify-center">
-            <img src="/loading.gif" alt="Carregando" className="w-10 h-10 mr-2" />
+            <img
+              src="/loading.gif"
+              alt="Carregando"
+              className="w-10 h-10 mr-2"
+            />
           </span>
         ) : (
           <span>
@@ -268,4 +282,4 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
       </form>
     </>
   );
-} 
+}

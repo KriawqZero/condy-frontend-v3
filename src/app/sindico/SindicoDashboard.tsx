@@ -1,58 +1,36 @@
-import { User } from '@/types';
-import Link from 'next/link';
-import Button from '@/components/ui/Button';
+import Button from "@/components/ui/Button";
+import { User } from "@/types";
+import Link from "next/link";
 
 interface SindicoDashboardProps {
   user: User;
 }
 
-// Mock data - em produção viria da API
-const mockChamados = [
-  {
-    id: '1',
-    numero_chamado: 'CH001',
-    status: 'ABERTO',
-    descricao: 'Portão automático não está funcionando',
-    valor: null,
-    prestador: null,
-    created_at: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    numero_chamado: 'CH002',
-    status: 'EM_ANDAMENTO',
-    descricao: 'Vazamento na piscina',
-    valor: 850.00,
-    prestador: 'Hidráulica Silva',
-    created_at: '2024-01-10T14:30:00Z'
-  }
-];
-
 export default function SindicoDashboard({ user }: SindicoDashboardProps) {
-  const chamadosAbertos = mockChamados.filter(c => c.status !== 'CONCLUIDO');
+  const chamadosAbertos = mockChamados.filter((c) => c.status !== "CONCLUIDO");
   const temChamados = chamadosAbertos.length > 0;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ABERTO':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'EM_ANDAMENTO':
-        return 'bg-blue-100 text-blue-800';
-      case 'CONCLUIDO':
-        return 'bg-green-100 text-green-800';
+      case "ABERTO":
+        return "bg-yellow-100 text-yellow-800";
+      case "EM_ANDAMENTO":
+        return "bg-blue-100 text-blue-800";
+      case "CONCLUIDO":
+        return "bg-green-100 text-green-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'ABERTO':
-        return 'Aberto';
-      case 'EM_ANDAMENTO':
-        return 'Em Andamento';
-      case 'CONCLUIDO':
-        return 'Concluído';
+      case "ABERTO":
+        return "Aberto";
+      case "EM_ANDAMENTO":
+        return "Em Andamento";
+      case "CONCLUIDO":
+        return "Concluído";
       default:
         return status;
     }
@@ -66,7 +44,8 @@ export default function SindicoDashboard({ user }: SindicoDashboardProps) {
           Olá, {user.name}! 👋
         </h1>
         <p className="text-gray-600">
-          Bem-vindo ao painel do síndico. Aqui você pode acompanhar e gerenciar todos os seus chamados.
+          Bem-vindo ao painel do síndico. Aqui você pode acompanhar e gerenciar
+          todos os seus chamados.
         </p>
       </div>
 
@@ -131,33 +110,41 @@ export default function SindicoDashboard({ user }: SindicoDashboardProps) {
                         <span className="font-mono text-sm font-medium text-gray-600">
                           {chamado.numero_chamado}
                         </span>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(chamado.status)}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                            chamado.status
+                          )}`}
+                        >
                           {getStatusText(chamado.status)}
                         </span>
                       </div>
-                      
+
                       <h3 className="font-medium text-gray-900 mb-1">
                         {chamado.descricao}
                       </h3>
-                      
+
                       <div className="text-sm text-gray-600 space-y-1">
                         {chamado.valor && (
                           <p>
-                            <span className="font-medium">Valor:</span> R$ {chamado.valor.toFixed(2)}
+                            <span className="font-medium">Valor:</span> R${" "}
+                            {chamado.valor.toFixed(2)}
                           </p>
                         )}
                         {chamado.prestador && (
                           <p>
-                            <span className="font-medium">Prestador:</span> {chamado.prestador}
+                            <span className="font-medium">Prestador:</span>{" "}
+                            {chamado.prestador}
                           </p>
                         )}
                         <p>
-                          <span className="font-medium">Criado em:</span>{' '}
-                          {new Date(chamado.created_at).toLocaleDateString('pt-BR')}
+                          <span className="font-medium">Criado em:</span>{" "}
+                          {new Date(chamado.created_at).toLocaleDateString(
+                            "pt-BR"
+                          )}
                         </p>
                       </div>
                     </div>
-                    
+
                     <Link href={`/sindico/chamados/${chamado.id}`}>
                       <Button variant="secondary" size="sm">
                         Ver detalhes
@@ -177,9 +164,7 @@ export default function SindicoDashboard({ user }: SindicoDashboardProps) {
                 Você não possui chamados abertos no momento.
               </p>
               <Link href="/sindico/chamados/novo">
-                <Button>
-                  Abrir novo chamado
-                </Button>
+                <Button>Abrir novo chamado</Button>
               </Link>
             </div>
           )}
@@ -187,4 +172,4 @@ export default function SindicoDashboard({ user }: SindicoDashboardProps) {
       </div>
     </div>
   );
-} 
+}

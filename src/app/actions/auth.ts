@@ -1,10 +1,9 @@
 'use server';
 
+import { checkCpfCnpj, checkEmail, loginUser } from '@/lib/api';
+import { createSession, destroySession } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { loginUser, registerUser, checkEmail, checkCpfCnpj } from '@/lib/api';
-import { createSession, destroySession } from '@/lib/session';
-import { LoginRequest, RegisterRequest } from '@/types';
 
 // Schemas de validação
 const loginSchema = z.object({
@@ -38,19 +37,20 @@ export async function loginAction(formData: FormData) {
     const validatedData = loginSchema.parse(rawData);
     
     const response = await loginUser(validatedData);
+    console.log('Login response:', response);
     
-    if (response.success) {
-      await createSession(response.data.token, response.data.user);
-      
+    if (response) {
+      await createSession(response.token, response.user);
+      console.log('Usuário logado:', response.user);
       // Redirecionar baseado no tipo de usuário
-      switch (response.data.user.user_type) {
+      switch (response.user.userType) {
         case 'ADMIN_PLATAFORMA':
           redirect('/admin');
         case 'SINDICO_RESIDENTE':
         case 'SINDICO_PROFISSIONAL':
           redirect('/sindico');
-        case 'ADMIN_IMOVEIS':
-          redirect('/admin-imoveis');
+        case 'EMPRESA':
+          redirect('/empresa');
         case 'PRESTADOR':
           redirect('/prestador');
         default:
@@ -77,6 +77,7 @@ export async function loginAction(formData: FormData) {
 }
 
 // Server Action para registro
+/*
 export async function registerAction(formData: FormData) {
   try {
     const rawData = {
@@ -95,8 +96,8 @@ export async function registerAction(formData: FormData) {
     
     const response = await registerUser(validatedData);
     
-    if (response.success) {
-      await createSession(response.data.token, response.data.user);
+    if (response) {
+      await createSession(response.token, response.user);
       redirect('/dashboard');
     }
     
@@ -117,6 +118,7 @@ export async function registerAction(formData: FormData) {
     };
   }
 }
+  */
 
 // Server Action para logout
 export async function logoutAction() {

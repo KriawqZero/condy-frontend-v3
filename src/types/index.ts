@@ -2,20 +2,17 @@
 export interface User {
   id: string;
   name: string;
-  cpf_cnpj: string;
-  whatsapp: string;
   email: string;
-  user_type: UserType;
-  data_nascimento?: string;
-  email_pessoal?: string;
-  created_at: string;
-  updated_at: string;
+  cpfCnpj: string;
+  whatsapp: string;
+  userType: UserType;
+  dataNascimento?: string;
 }
 
 export type UserType = 
   | 'SINDICO_RESIDENTE'
   | 'SINDICO_PROFISSIONAL'
-  | 'ADMIN_IMOVEIS'
+  | 'EMPRESA'
   | 'PRESTADOR'
   | 'ADMIN_PLATAFORMA';
 
@@ -38,12 +35,8 @@ export interface RegisterRequest {
 }
 
 export interface AuthResponse {
-  success: boolean;
-  data: {
-    token: string;
-    user: User;
-  };
-  message?: string;
+  user: User;
+  token: string;
 }
 
 // Imovel Types
