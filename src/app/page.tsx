@@ -1,8 +1,16 @@
-import Link from 'next/link';
-import Layout from '@/components/layout/Layout';
-import Button from '@/components/ui/Button';
+import Layout from "@/components/layout/Layout";
+import Button from "@/components/ui/Button";
+import { getSession } from "@/lib/session";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Verificar se já está logado
+  const session = await getSession();
+  if (!session.isLoggedIn) {
+    redirect("/login"); // Redirecionar para dashboard padrão
+  } else redirect("/sindico"); // Redirecionar para dashboard do síndico
+
   return (
     <Layout showSidebar={false}>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -13,16 +21,17 @@ export default function HomePage() {
               <main className="mx-auto max-w-7xl px-4 pt-10 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
                 <div className="sm:text-center lg:text-left">
                   <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                    <span className="block xl:inline">CONDY</span>{' '}
+                    <span className="block xl:inline">CONDY</span>{" "}
                     <span className="block text-blue-600 xl:inline">
                       Sistema de Gestão
                     </span>
                   </h1>
                   <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                    Plataforma completa para gestão condominial. Gerencie chamados, 
-                    acompanhe serviços e mantenha tudo organizado em um só lugar.
+                    Plataforma completa para gestão condominial. Gerencie
+                    chamados, acompanhe serviços e mantenha tudo organizado em
+                    um só lugar.
                   </p>
-                  
+
                   <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                     <div className="rounded-md shadow">
                       <Link href="/login">
@@ -33,7 +42,11 @@ export default function HomePage() {
                     </div>
                     <div className="mt-3 sm:mt-0 sm:ml-3">
                       <Link href="/consulta">
-                        <Button variant="secondary" size="lg" className="w-full px-8 py-3">
+                        <Button
+                          variant="secondary"
+                          size="lg"
+                          className="w-full px-8 py-3"
+                        >
                           Consultar Chamado
                         </Button>
                       </Link>
@@ -43,7 +56,7 @@ export default function HomePage() {
               </main>
             </div>
           </div>
-          
+
           {/* Illustration */}
           <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
             <div className="h-56 w-full bg-gradient-to-r from-blue-400 to-blue-600 sm:h-72 md:h-96 lg:w-full lg:h-full flex items-center justify-center">
@@ -78,7 +91,7 @@ export default function HomePage() {
                       Gestão de Chamados
                     </h3>
                     <p className="mt-2 text-base text-gray-500">
-                      Abra, acompanhe e gerencie todos os chamados de manutenção 
+                      Abra, acompanhe e gerencie todos os chamados de manutenção
                       do seu condomínio de forma organizada.
                     </p>
                   </div>
@@ -92,8 +105,8 @@ export default function HomePage() {
                       Controle de Ativos
                     </h3>
                     <p className="mt-2 text-base text-gray-500">
-                      Registre e monitore todos os equipamentos e ativos 
-                      do condomínio com códigos únicos.
+                      Registre e monitore todos os equipamentos e ativos do
+                      condomínio com códigos únicos.
                     </p>
                   </div>
                 </div>
@@ -106,8 +119,8 @@ export default function HomePage() {
                       Acesso Mobile
                     </h3>
                     <p className="mt-2 text-base text-gray-500">
-                      Acesse o sistema de qualquer dispositivo, 
-                      a qualquer hora e em qualquer lugar.
+                      Acesse o sistema de qualquer dispositivo, a qualquer hora
+                      e em qualquer lugar.
                     </p>
                   </div>
                 </div>

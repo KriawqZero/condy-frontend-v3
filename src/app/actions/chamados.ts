@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { CreateChamadoRequest, AtivoManual } from '@/types';
+import { createChamado, getChamadoById, getChamados } from '@/lib/api';
 
 // Mock data para desenvolvimento (remover quando API estiver pronta)
 const mockChamados = [
@@ -123,9 +124,8 @@ const updateChamadoSchema = z.object({
 // Server Action para listar chamados
 export async function getChamadosAction() {
   try {
-    // TODO: Substituir por chamada real à API quando disponível
-    // const response = await getChamados();
-    return { success: true, data: mockChamados };
+    const response = await getChamados();
+    return { success: true, data: response.data };
   } catch (error: any) {
     return { 
       success: false, 
@@ -137,9 +137,9 @@ export async function getChamadosAction() {
 // Server Action para obter chamado por ID
 export async function getChamadoByIdAction(id: string) {
   try {
-    // TODO: Substituir por chamada real à API quando disponível
-    // const response = await getChamadoById(id);
-    const chamado = mockChamados.find(c => c.id === id);
+    const response = await getChamadoById(id);
+    
+    const chamado = response.data;
     if (!chamado) {
       return { success: false, error: 'Chamado não encontrado' };
     }
@@ -177,8 +177,7 @@ export async function createChamadoAction(formData: FormData) {
 
     const validatedData = createChamadoSchema.parse(rawData);
     
-    // TODO: Substituir por chamada real à API quando disponível
-    // const response = await createChamado(validatedData);
+    const response = await createChamado(validatedData);
     
     // Mock: Gerar número do chamado
     const numeroChamado = `CH${String(mockChamados.length + 1).padStart(3, '0')}`;
