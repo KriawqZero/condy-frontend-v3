@@ -6,7 +6,12 @@ import SindicoDashboard from "./SindicoDashboard";
 export default async function SindicoPage() {
   const session = await getSession();
 
-  if (!session.isLoggedIn || !session.user) {
+  if (
+    !session.isLoggedIn ||
+    session.user === undefined ||
+    session.user === null
+  ) {
+    console.error("Usuário não está logado ou dados do usuário inválidos");
     redirect("/login");
   }
 
@@ -16,6 +21,7 @@ export default async function SindicoPage() {
       session.user.userType
     )
   ) {
+    console.error("Usuário não é síndico");
     redirect("/login");
   }
 

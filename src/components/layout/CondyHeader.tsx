@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { User } from '@/types';
-import { logoutAction } from '@/app/actions/auth';
+import { logoutAction } from "@/app/actions/auth";
+import { User } from "@/types";
 
 interface CondyHeaderProps {
   user?: User;
@@ -10,10 +10,13 @@ interface CondyHeaderProps {
 
 export default function CondyHeader({ user, title }: CondyHeaderProps) {
   const handleWhatsAppClick = () => {
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5511999999999';
-    const message = encodeURIComponent('Olá! Preciso de ajuda com o sistema CONDY.');
+    const whatsappNumber =
+      process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5511999999999";
+    const message = encodeURIComponent(
+      "Olá! Preciso de ajuda com o sistema CONDY."
+    );
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
   return (
@@ -45,7 +48,11 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
                 className="flex items-center space-x-2 text-green-600 hover:text-green-700 transition-colors"
                 title="Falar no WhatsApp"
               >
-                <img src="/svg/whatsapp_icon.svg" alt="WhatsApp" className="w-5 h-5" />
+                <img
+                  src="/svg/whatsapp_icon.svg"
+                  alt="WhatsApp"
+                  className="w-5 h-5"
+                />
                 <span className="text-sm font-medium">Ajuda</span>
               </button>
 
@@ -54,11 +61,11 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
                 <div className="text-sm text-right">
                   <p className="font-medium text-gray-900">{user.name}</p>
                   <p className="text-gray-500 capitalize text-xs">
-                    {user.user_type.toLowerCase().replace('_', ' ')}
+                    {user.userType.toLowerCase().replace("_", " ")}
                   </p>
                 </div>
               </div>
-              
+
               {/* Botão de logout */}
               <form action={logoutAction}>
                 <button
@@ -77,7 +84,11 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
                 className="flex items-center space-x-2 text-green-600 hover:text-green-700 transition-colors"
                 title="Falar no WhatsApp"
               >
-                <img src="/svg/whatsapp_icon.svg" alt="WhatsApp" className="w-5 h-5" />
+                <img
+                  src="/svg/whatsapp_icon.svg"
+                  alt="WhatsApp"
+                  className="w-5 h-5"
+                />
                 <span className="text-sm font-medium">Ajuda</span>
               </button>
 
@@ -103,4 +114,4 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
       </div>
     </header>
   );
-} 
+}

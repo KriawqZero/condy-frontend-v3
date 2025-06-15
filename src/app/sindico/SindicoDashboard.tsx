@@ -1,3 +1,4 @@
+import { getChamadosAction } from "@/app/actions/chamados";
 import Button from "@/components/ui/Button";
 import { User } from "@/types";
 import Link from "next/link";
@@ -6,9 +7,11 @@ interface SindicoDashboardProps {
   user: User;
 }
 
-export default function SindicoDashboard({ user }: SindicoDashboardProps) {
-  const chamadosAbertos = mockChamados.filter((c) => c.status !== "CONCLUIDO");
-  const temChamados = chamadosAbertos.length > 0;
+export default async function SindicoDashboard({
+  user,
+}: SindicoDashboardProps) {
+  const chamados = (await getChamadosAction()).data || [];
+  const temChamados = chamados.length > 0;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -99,7 +102,7 @@ export default function SindicoDashboard({ user }: SindicoDashboardProps) {
         <div className="p-6">
           {temChamados ? (
             <div className="space-y-4">
-              {chamadosAbertos.map((chamado) => (
+              {chamados.map((chamado) => (
                 <div
                   key={chamado.id}
                   className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
@@ -108,7 +111,7 @@ export default function SindicoDashboard({ user }: SindicoDashboardProps) {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="font-mono text-sm font-medium text-gray-600">
-                          {chamado.numero_chamado}
+                          {chamado.numeroChamado}
                         </span>
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
@@ -120,16 +123,10 @@ export default function SindicoDashboard({ user }: SindicoDashboardProps) {
                       </div>
 
                       <h3 className="font-medium text-gray-900 mb-1">
-                        {chamado.descricao}
+                        {chamado.descricaoOcorrido}
                       </h3>
 
-                      <div className="text-sm text-gray-600 space-y-1">
-                        {chamado.valor && (
-                          <p>
-                            <span className="font-medium">Valor:</span> R${" "}
-                            {chamado.valor.toFixed(2)}
-                          </p>
-                        )}
+                      {/*<div className="text-sm text-gray-600 space-y-1">
                         {chamado.prestador && (
                           <p>
                             <span className="font-medium">Prestador:</span>{" "}
@@ -138,11 +135,11 @@ export default function SindicoDashboard({ user }: SindicoDashboardProps) {
                         )}
                         <p>
                           <span className="font-medium">Criado em:</span>{" "}
-                          {new Date(chamado.created_at).toLocaleDateString(
+                          {new Date(chamado.createdAt).toLocaleDateString(
                             "pt-BR"
                           )}
                         </p>
-                      </div>
+                      </div>*/}
                     </div>
 
                     <Link href={`/sindico/chamados/${chamado.id}`}>

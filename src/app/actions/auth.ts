@@ -1,78 +1,92 @@
-'use server';
+"use server";
 
-import { checkCpfCnpj, checkEmail, loginUser } from '@/lib/api';
-import { createSession, destroySession } from '@/lib/session';
-import { redirect } from 'next/navigation';
-import { z } from 'zod';
+import { checkCpfCnpj, checkEmail, loginUser } from "@/lib/api";
+import { createSession, destroySession } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { z } from "zod";
 
 // Schemas de validação
 const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
-const registerSchema = z.object({
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  cpf_cnpj: z.string().min(11, 'CPF/CNPJ inválido'),
-  whatsapp: z.string().min(10, 'WhatsApp inválido'),
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-  password_confirmation: z.string(),
-  user_type: z.enum(['SINDICO_RESIDENTE', 'SINDICO_PROFISSIONAL', 'ADMIN_IMOVEIS', 'PRESTADOR', 'ADMIN_PLATAFORMA']),
-  data_nascimento: z.string().optional(),
-  email_pessoal: z.string().email().optional(),
-}).refine((data) => data.password === data.password_confirmation, {
-  message: "Senhas não coincidem",
-  path: ["password_confirmation"],
-});
+const registerSchema = z
+  .object({
+    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+    cpf_cnpj: z.string().min(11, "CPF/CNPJ inválido"),
+    whatsapp: z.string().min(10, "WhatsApp inválido"),
+    email: z.string().email("Email inválido"),
+    password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+    password_confirmation: z.string(),
+    user_type: z.enum([
+      "SINDICO_RESIDENTE",
+      "SINDICO_PROFISSIONAL",
+      "ADMIN_IMOVEIS",
+      "PRESTADOR",
+      "ADMIN_PLATAFORMA",
+    ]),
+    data_nascimento: z.string().optional(),
+    email_pessoal: z.string().email().optional(),
+  })
+  .refine((data) => data.password === data.password_confirmation, {
+    message: "Senhas não coincidem",
+    path: ["password_confirmation"],
+  });
 
 // Server Action para login
 export async function loginAction(formData: FormData) {
+  await destroySession(); // Garantir que a sessão anterior seja destruída
+  let redirectPath = "/default";
   try {
     const rawData = {
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
     };
 
     const validatedData = loginSchema.parse(rawData);
-    
+
     const response = await loginUser(validatedData);
-    console.log('Login response:', response);
-    
+    console.log("Login response:", response);
+
     if (response) {
-      await createSession(response.token, response.user);
-      console.log('Usuário logado:', response.user);
+      await createSession(response.data.token, response.data.user);
+      console.log("Usuário logado:", response.data);
       // Redirecionar baseado no tipo de usuário
-      switch (response.user.userType) {
-        case 'ADMIN_PLATAFORMA':
-          redirect('/admin');
-        case 'SINDICO_RESIDENTE':
-        case 'SINDICO_PROFISSIONAL':
-          redirect('/sindico');
-        case 'EMPRESA':
-          redirect('/empresa');
-        case 'PRESTADOR':
-          redirect('/prestador');
+
+      switch (response.data.user.userType) {
+        case "ADMIN_PLATAFORMA":
+          redirectPath = "/admin";
+        case "SINDICO_RESIDENTE":
+        case "SINDICO_PROFISSIONAL":
+          redirectPath = "/sindico";
+        case "EMPRESA":
+          redirectPath = "/empresa";
+        case "PRESTADOR":
+          redirectPath = "/prestador";
         default:
-          redirect('/dashboard');
+          redirectPath = "/dashboard";
       }
     }
-    
-    return { success: false, error: 'Credenciais inválidas' };
-    
+
+    console.error("Login falhou: Credenciais inválidas");
+
+    return { success: false, error: "Credenciais inválidas" };
   } catch (error: any) {
-    if (error.name === 'ZodError') {
-      return { 
-        success: false, 
-        error: 'Dados inválidos',
-        fieldErrors: error.errors 
+    if (error.name === "ZodError") {
+      return {
+        success: false,
+        error: "Dados inválidos",
+        fieldErrors: error.errors,
       };
     }
-    
-    return { 
-      success: false, 
-      error: error.message || 'Erro interno do servidor' 
+
+    return {
+      success: false,
+      error: error.message || "Erro interno do servidor",
     };
+  } finally {
+    redirect(redirectPath);
   }
 }
 
@@ -123,7 +137,7 @@ export async function registerAction(formData: FormData) {
 // Server Action para logout
 export async function logoutAction() {
   await destroySession();
-  redirect('/login');
+  redirect("/login");
 }
 
 // Server Action para verificar email
@@ -144,4 +158,4 @@ export async function checkCpfCnpjAction(cpf_cnpj: string) {
   } catch (error: any) {
     return { available: false, error: error.message };
   }
-} 
+}

@@ -9,12 +9,12 @@ export interface User {
   dataNascimento?: string;
 }
 
-export type UserType = 
-  | 'SINDICO_RESIDENTE'
-  | 'SINDICO_PROFISSIONAL'
-  | 'EMPRESA'
-  | 'PRESTADOR'
-  | 'ADMIN_PLATAFORMA';
+export type UserType =
+  | "SINDICO_RESIDENTE"
+  | "SINDICO_PROFISSIONAL"
+  | "EMPRESA"
+  | "PRESTADOR"
+  | "ADMIN_PLATAFORMA";
 
 // Auth Types
 export interface LoginRequest {
@@ -35,8 +35,11 @@ export interface RegisterRequest {
 }
 
 export interface AuthResponse {
-  user: User;
-  token: string;
+  success: boolean;
+  data: {
+    user: User;
+    token: string;
+  };
 }
 
 // Imovel Types
@@ -58,7 +61,7 @@ export interface Imovel {
   ativos?: Ativo[];
 }
 
-export type RegimeTributario = 'SIMPLES' | 'LUCRO_PRESUMIDO' | 'LUCRO_REAL';
+export type RegimeTributario = "SIMPLES" | "LUCRO_PRESUMIDO" | "LUCRO_REAL";
 
 export interface CreateImovelRequest {
   cnpj: string;
@@ -156,9 +159,9 @@ export interface AtivoManual {
   local_instalacao: string;
 }
 
-export type Prioridade = 'NORMAL' | 'URGENCIA' | 'EMERGENCIA';
-export type Escopo = 'ORCAMENTO' | 'SERVICO_IMEDIATO';
-export type StatusChamado = 'ABERTO' | 'EM_ANDAMENTO' | 'CONCLUIDO';
+export type Prioridade = "NORMAL" | "URGENCIA" | "EMERGENCIA";
+export type Escopo = "ORCAMENTO" | "SERVICO_IMEDIATO";
+export type StatusChamado = "ABERTO" | "EM_ANDAMENTO" | "CONCLUIDO";
 
 export interface PrestadorChamado {
   cnpj: string;
@@ -203,12 +206,12 @@ export interface RegisterForm extends RegisterRequest {}
 // Component Props Types
 export interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "danger";
+  size?: "sm" | "md" | "lg";
   disabled?: boolean;
   loading?: boolean;
   onClick?: () => void;
-  type?: 'button' | 'submit' | 'reset';
+  type?: "button" | "submit" | "reset";
   className?: string;
 }
 
@@ -227,4 +230,4 @@ export interface InputProps {
 // Utility Types
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-}; 
+};
