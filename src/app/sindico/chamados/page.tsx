@@ -1,23 +1,27 @@
-import { redirect } from 'next/navigation';
-import { getSession } from '@/lib/session';
-import CondyLayout from '@/components/layout/CondyLayout';
-import ChamadosListSindico from './ChamadosListSindico';
+import CondyLayout from "@/components/layout/CondyLayout";
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
+import ChamadosListSindico from "./ChamadosListSindico";
 
 export default async function ChamadosSindicoPage() {
   const session = await getSession();
-  
+
   if (!session.isLoggedIn || !session.user) {
-    redirect('/login');
+    redirect("/login");
   }
 
   // Verificar se é síndico
-  if (!['SINDICO_RESIDENTE', 'SINDICO_PROFISSIONAL'].includes(session.user.user_type)) {
-    redirect('/login');
+  if (
+    !["SINDICO_RESIDENTE", "SINDICO_PROFISSIONAL"].includes(
+      session.user.userType
+    )
+  ) {
+    redirect("/login");
   }
 
   return (
-    <CondyLayout 
-      user={session.user} 
+    <CondyLayout
+      user={session.user}
       title="Meus Chamados"
       maxWidth="full"
       background="gray"
@@ -30,10 +34,11 @@ export default async function ChamadosSindicoPage() {
               Meus Chamados
             </h1>
             <p className="text-gray-600 mt-1">
-              Gerencie e acompanhe o status de todos os seus chamados de manutenção
+              Gerencie e acompanhe o status de todos os seus chamados de
+              manutenção
             </p>
           </div>
-          
+
           <div className="mt-4 md:mt-0">
             <a
               href="/sindico/chamados/novo"
@@ -50,4 +55,4 @@ export default async function ChamadosSindicoPage() {
       </div>
     </CondyLayout>
   );
-} 
+}

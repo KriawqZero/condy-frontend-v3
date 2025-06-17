@@ -11,6 +11,7 @@ export default async function SindicoDashboard({
   user,
 }: SindicoDashboardProps) {
   const chamados = (await getChamadosAction()).data || [];
+  console.log("Chamados:", chamados);
   const temChamados = chamados.length > 0;
 
   const getStatusColor = (status: string) => {

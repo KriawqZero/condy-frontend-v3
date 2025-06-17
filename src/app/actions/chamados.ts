@@ -1,6 +1,7 @@
 "use server";
 
 import { getChamadoById, getChamados } from "@/lib/api";
+import { Chamado } from "@/types";
 import { z } from "zod";
 
 /* Schemas de validação
@@ -12,25 +13,6 @@ const ativoManualSchema = z.object({
   modelo: z.string().min(1, "Modelo é obrigatório"),
   local_instalacao: z.string().min(1, "Local de instalação é obrigatório"),
 });*/
-
-type Chamado = {
-  id: string;
-  numeroChamado: string;
-  descricaoOcorrido: string;
-  informacoesAdicionais?: string;
-
-  prioridade: "BAIXA" | "MEDIA" | "ALTA";
-  escopo: "ORCAMENTO" | "SERVICO_IMEDIATO";
-  status: "NOVO" | "A_CAMINHO" | "EM_ATENDIMENTO" | "CONCLUIDO";
-
-  imovelId: number;
-  solicitanteId: string;
-  ativoId?: number;
-  prestadorId?: string;
-
-  createdAt: Date;
-  updatedAt: Date;
-};
 
 type ResponsePayload<T> = {
   success: boolean | undefined;
@@ -70,7 +52,7 @@ const createChamadoSchema = z
 export async function getChamadosAction(): Promise<ResponsePayload<Chamado[]>> {
   try {
     const response = await getChamados();
-    return { success: true, data: response.items };
+    return { success: true, data: response.data.items };
   } catch (error: any) {
     return {
       success: false,

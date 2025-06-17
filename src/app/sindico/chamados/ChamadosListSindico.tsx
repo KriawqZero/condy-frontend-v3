@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { getChamadosAction } from '@/app/actions/chamados';
-import { Chamado } from '@/types';
+import { getChamadosAction } from "@/app/actions/chamados";
+import { Chamado } from "@/types";
+import { useEffect, useState } from "react";
 
 export default function ChamadosListSindico() {
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [filtroStatus, setFiltroStatus] = useState<string>('TODOS');
+  const [error, setError] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState<string>("TODOS");
 
   useEffect(() => {
     const fetchChamados = async () => {
       try {
         setLoading(true);
         const result = await getChamadosAction();
-        
-        if (result.success) {
+
+        if (result.success && result.data !== undefined) {
           setChamados(result.data);
         } else {
-          setError(result.error || 'Erro ao carregar chamados');
+          setError(result.error || "Erro ao carregar chamados");
         }
       } catch (err: any) {
-        setError('Erro interno. Tente novamente.');
+        setError("Erro interno. Tente novamente.");
       } finally {
         setLoading(false);
       }
@@ -33,50 +33,54 @@ export default function ChamadosListSindico() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ABERTO':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'EM_ANDAMENTO':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'CONCLUIDO':
-        return 'bg-green-100 text-green-800 border-green-200';
+      case "ABERTO":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "EM_ANDAMENTO":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "CONCLUIDO":
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getPrioridadeColor = (prioridade: string) => {
     switch (prioridade) {
-      case 'NORMAL':
-        return 'bg-blue-50 text-blue-700';
-      case 'URGENCIA':
-        return 'bg-yellow-50 text-yellow-700';
-      case 'EMERGENCIA':
-        return 'bg-red-50 text-red-700';
+      case "NORMAL":
+        return "bg-blue-50 text-blue-700";
+      case "URGENCIA":
+        return "bg-yellow-50 text-yellow-700";
+      case "EMERGENCIA":
+        return "bg-red-50 text-red-700";
       default:
-        return 'bg-gray-50 text-gray-700';
+        return "bg-gray-50 text-gray-700";
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const handleWhatsAppClick = (numero: string) => {
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5511999999999';
-    const message = encodeURIComponent(`Olá! Gostaria de falar sobre o chamado ${numero}.`);
+    const whatsappNumber =
+      process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5511999999999";
+    const message = encodeURIComponent(
+      `Olá! Gostaria de falar sobre o chamado ${numero}.`
+    );
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
-  const chamadosFiltrados = filtroStatus === 'TODOS' 
-    ? chamados 
-    : chamados.filter(c => c.status === filtroStatus);
+  const chamadosFiltrados =
+    filtroStatus === "TODOS"
+      ? chamados
+      : chamados.filter((c) => c.status === filtroStatus);
 
   if (loading) {
     return (
@@ -106,22 +110,26 @@ export default function ChamadosListSindico() {
       {/* Filtros */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex flex-wrap gap-2">
-          {['TODOS', 'ABERTO', 'EM_ANDAMENTO', 'CONCLUIDO'].map((status) => (
+          {["TODOS", "ABERTO", "EM_ANDAMENTO", "CONCLUIDO"].map((status) => (
             <button
               key={status}
               onClick={() => setFiltroStatus(status)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filtroStatus === status
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              {status === 'TODOS' ? 'Todos' : 
-               status === 'ABERTO' ? 'Abertos' :
-               status === 'EM_ANDAMENTO' ? 'Em Andamento' : 'Concluídos'}
-              {status !== 'TODOS' && (
+              {status === "TODOS"
+                ? "Todos"
+                : status === "ABERTO"
+                ? "Abertos"
+                : status === "EM_ANDAMENTO"
+                ? "Em Andamento"
+                : "Concluídos"}
+              {status !== "TODOS" && (
                 <span className="ml-2 text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
-                  {chamados.filter(c => c.status === status).length}
+                  {chamados.filter((c) => c.status === status).length}
                 </span>
               )}
             </button>
@@ -133,8 +141,8 @@ export default function ChamadosListSindico() {
       {chamadosFiltrados.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
           <div className="text-gray-500 mb-4">
-            {filtroStatus === 'TODOS' 
-              ? 'Nenhum chamado encontrado' 
+            {filtroStatus === "TODOS"
+              ? "Nenhum chamado encontrado"
               : `Nenhum chamado ${filtroStatus.toLowerCase()} encontrado`}
           </div>
           <a
@@ -148,43 +156,70 @@ export default function ChamadosListSindico() {
       ) : (
         <div className="grid gap-4">
           {chamadosFiltrados.map((chamado) => (
-            <div key={chamado.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div
+              key={chamado.id}
+              className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow"
+            >
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                 {/* Informações principais */}
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
                     <span className="font-mono text-lg font-bold text-blue-600">
-                      {chamado.numero_chamado}
+                      {chamado.numeroChamado}
                     </span>
-                    <span className={`px-2 py-1 rounded-lg text-xs font-medium border ${getStatusColor(chamado.status)}`}>
-                      {chamado.status === 'ABERTO' ? 'Aberto' :
-                       chamado.status === 'EM_ANDAMENTO' ? 'Em Andamento' : 'Concluído'}
+                    <span
+                      className={`px-2 py-1 rounded-lg text-xs font-medium border ${getStatusColor(
+                        chamado.status
+                      )}`}
+                    >
+                      {chamado.status === "NOVO"
+                        ? "Novo"
+                        : chamado.status === "A_CAMINHO"
+                        ? "A Caminho"
+                        : chamado.status === "EM_ATENDIMENTO"
+                        ? "Em Atendimento"
+                        : "Concluído"}
                     </span>
-                    <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getPrioridadeColor(chamado.prioridade)}`}>
-                      {chamado.prioridade === 'NORMAL' ? 'Normal' :
-                       chamado.prioridade === 'URGENCIA' ? 'Urgência' : 'Emergência'}
+                    <span
+                      className={`px-2 py-1 rounded-lg text-xs font-medium ${getPrioridadeColor(
+                        chamado.prioridade
+                      )}`}
+                    >
+                      {chamado.prioridade === "BAIXA"
+                        ? "BAIXA"
+                        : chamado.prioridade === "MEDIA"
+                        ? "MÉDIA"
+                        : "ALTA"}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {chamado.ativo?.descricao_ativo}
-                  </h3>
-                  
                   <p className="text-gray-600 mb-3 line-clamp-2">
-                    {chamado.descricao_ocorrido}
+                    {chamado.descricaoOcorrido}
                   </p>
 
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                     <div className="flex items-center">
-                      <img src="/svg/building_icon.svg" alt="" className="w-4 h-4 mr-1" />
-                      {chamado.condominio?.nome_fantasia}
+                      <img
+                        src="/svg/building_icon.svg"
+                        alt=""
+                        className="w-4 h-4 mr-1"
+                      />
+                      {chamado.imovel.nome_fantasia}
                     </div>
                     <div className="flex items-center">
-                      <img src="/svg/location_pin.svg" alt="" className="w-4 h-4 mr-1" />
+                      <img
+                        src="/svg/location_pin.svg"
+                        alt=""
+                        className="w-4 h-4 mr-1"
+                      />
                       {chamado.ativo?.local_instalacao}
                     </div>
                     <div className="flex items-center">
-                      <img src="/svg/calendar_icon.svg" alt="" className="w-4 h-4 mr-1" />
+                      <img
+                        src="/svg/calendar_icon.svg"
+                        alt=""
+                        className="w-4 h-4 mr-1"
+                      />
                       {formatDate(chamado.created_at)}
                     </div>
                   </div>
@@ -192,9 +227,14 @@ export default function ChamadosListSindico() {
                   {chamado.valor && (
                     <div className="mt-3 p-3 bg-green-50 rounded-lg">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-green-800">Valor do Serviço:</span>
+                        <span className="text-sm font-medium text-green-800">
+                          Valor do Serviço:
+                        </span>
                         <span className="text-lg font-bold text-green-600">
-                          R$ {chamado.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          R${" "}
+                          {chamado.valor.toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                          })}
                         </span>
                       </div>
                       {chamado.prestador_info && (
@@ -212,10 +252,14 @@ export default function ChamadosListSindico() {
                     onClick={() => handleWhatsAppClick(chamado.numero_chamado)}
                     className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                   >
-                    <img src="/svg/whatsapp_icon.svg" alt="" className="w-4 h-4 mr-2" />
+                    <img
+                      src="/svg/whatsapp_icon.svg"
+                      alt=""
+                      className="w-4 h-4 mr-2"
+                    />
                     WhatsApp
                   </button>
-                  
+
                   <a
                     href={`/sindico/chamados/${chamado.id}`}
                     className="flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
@@ -230,4 +274,4 @@ export default function ChamadosListSindico() {
       )}
     </div>
   );
-} 
+}

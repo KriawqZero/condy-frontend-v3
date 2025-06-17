@@ -126,29 +126,38 @@ export interface CreateAtivoRequest {
   relatorio_fotografico_urls: string[];
 }
 
+export interface Imovel {
+  id: number;
+  cep: string;
+  endereco: string;
+  cidade: string;
+  bairro: string;
+  numero: string;
+  uf: string;
+
+  complemento?: string;
+
+  quantidadeMoradias: number;
+}
+
 // Chamado Types (baseado nos requisitos)
 export interface Chamado {
   id: string;
-  numero_chamado: string;
-  condominio_id: string;
-  condominio?: Imovel;
-  ativo_id: string;
-  ativo?: Ativo;
-  sindico_id: string;
-  sindico?: User;
-  descricao_ocorrido: string;
-  arquivos_anexos: string[];
-  informacoes_adicionais?: string;
-  prioridade: Prioridade;
-  escopo: Escopo;
-  status: StatusChamado;
-  valor?: number;
-  garantia?: boolean;
-  prestador_info?: PrestadorChamado;
-  observacao_prestador?: string;
-  nf_recibo_url?: string;
-  created_at: string;
-  updated_at: string;
+  numeroChamado: string;
+  descricaoOcorrido: string;
+  informacoesAdicionais?: string;
+
+  prioridade: "BAIXA" | "MEDIA" | "ALTA";
+  escopo: "ORCAMENTO" | "SERVICO_IMEDIATO";
+  status: "NOVO" | "A_CAMINHO" | "EM_ATENDIMENTO" | "CONCLUIDO";
+
+  imovelId: number;
+  solicitanteId: string;
+  ativoId?: number;
+  prestadorId?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Tipos específicos para criação de chamado manual
