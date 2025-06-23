@@ -37,7 +37,8 @@ const registerSchema = z
 // Server Action para login
 export async function loginAction(formData: FormData) {
   await destroySession(); // Garantir que a sessão anterior seja destruída
-  let redirectPath = "/default";
+  let redirectPath = "/dashboard"; // Default fallback
+
   try {
     const rawData = {
       email: formData.get("email") as string,
@@ -46,33 +47,49 @@ export async function loginAction(formData: FormData) {
 
     const validatedData = loginSchema.parse(rawData);
 
-    const response = await loginUser(validatedData);
-    console.log("Login response:", response);
+    try {
+      // Try login with API
+      const response = await loginUser(validatedData);
 
-    if (response) {
+      if (!response || !response.data) {
+        return { success: false, error: "Credenciais inválidas" };
+      }
+
+      // Login bem sucedido
       await createSession(response.data.token, response.data.user);
-      console.log("Usuário logado:", response.data);
-      // Redirecionar baseado no tipo de usuário
 
+      // Determinar rota de redirecionamento
       switch (response.data.user.userType) {
         case "ADMIN_PLATAFORMA":
           redirectPath = "/admin";
+          break;
         case "SINDICO_RESIDENTE":
         case "SINDICO_PROFISSIONAL":
           redirectPath = "/sindico";
+          break;
         case "EMPRESA":
           redirectPath = "/empresa";
+          break;
         case "PRESTADOR":
           redirectPath = "/prestador";
+          break;
         default:
           redirectPath = "/dashboard";
+          break;
       }
+
+      // Redirecionar apenas em caso de sucesso
+      redirect(redirectPath);
+    } catch (apiError: any) {
+      // Handle API errors separately
+      return {
+        success: false,
+        error: apiError.message || "Credenciais inválidas",
+      };
     }
-
-    console.error("Login falhou: Credenciais inválidas");
-
-    return { success: false, error: "Credenciais inválidas" };
   } catch (error: any) {
+    console.error("Login error:", error);
+
     if (error.name === "ZodError") {
       return {
         success: false,
@@ -85,9 +102,10 @@ export async function loginAction(formData: FormData) {
       success: false,
       error: error.message || "Erro interno do servidor",
     };
-  } finally {
-    redirect(redirectPath);
   }
+
+  // This line won't be reached due to redirect, but helps TypeScript
+  return { success: true };
 }
 
 // Server Action para registro

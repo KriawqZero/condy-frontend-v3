@@ -42,7 +42,7 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
 
       const result = await loginAction(formDataToSend);
       console.log("Resultado do login:", result);
-      handleConsoleLog("Resultado do login:", "log");
+
       if (result && !result.success) {
         console.error("Login falhou:", result.error);
         onShowError({
