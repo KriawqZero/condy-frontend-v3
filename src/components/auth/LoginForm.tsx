@@ -127,7 +127,7 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
         .form-input:not(:placeholder-shown) ~ .floating-label {
           top: -1px;
           left: 15px;
-          transform: translateY(0);
+          transform: translateY(-10px);
           font-size: 12px;
           font-weight: 600;
           color: #1f45ff;

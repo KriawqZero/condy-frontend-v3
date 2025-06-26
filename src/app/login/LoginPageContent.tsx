@@ -109,7 +109,7 @@ export default function LoginPageContent() {
 
       <Footer />
 
-      {/* Modal de erro */}
+      {/* Modal de erro }
       {showError && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full">
@@ -159,7 +159,7 @@ export default function LoginPageContent() {
             </div>
           </div>
         </div>
-      )}
+      )*/}
     </div>
   );
 }
