@@ -33,7 +33,6 @@ export default function LoginPageContent() {
 
   return (
     <div className="flex bg-white flex-col min-h-screen">
-      <h1>TESTE TESTE</h1>
       <Head>
         <title>Condy - Login</title>
         <meta
