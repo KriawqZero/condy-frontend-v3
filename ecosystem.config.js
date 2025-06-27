@@ -7,13 +7,16 @@ module.exports = {
       script: 'node_modules/next/dist/bin/next',
       args: ['start'],
       env_local: {
-        APP_ENV: 'local'
+        NODE_ENV: 'development',
+        PORT: 4500
       },
       env_dev: {
-        APP_ENV: 'dev'
+        NODE_ENV: 'development',
+        PORT: 4500
       },
       env_prod: {
-        APP_ENV: 'prod'
+        NODE_ENV: 'production',
+        PORT: 4500
       }
     }
   ]
