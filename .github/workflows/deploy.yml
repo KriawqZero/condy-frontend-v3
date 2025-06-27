@@ -20,5 +20,4 @@ jobs:
             cd $HOME/frontend-v3
             git pull
             yarn
-            yarn build
             yarn deploy:dev
