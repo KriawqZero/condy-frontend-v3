@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy:local": "next build && pm2 startOrRestart ecosystem.config.js --env local",
-    "deploy:dev": "next build && pm2 startOrRestart ecosystem.config.js --env dev",
-    "deploy:prod": "next build && pm2 startOrRestart ecosystem.config.js --env prod"
+    "deploy:local": "next build && pm2 startOrRestart ecosystem.config.js --env local -p 3500",
+    "deploy:dev": "next build && pm2 startOrRestart ecosystem.config.js --env dev -p 3500",
+    "deploy:prod": "next build && pm2 startOrRestart ecosystem.config.js --env prod -p 4500"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",

@@ -9,6 +9,7 @@ export default function LoginPageContent() {
   const [showError, setShowError] = useState(false);
   const [errorTitle, setErrorTitle] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [hasLoginError, setHasLoginError] = useState(false);
 
   const handleShowError = (error: {
     errorTitle: string;
@@ -17,6 +18,7 @@ export default function LoginPageContent() {
     setShowError(true);
     setErrorTitle(error.errorTitle);
     setErrorMessage(error.errorMessage);
+    setHasLoginError(true);
   };
 
   const handleWhatsAppClick = () => {
@@ -61,7 +63,7 @@ export default function LoginPageContent() {
                 </p>
               </div>
 
-              <LoginForm onShowError={handleShowError} />
+              <LoginForm />
 
               <div className="mt-8 p-4 bg-green-50 rounded-xl border border-green-200">
                 <div className="flex items-center">

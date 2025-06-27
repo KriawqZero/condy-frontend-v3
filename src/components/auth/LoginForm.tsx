@@ -3,11 +3,12 @@
 import { loginAction } from "@/app/actions/auth";
 import { useState } from "react";
 
-interface LoginFormProps {
-  onShowError: (error: { errorTitle: string; errorMessage: string }) => void;
-}
+type LoginErrorType = {
+  errorTitle: string;
+  errorMessage: string;
+};
 
-export default function LoginForm({ onShowError }: LoginFormProps) {
+export default function LoginForm() {
   const [formData, setFormData] = useState({
     email: "",
     senha: "",
@@ -15,6 +16,7 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
 
   const [loading, setLoading] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [loginError, setLoginError] = useState<LoginErrorType | null>(null);
 
   const isValidEmail = () => {
     if (!formData.email) return false;
@@ -44,16 +46,14 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
       console.log("Resultado do login:", result);
 
       if (result && !result.success) {
-        console.error("Login falhou:", result.error);
-        onShowError({
+        setLoginError({
           errorTitle: "Dados incorretos",
           errorMessage:
             "Email ou senha incorretos. Verifique seus dados e tente novamente.",
         });
       }
     } catch (error) {
-      console.error("Erro ao fazer login:", error);
-      onShowError({
+      setLoginError({
         errorTitle: "Erro de conexão",
         errorMessage:
           "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.",
@@ -202,10 +202,12 @@ export default function LoginForm({ onShowError }: LoginFormProps) {
             <label
               htmlFor="email-input"
               className={`floating-label ${
-                formData.email && !isValidEmail() ? "text-red-500" : ""
+                (formData.email && !isValidEmail()) || loginError
+                  ? "text-red-500"
+                  : ""
               }`}
             >
-              Email de cadastro
+              {loginError ? loginError.errorMessage : "Email de cadastro"}
             </label>
             {formData.email && isValidEmail() && (
               <div className="check-icon">
