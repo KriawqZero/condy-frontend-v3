@@ -165,184 +165,182 @@ export default function SindicoDashboard() {
   ).length;
 
   return (
-    <div className="min-h-screen">
-      {/* Main Content */}
-      <div className="bg-[#F5F7FF] min-h-screen -mt-32 relative z-0 pt-32">
-        <div className="container mx-auto px-6 lg:px-18 pb-20">
-          {/* Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {/* Total Invested */}
-            <Card className="bg-white rounded-[20px] p-5 shadow-sm border-0">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
-                  <StatisticsIcon />
-                </div>
-                <div>
-                  <p className="font-afacad text-sm font-bold text-[#7F98BC] mb-1">
-                    Total investido
-                  </p>
-                  <div className="font-afacad text-2xl font-bold text-black">
-                    <span className="text-base font-normal">R$</span> 7.400,00
-                  </div>
+    <div className="relative pb-20">
+      {/* Cards sobrepostos ao header - Ajustado para ficar 50% dentro e 50% fora */}
+      <div className="container mx-auto px-6 lg:px-18 relative -mt-20 z-10">
+        {/* Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {/* Total Invested */}
+          <Card className="bg-white rounded-[20px] p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                <StatisticsIcon />
+              </div>
+              <div>
+                <p className="font-afacad text-sm font-bold text-[#7F98BC] mb-1">
+                  Total investido
+                </p>
+                <div className="font-afacad text-2xl font-bold text-black">
+                  <span className="text-base font-normal">R$</span> 7.400,00
                 </div>
               </div>
-            </Card>
+            </div>
+          </Card>
 
-            {/* Active Tickets */}
-            <Card className="bg-white rounded-[20px] p-5 shadow-sm border-0">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
-                  <NoteIcon />
-                </div>
-                <div>
-                  <p className="font-afacad text-sm font-bold text-[#7F98BC] mb-1">
-                    Chamados ativos
-                  </p>
-                  <div className="font-afacad text-2xl font-bold text-black">
-                    {activeTicketsCount.toString().padStart(2, "0")} chamados
-                  </div>
+          {/* Active Tickets */}
+          <Card className="bg-white rounded-[20px] p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
+                <NoteIcon />
+              </div>
+              <div>
+                <p className="font-afacad text-sm font-bold text-[#7F98BC] mb-1">
+                  Chamados ativos
+                </p>
+                <div className="font-afacad text-2xl font-bold text-black">
+                  {activeTicketsCount.toString().padStart(2, "0")} chamados
                 </div>
               </div>
-            </Card>
+            </div>
+          </Card>
 
-            {/* Completed Tickets */}
-            <Card className="bg-white rounded-[20px] p-5 shadow-sm border-0">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
-                  <ClipboardTickIcon />
-                </div>
-                <div>
-                  <p className="font-afacad text-sm font-bold text-[#7F98BC] mb-1">
-                    Chamados concluídos
-                  </p>
-                  <div className="font-afacad text-2xl font-bold text-black">
-                    {completedTicketsCount.toString().padStart(2, "0")}{" "}
-                    finalizados
-                  </div>
+          {/* Completed Tickets */}
+          <Card className="bg-white rounded-[20px] p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                <ClipboardTickIcon />
+              </div>
+              <div>
+                <p className="font-afacad text-sm font-bold text-[#7F98BC] mb-1">
+                  Chamados concluídos
+                </p>
+                <div className="font-afacad text-2xl font-bold text-black">
+                  {completedTicketsCount.toString().padStart(2, "0")}{" "}
+                  finalizados
                 </div>
               </div>
-            </Card>
+            </div>
+          </Card>
+        </div>
+
+        {/* Tickets Section */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+            <div>
+              <h2 className="font-afacad text-3xl font-bold text-black mb-1">
+                Seus Chamados
+              </h2>
+              <p className="font-afacad text-base text-black">
+                Acompanhe as últimas atualizações ou histórico dos seus
+                pedidos
+              </p>
+            </div>
+            <Button
+              className="bg-[#1F45FF] hover:bg-[#1F45FF]/90 text-white font-afacad font-bold text-base px-8 py-3 h-12 rounded-xl shadow-lg"
+              onClick={() => setHasTickets(!hasTickets)}
+            >
+              Novo chamado
+            </Button>
           </div>
 
-          {/* Tickets Section */}
-          <div className="mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-              <div>
-                <h2 className="font-afacad text-3xl font-bold text-black mb-1">
-                  Seus Chamados
-                </h2>
-                <p className="font-afacad text-base text-black">
-                  Acompanhe as últimas atualizações ou histórico dos seus
-                  pedidos
-                </p>
-              </div>
-              <Button
-                className="bg-[#1F45FF] hover:bg-[#1F45FF]/90 text-white font-afacad font-bold text-base px-8 py-3 h-12 rounded-xl shadow-lg"
-                onClick={() => setHasTickets(!hasTickets)}
-              >
-                Novo chamado
-              </Button>
-            </div>
-
-            {hasTickets ? (
-              /* Tickets Table */
-              <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-                {/* Table Header */}
-                <div className="bg-white/30 px-6 py-4 border-b border-[#EFF0FF]">
-                  <div className="grid grid-cols-7 gap-4 text-sm font-afacad font-bold text-black">
-                    <div>Tipo de chamado</div>
-                    <div>Ativo cadastrado</div>
-                    <div>Valor do serviço</div>
-                    <div>Prestador vinculado</div>
-                    <div>Observações gerais</div>
-                    <div>Chamado</div>
-                    <div>Status do chamado</div>
-                  </div>
+          {hasTickets ? (
+            /* Tickets Table */
+            <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+              {/* Table Header */}
+              <div className="bg-white/30 px-6 py-4 border-b border-[#EFF0FF]">
+                <div className="grid grid-cols-7 gap-4 text-sm font-afacad font-bold text-black">
+                  <div>Tipo de chamado</div>
+                  <div>Ativo cadastrado</div>
+                  <div>Valor do serviço</div>
+                  <div>Prestador vinculado</div>
+                  <div>Observações gerais</div>
+                  <div>Chamado</div>
+                  <div>Status do chamado</div>
                 </div>
+              </div>
 
-                {/* Table Body */}
-                <div className="divide-y divide-[#EFF0FF]">
-                  {mockTickets.map((ticket) => (
-                    <div
-                      key={ticket.id}
-                      className="px-6 py-4 hover:bg-gray-50 group cursor-pointer"
-                    >
-                      <div className="grid grid-cols-7 gap-4 items-center">
-                        <div className="font-afacad text-sm font-bold text-black">
-                          {ticket.type}
-                        </div>
-                        <div className="font-afacad text-sm font-bold text-black">
-                          {ticket.asset}
-                        </div>
-                        <div
-                          className={cn(
-                            "font-afacad text-sm font-bold",
-                            ticket.value.includes("Sem")
-                              ? "text-black/50"
-                              : "text-black"
-                          )}
-                        >
-                          {ticket.value}
-                        </div>
-                        <div
-                          className={cn(
-                            "font-afacad text-sm font-bold",
-                            ticket.provider.includes("Sem")
-                              ? "text-black/50"
-                              : "text-black"
-                          )}
-                        >
-                          {ticket.provider}
-                        </div>
-                        <div className="font-afacad text-sm font-bold text-black">
-                          {ticket.observations}
-                        </div>
-                        <div className="font-afacad text-sm font-bold text-black">
-                          {ticket.ticketId}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          {getStatusBadge(ticket.status)}
-                          <div className="w-6 h-6 rounded-full bg-[#F5F7FF] flex items-center justify-center ml-2">
-                            <ChevronRightIcon />
-                          </div>
+              {/* Table Body */}
+              <div className="divide-y divide-[#EFF0FF]">
+                {mockTickets.map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className="px-6 py-4 hover:bg-gray-50 group cursor-pointer"
+                  >
+                    <div className="grid grid-cols-7 gap-4 items-center">
+                      <div className="font-afacad text-sm font-bold text-black">
+                        {ticket.type}
+                      </div>
+                      <div className="font-afacad text-sm font-bold text-black">
+                        {ticket.asset}
+                      </div>
+                      <div
+                        className={cn(
+                          "font-afacad text-sm font-bold",
+                          ticket.value.includes("Sem")
+                            ? "text-black/50"
+                            : "text-black"
+                        )}
+                      >
+                        {ticket.value}
+                      </div>
+                      <div
+                        className={cn(
+                          "font-afacad text-sm font-bold",
+                          ticket.provider.includes("Sem")
+                            ? "text-black/50"
+                            : "text-black"
+                        )}
+                      >
+                        {ticket.provider}
+                      </div>
+                      <div className="font-afacad text-sm font-bold text-black">
+                        {ticket.observations}
+                      </div>
+                      <div className="font-afacad text-sm font-bold text-black">
+                        {ticket.ticketId}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        {getStatusBadge(ticket.status)}
+                        <div className="w-6 h-6 rounded-full bg-[#F5F7FF] flex items-center justify-center ml-2">
+                          <ChevronRightIcon />
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
-            ) : (
-              /* Empty State */
-              <div className="flex flex-col items-center justify-center py-16">
-                <EmptyStateIllustration />
-                <div className="text-center mt-6 max-w-md">
-                  <h3 className="font-afacad text-3xl font-bold text-black mb-3">
-                    Olá, Lucas Mezabarba
-                  </h3>
-                  <p className="font-afacad text-base text-black mb-8">
-                    Você ainda não criou nenhum chamado.
-                    <br />
-                    Quando precisar, registre sua solicitação de forma rápida e
-                    prática.
-                  </p>
-                  <Button
-                    className="bg-[#1F45FF] hover:bg-[#1F45FF]/90 text-white font-afacad font-bold text-base px-8 py-3 h-12 rounded-xl shadow-lg w-full"
-                    onClick={() => setHasTickets(true)}
-                  >
-                    Novo chamado
-                  </Button>
-                </div>
+            </div>
+          ) : (
+            /* Empty State */
+            <div className="flex flex-col items-center justify-center py-16">
+              <EmptyStateIllustration />
+              <div className="text-center mt-6 max-w-md">
+                <h3 className="font-afacad text-3xl font-bold text-black mb-3">
+                  Olá, Lucas Mezabarba
+                </h3>
+                <p className="font-afacad text-base text-black mb-8">
+                  Você ainda não criou nenhum chamado.
+                  <br />
+                  Quando precisar, registre sua solicitação de forma rápida e
+                  prática.
+                </p>
+                <Button
+                  className="bg-[#1F45FF] hover:bg-[#1F45FF]/90 text-white font-afacad font-bold text-base px-8 py-3 h-12 rounded-xl shadow-lg w-full"
+                  onClick={() => setHasTickets(true)}
+                >
+                  Novo chamado
+                </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+      </div>
 
-        {/* WhatsApp Float Button */}
-        <div className="fixed bottom-8 right-8">
-          <button className="w-16 h-16 bg-[#10A07B] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
-            <WhatsappIcon />
-          </button>
-        </div>
+      {/* WhatsApp Float Button */}
+      <div className="fixed bottom-8 right-8 z-50">
+        <button className="w-16 h-16 bg-[#10A07B] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+          <WhatsappIcon />
+        </button>
       </div>
     </div>
   );

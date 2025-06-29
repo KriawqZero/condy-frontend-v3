@@ -53,12 +53,9 @@ export default function CondyLayout({
       {/* Header */}
       <CondyHeader user={user} title={title} />
 
-      <div className="flex flex-1">
-        {/* Main Content */}
-        <main className={`flex-1 ${showSidebar && user ? "ml-64" : ""}`}>
-          <div className={`p-6 ${getMaxWidthClass()}`}>{children}</div>
-        </main>
-      </div>
+      <main className="relative">
+        <div>{children}</div>
+      </main>
 
       {/* Footer */}
       {showFooter && <Footer />}

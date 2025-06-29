@@ -1,48 +1,36 @@
 export const NoteIcon = () => (
   <svg
-    width="30"
-    height="30"
-    viewBox="0 0 30 30"
+    width="28"
+    height="28"
+    viewBox="0 0 28 28"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M10 2.5V6.25"
-      stroke="#1F45FF"
-      strokeWidth="2.5"
-      strokeMiterlimit="10"
+      d="M18 3H10C8.89543 3 8 3.89543 8 5V23C8 24.1046 8.89543 25 10 25H18C19.1046 25 20 24.1046 20 23V5C20 3.89543 19.1046 3 18 3Z"
+      stroke="#F97316"
+      strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M20 2.5V6.25"
-      stroke="#1F45FF"
-      strokeWidth="2.5"
-      strokeMiterlimit="10"
+      d="M12 9H16"
+      stroke="#F97316"
+      strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M8.75 16.25H18.75"
-      stroke="#1F45FF"
-      strokeWidth="2.5"
-      strokeMiterlimit="10"
+      d="M12 14H16"
+      stroke="#F97316"
+      strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M8.75 21.25H15"
-      stroke="#1F45FF"
-      strokeWidth="2.5"
-      strokeMiterlimit="10"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M20 4.375C24.1625 4.6 26.25 6.1875 26.25 12.0625V19.7875C26.25 24.9375 25 27.5125 18.75 27.5125H11.25C5 27.5125 3.75 24.9375 3.75 19.7875V12.0625C3.75 6.1875 5.8375 4.6125 10 4.375H20Z"
-      stroke="#1F45FF"
-      strokeWidth="2.5"
-      strokeMiterlimit="10"
+      d="M12 19H14"
+      stroke="#F97316"
+      strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"
     />

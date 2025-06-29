@@ -30,9 +30,9 @@ export default async function SindicoPage() {
       user={session.user}
       title="Dashboard"
       maxWidth="full"
-      background="white"
+      background="gray"
     >
-      <SindicoDashboard user={session.user} />
+      <SindicoDashboard />
     </CondyLayout>
   );
 }
