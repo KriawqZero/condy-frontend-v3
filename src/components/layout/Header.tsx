@@ -1,6 +1,6 @@
 import { User } from '@/types';
 import { logoutAction } from '@/app/actions/auth';
-import Button from '../ui/Button';
+import { Button } from '../ui/Button';
 
 interface HeaderProps {
   user?: User;
@@ -31,7 +31,7 @@ export default function Header({ user, title }: HeaderProps) {
                 <div className="text-sm">
                   <p className="font-medium text-gray-900">{user.name}</p>
                   <p className="text-gray-500 capitalize">
-                    {user.user_type.toLowerCase().replace('_', ' ')}
+                    {user.userType.toLowerCase().replace('_', ' ')}
                   </p>
                 </div>
               </div>

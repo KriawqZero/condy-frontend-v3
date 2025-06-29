@@ -11,7 +11,7 @@ export default async function NovoChamadoPage() {
   }
 
   // Verificar se é síndico
-  if (!['SINDICO_RESIDENTE', 'SINDICO_PROFISSIONAL'].includes(session.user.user_type)) {
+  if (!['SINDICO_RESIDENTE', 'SINDICO_PROFISSIONAL'].includes(session.user.userType)) {
     redirect('/login');
   }
 

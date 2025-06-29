@@ -27,27 +27,15 @@ export default async function ChamadosSindicoPage() {
       background="gray"
     >
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-              Meus Chamados
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Gerencie e acompanhe o status de todos os seus chamados de
-              manutenção
-            </p>
+        {/* Header simples */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <img src="/horizontal_logo.svg" alt="Condy" className="h-8" />
           </div>
-
-          <div className="mt-4 md:mt-0">
-            <a
-              href="/sindico/chamados/novo"
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <img src="/svg/plus_icon.svg" alt="" className="w-5 h-5 mr-2" />
-              Novo Chamado
-            </a>
-          </div>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+            Olá, {session.user.name}
+          </h1>
+          <p className="text-sm text-gray-600">Condomínio Millionen Ipane</p>
         </div>
 
         {/* Lista de chamados */}
