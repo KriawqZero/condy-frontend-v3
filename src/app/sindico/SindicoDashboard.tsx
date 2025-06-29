@@ -165,9 +165,9 @@ export default function SindicoDashboard() {
   ).length;
 
   return (
-    <div className="relative pb-20">
+    <div className="relative pb-20 mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
       {/* Cards sobrepostos ao header - Ajustado para ficar 50% dentro e 50% fora */}
-      <div className="container mx-auto px-6 lg:px-18 relative -mt-20 z-10">
+      <div className="container relative -mt-20 z-10">
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {/* Total Invested */}
@@ -231,8 +231,7 @@ export default function SindicoDashboard() {
                 Seus Chamados
               </h2>
               <p className="font-afacad text-base text-black">
-                Acompanhe as últimas atualizações ou histórico dos seus
-                pedidos
+                Acompanhe as últimas atualizações ou histórico dos seus pedidos
               </p>
             </div>
             <Button

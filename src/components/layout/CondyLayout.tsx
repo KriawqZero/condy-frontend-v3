@@ -6,7 +6,6 @@ import CondyHeader from "./CondyHeader";
 interface CondyLayoutProps {
   children: ReactNode;
   user?: User;
-  showSidebar?: boolean;
   showFooter?: boolean;
   title?: string;
   maxWidth?: "sm" | "md" | "lg" | "xl" | "full";
@@ -16,7 +15,6 @@ interface CondyLayoutProps {
 export default function CondyLayout({
   children,
   user,
-  showSidebar = true,
   showFooter = true,
   title,
   maxWidth = "full",

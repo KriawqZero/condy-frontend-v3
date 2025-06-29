@@ -30,7 +30,7 @@ export default async function SindicoPage() {
       user={session.user}
       title="Dashboard"
       maxWidth="full"
-      background="gray"
+      showFooter={false}
     >
       <SindicoDashboard />
     </CondyLayout>
