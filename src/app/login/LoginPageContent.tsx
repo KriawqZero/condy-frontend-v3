@@ -42,7 +42,7 @@ export default function LoginPageContent() {
       </Head>
 
       <div className="flex flex-grow w-full overflow-auto">
-        <div className="w-full lg:w-1/2 bg-white flex flex-col m-20">
+        <div className="w-full lg:w-1/2 bg-white flex flex-col px-6 py-12 sm:px-10 lg:px-20">
           <header className="flex justify-start pt-8 sm:pt-10 px-6 sm:px-8">
             <img
               src="/horizontal_logo.svg"

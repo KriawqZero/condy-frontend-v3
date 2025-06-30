@@ -244,69 +244,73 @@ export default function SindicoDashboard() {
 
           {hasTickets ? (
             /* Tickets Table */
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-              {/* Table Header */}
-              <div className="bg-white/30 px-6 py-4 border-b border-[#EFF0FF]">
-                <div className="grid grid-cols-7 gap-4 text-sm font-afacad font-bold text-black">
-                  <div>Tipo de chamado</div>
-                  <div>Ativo cadastrado</div>
-                  <div>Valor do serviço</div>
-                  <div>Prestador vinculado</div>
-                  <div>Observações gerais</div>
-                  <div>Chamado</div>
-                  <div>Status do chamado</div>
-                </div>
-              </div>
-
-              {/* Table Body */}
-              <div className="divide-y divide-[#EFF0FF]">
-                {mockTickets.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    className="px-6 py-4 hover:bg-gray-50 group cursor-pointer"
-                  >
-                    <div className="grid grid-cols-7 gap-4 items-center">
-                      <div className="font-afacad text-sm font-bold text-black">
-                        {ticket.type}
-                      </div>
-                      <div className="font-afacad text-sm font-bold text-black">
-                        {ticket.asset}
-                      </div>
-                      <div
-                        className={cn(
-                          "font-afacad text-sm font-bold",
-                          ticket.value.includes("Sem")
-                            ? "text-black/50"
-                            : "text-black"
-                        )}
-                      >
-                        {ticket.value}
-                      </div>
-                      <div
-                        className={cn(
-                          "font-afacad text-sm font-bold",
-                          ticket.provider.includes("Sem")
-                            ? "text-black/50"
-                            : "text-black"
-                        )}
-                      >
-                        {ticket.provider}
-                      </div>
-                      <div className="font-afacad text-sm font-bold text-black">
-                        {ticket.observations}
-                      </div>
-                      <div className="font-afacad text-sm font-bold text-black">
-                        {ticket.ticketId}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        {getStatusBadge(ticket.status)}
-                        <div className="w-6 h-6 rounded-full bg-[#F5F7FF] flex items-center justify-center ml-2">
-                          <ChevronRightIcon />
-                        </div>
-                      </div>
+            <div className="bg-white rounded-2xl shadow-sm w-full">
+              <div className="overflow-x-auto w-full">
+                <div className="min-w-[700px]">
+                  {/* Table Header */}
+                  <div className="bg-white/30 px-6 py-4 border-b border-[#EFF0FF]">
+                    <div className="grid grid-cols-7 gap-4 text-sm font-afacad font-bold text-black">
+                      <div>Tipo de chamado</div>
+                      <div>Ativo cadastrado</div>
+                      <div>Valor do serviço</div>
+                      <div>Prestador vinculado</div>
+                      <div>Observações gerais</div>
+                      <div>Chamado</div>
+                      <div>Status do chamado</div>
                     </div>
                   </div>
-                ))}
+
+                  {/* Table Body */}
+                  <div className="divide-y divide-[#EFF0FF]">
+                    {mockTickets.map((ticket) => (
+                      <div
+                        key={ticket.id}
+                        className="px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[700px]"
+                      >
+                        <div className="grid grid-cols-7 gap-4 items-center">
+                          <div className="font-afacad text-sm font-bold text-black">
+                            {ticket.type}
+                          </div>
+                          <div className="font-afacad text-sm font-bold text-black">
+                            {ticket.asset}
+                          </div>
+                          <div
+                            className={cn(
+                              "font-afacad text-sm font-bold",
+                              ticket.value.includes("Sem")
+                                ? "text-black/50"
+                                : "text-black"
+                            )}
+                          >
+                            {ticket.value}
+                          </div>
+                          <div
+                            className={cn(
+                              "font-afacad text-sm font-bold",
+                              ticket.provider.includes("Sem")
+                                ? "text-black/50"
+                                : "text-black"
+                            )}
+                          >
+                            {ticket.provider}
+                          </div>
+                          <div className="font-afacad text-sm font-bold text-black">
+                            {ticket.observations}
+                          </div>
+                          <div className="font-afacad text-sm font-bold text-black">
+                            {ticket.ticketId}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            {getStatusBadge(ticket.status)}
+                            <div className="w-6 h-6 rounded-full bg-[#F5F7FF] flex items-center justify-center ml-2">
+                              <ChevronRightIcon />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           ) : (

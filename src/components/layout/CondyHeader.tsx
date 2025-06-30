@@ -1,6 +1,6 @@
 "use client";
 
-import { LogoutIcon } from "@/components/icons/LogoutIcon";
+import { LogoutButton } from "@/components/icons/LogoutButton";
 import { User } from "@/types";
 
 interface CondyHeaderProps {
@@ -14,7 +14,6 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
       className="h-92 relative overflow-hidden"
       style={{
         background: "linear-gradient(90deg, #DFE0F9 0%, #FBD9B9 100%)",
-        borderRadius: "0 0 32px 32px",
       }}
     >
       {/* Header Content */}
@@ -25,9 +24,7 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
         </div>
 
         {/* Logout Button */}
-        <button className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors">
-          <LogoutIcon />
-        </button>
+        <LogoutButton className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center" />
       </div>
 
       {/* Welcome Message - Ajustado para não conflitar com os cards */}
@@ -39,7 +36,7 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
       </div>
 
       {/* Ilustração de Prédio */}
-      <div className="absolute right-0 bottom-0 opacity-10">
+      <div className="hidden absolute right-0 bottom-0 opacity-10">
         <img
           src="3d_illustration.png"
           alt="Ilustração de Prédio"
