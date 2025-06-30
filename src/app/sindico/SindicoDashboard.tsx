@@ -1,5 +1,6 @@
 "use client";
 
+import { getChamadosAction } from "@/app/actions/chamados";
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { ClipboardTickIcon } from "@/components/icons/ClipboardClipIcon";
 import { NoteIcon } from "@/components/icons/NoteIcon";
@@ -8,82 +9,8 @@ import { WhatsappIcon } from "@/components/icons/WhatsappIcon";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-
-interface Ticket {
-  id: string;
-  type: string;
-  asset: string;
-  value: string;
-  provider: string;
-  observations: string;
-  ticketId: string;
-  status: "completed" | "in-progress" | "pending";
-}
-
-const mockTickets: Ticket[] = [
-  {
-    id: "1",
-    type: "Manutenção preventiva",
-    asset: "Elevador social",
-    value: "R$ 1.200,00",
-    provider: "Elevatech Serviços",
-    observations: "Troca de cabo de tração agendada.",
-    ticketId: "#000129",
-    status: "in-progress",
-  },
-  {
-    id: "2",
-    type: "Solicitação de orçamento",
-    asset: "Piscina",
-    value: "Sem valor",
-    provider: "Sem prestador",
-    observations: "Avaliação inicial para troca de bomba.",
-    ticketId: "#000112",
-    status: "pending",
-  },
-  {
-    id: "3",
-    type: "Orçamento solicitado",
-    asset: "Portões sociais",
-    value: "Sem valor",
-    provider: "Sem prestador",
-    observations: "Instalação de fechadura nova",
-    ticketId: "#000422",
-    status: "pending",
-  },
-  {
-    id: "4",
-    type: "Manutenção corretiva",
-    asset: "Academia",
-    value: "R$ 320,00",
-    provider: "FitService Equipamentos",
-    observations: "Substituição do painel da esteira",
-    ticketId: "#000269",
-    status: "completed",
-  },
-  {
-    id: "5",
-    type: "Reparo emergencial",
-    asset: "Iluminação externa",
-    value: "R$ 240,00",
-    provider: "Elétrica Norte",
-    observations: "Curto resolvido; troca de disjuntor feita",
-    ticketId: "#000954",
-    status: "completed",
-  },
-  {
-    id: "6",
-    type: "Reparo emergencial",
-    asset: "Portão da garagem",
-    value: "R$ 850,00",
-    provider: "PortSafe Tecnologia",
-    observations: "Motor travado foi substituído",
-    ticketId: "#001292",
-    status: "completed",
-  },
-];
+import { Chamado } from "@/types";
+import { useEffect, useState } from "react";
 
 const EmptyStateIllustration = () => (
   <div className="w-[148px] h-[140px] relative">
@@ -129,39 +56,60 @@ const EmptyStateIllustration = () => (
   </div>
 );
 
-function getStatusBadge(status: Ticket["status"]) {
+function getStatusBadge(status: Chamado["status"]) {
   switch (status) {
-    case "completed":
+    case "NOVO":
       return (
-        <Badge className="bg-green-50 text-green-600 hover:bg-green-50 border-green-200">
-          Serviço concluído
+        <Badge className="bg-blue-50 text-blue-600 border-blue-200">
+          Novo chamado
         </Badge>
       );
-    case "in-progress":
+    case "A_CAMINHO":
       return (
-        <Badge className="bg-yellow-50 text-yellow-600 hover:bg-yellow-50 border-yellow-200">
-          Em andamento
+        <Badge className="bg-yellow-50 text-yellow-600 border-yellow-200">
+          A caminho
         </Badge>
       );
-    case "pending":
+    case "EM_ATENDIMENTO":
       return (
-        <Badge className="bg-blue-50 text-blue-600 hover:bg-blue-50 border-blue-200">
-          Aguardando técnico
+        <Badge className="bg-orange-50 text-orange-600 border-orange-200">
+          Em atendimento
         </Badge>
       );
-    default:
-      return null;
+    case "CONCLUIDO":
+      return (
+        <Badge className="bg-green-50 text-green-600 border-green-200">
+          Concluído
+        </Badge>
+      );
   }
 }
 
 export default function SindicoDashboard() {
   const [hasTickets, setHasTickets] = useState(true);
+  const [chamados, setChamados] = useState<Chamado[]>([]);
+  const [loadingChamados, setLoadingChamados] = useState(true);
 
-  const activeTicketsCount = mockTickets.filter(
-    (ticket) => ticket.status !== "completed"
+  useEffect(() => {
+    async function fetchChamados() {
+      setLoadingChamados(true);
+      const response = await getChamadosAction();
+      if (response.success && response.data) {
+        setChamados(response.data);
+      } else {
+        console.error("Erro ao buscar chamados:", response.error);
+      }
+      setLoadingChamados(false);
+    }
+
+    fetchChamados();
+  }, []);
+
+  const activeTicketsCount = chamados.filter(
+    (chamado) => chamado.status !== "CONCLUIDO"
   ).length;
-  const completedTicketsCount = mockTickets.filter(
-    (ticket) => ticket.status === "completed"
+  const completedTicketsCount = chamados.filter(
+    (chamado) => chamado.status === "CONCLUIDO"
   ).length;
 
   return (
@@ -262,46 +210,34 @@ export default function SindicoDashboard() {
 
                   {/* Table Body */}
                   <div className="divide-y divide-[#EFF0FF]">
-                    {mockTickets.map((ticket) => (
+                    {chamados.map((chamado) => (
                       <div
-                        key={ticket.id}
+                        key={chamado.id}
                         className="px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[700px]"
                       >
                         <div className="grid grid-cols-7 gap-4 items-center">
                           <div className="font-afacad text-sm font-bold text-black">
-                            {ticket.type}
+                            {chamado.escopo === "ORCAMENTO"
+                              ? "Solicitação de orçamento"
+                              : "Serviço imediato"}
                           </div>
                           <div className="font-afacad text-sm font-bold text-black">
-                            {ticket.asset}
+                            {chamado.imovel?.endereco || "Sem endereço"}
                           </div>
-                          <div
-                            className={cn(
-                              "font-afacad text-sm font-bold",
-                              ticket.value.includes("Sem")
-                                ? "text-black/50"
-                                : "text-black"
-                            )}
-                          >
-                            {ticket.value}
+                          <div className="font-afacad text-sm font-bold text-black text-black/50">
+                            {"Não definido"} {/* valorEstimado vem separado? */}
                           </div>
-                          <div
-                            className={cn(
-                              "font-afacad text-sm font-bold",
-                              ticket.provider.includes("Sem")
-                                ? "text-black/50"
-                                : "text-black"
-                            )}
-                          >
-                            {ticket.provider}
+                          <div className="font-afacad text-sm font-bold text-black text-black/50">
+                            {"Sem prestador"}
                           </div>
                           <div className="font-afacad text-sm font-bold text-black">
-                            {ticket.observations}
+                            {chamado.descricaoOcorrido}
                           </div>
                           <div className="font-afacad text-sm font-bold text-black">
-                            {ticket.ticketId}
+                            {chamado.numeroChamado}
                           </div>
                           <div className="flex items-center justify-between">
-                            {getStatusBadge(ticket.status)}
+                            {getStatusBadge(chamado.status)}
                             <div className="w-6 h-6 rounded-full bg-[#F5F7FF] flex items-center justify-center ml-2">
                               <ChevronRightIcon />
                             </div>

@@ -24,7 +24,7 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
         </div>
 
         {/* Logout Button */}
-        <LogoutButton className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center" />
+        <LogoutButton className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-amber-200 transition duration-500 cursor-pointer" />
       </div>
 
       {/* Welcome Message - Ajustado para não conflitar com os cards */}

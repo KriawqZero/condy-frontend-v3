@@ -53,13 +53,13 @@ export default function LoginPageContent() {
 
           <main className="flex flex-col items-start justify-center flex-grow px-6 sm:px-8 py-10">
             <div className="w-full max-w-md">
-              <div className="text-center mb-8">
+              <div className="text-start mb-8">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
-                  Bem-vindo à Condy, sua nova central de gestão condominial.
+                  Bem-vindo à Condy, sua nova central de gestão de manutenção.
                 </h1>
                 <p className="text-gray-600">
                   Gerencie chamados, acompanhe serviços e facilite a rotina do
-                  seu condomínio.
+                  seu condomínio ou empresa.
                 </p>
               </div>
 

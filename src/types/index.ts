@@ -152,6 +152,7 @@ export interface Chamado {
   status: "NOVO" | "A_CAMINHO" | "EM_ATENDIMENTO" | "CONCLUIDO";
 
   imovelId: number;
+  imovel?: Imovel;
   solicitanteId: string;
   ativoId?: number;
   prestadorId?: string;
