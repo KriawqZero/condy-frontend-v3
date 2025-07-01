@@ -32,7 +32,7 @@ export default async function SindicoPage() {
       maxWidth="full"
       showFooter={false}
     >
-      <SindicoDashboard />
+      <SindicoDashboard user={session.user} />
     </CondyLayout>
   );
 }

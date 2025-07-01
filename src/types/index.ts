@@ -134,10 +134,10 @@ export interface Imovel {
   bairro: string;
   numero: string;
   uf: string;
-
   complemento?: string;
-
-  quantidadeMoradias: number;
+  quantidade_moradias: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Chamado Types (baseado nos requisitos)
@@ -150,6 +150,7 @@ export interface Chamado {
   prioridade: "BAIXA" | "MEDIA" | "ALTA";
   escopo: "ORCAMENTO" | "SERVICO_IMEDIATO";
   status: "NOVO" | "A_CAMINHO" | "EM_ATENDIMENTO" | "CONCLUIDO";
+  valorEstimado?: number;
 
   imovelId: number;
   imovel?: Imovel;
@@ -212,6 +213,41 @@ export interface LoginForm {
 }
 
 export interface RegisterForm extends RegisterRequest {}
+
+// Anexo Types
+export interface Anexo {
+  id: number;
+  url: string;
+  awsKey: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  chamadoId: number | null;
+}
+
+export interface AnexoUploadResponse {
+  status: string;
+  data: Anexo;
+}
+
+// Novo Chamado Types
+export interface NovoImovelData {
+  cep: string;
+  endereco: string;
+  cidade: string;
+  bairro: string;
+  numero: string;
+  uf: string;
+  quantidade_moradias: number;
+  complemento?: string;
+}
+
+export interface NovoChamadoData {
+  descricaoOcorrido: string;
+  prioridade: "BAIXA" | "MEDIA" | "ALTA";
+  imovelId: number;
+  escopo: "SERVICO_IMEDIATO" | "ORCAMENTO";
+}
 
 // Component Props Types
 export interface ButtonProps {

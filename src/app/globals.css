@@ -114,6 +114,10 @@
     font-family: system-ui, sans-serif;
   }
 
+  button {
+    @apply cursor-pointer
+  }
+
 /*   body {
     @apply text-gray-900 bg-gray-50 bg-background text-foreground;
   }

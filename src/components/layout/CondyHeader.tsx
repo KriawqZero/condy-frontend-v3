@@ -1,6 +1,6 @@
 "use client";
 
-import { LogoutButton } from "@/components/icons/LogoutButton";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import { User } from "@/types";
 
 interface CondyHeaderProps {
