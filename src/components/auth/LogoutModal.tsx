@@ -26,7 +26,12 @@ export function LogoutModal({ open, onClose }: LogoutModalProps) {
     <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl p-6 text-center max-w-sm w-full shadow-xl">
         <div className="flex justify-center mb-4">
-          <LogoutIcon />
+          <LogoutIcon
+            color="#10A07B"
+            height={72}
+            width={72}
+            strokeWidth={2.4}
+          />
         </div>
         <h2 className="text-xl font-bold mb-2 text-black">
           Deseja mesmo sair da sua conta?

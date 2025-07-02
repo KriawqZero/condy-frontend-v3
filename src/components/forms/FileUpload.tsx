@@ -1,7 +1,7 @@
-import { Upload, File, Trash, CheckCircle } from "lucide-react";
-import { useRef, useState } from "react";
-import { uploadAnexoClient } from "@/lib/api";
+import { sendAnexoAction } from "@/app/actions/anexos";
 import { Anexo } from "@/types";
+import { CheckCircle, File, Trash, Upload } from "lucide-react";
+import { useRef, useState } from "react";
 
 interface FileUploadProps {
   onFilesUploaded: (anexos: Anexo[]) => void;
@@ -11,7 +11,7 @@ interface FileUploadProps {
 interface FileWithProgress {
   file: File;
   progress: number;
-  status: 'uploading' | 'completed' | 'error';
+  status: "uploading" | "completed" | "error";
   anexo?: Anexo;
   error?: string;
 }
@@ -21,49 +21,53 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
   const [uploadingFiles, setUploadingFiles] = useState<FileWithProgress[]>([]);
 
   const handleFileSelect = async (files: FileList) => {
-    const newFiles: FileWithProgress[] = Array.from(files).map(file => ({
+    const newFiles: FileWithProgress[] = Array.from(files).map((file) => ({
       file,
       progress: 0,
-      status: 'uploading' as const,
+      status: "uploading" as const,
     }));
 
-    setUploadingFiles(prev => [...prev, ...newFiles]);
+    setUploadingFiles((prev) => [...prev, ...newFiles]);
 
     for (let i = 0; i < newFiles.length; i++) {
       const fileData = newFiles[i];
-      
+
       try {
         // Simular progresso de upload
         const progressInterval = setInterval(() => {
-          setUploadingFiles(prev => 
-            prev.map(f => 
-              f.file === fileData.file && f.progress < 90 
+          setUploadingFiles((prev) =>
+            prev.map((f) =>
+              f.file === fileData.file && f.progress < 90
                 ? { ...f, progress: f.progress + 10 }
                 : f
             )
           );
         }, 200);
 
-        const response = await uploadAnexoClient(fileData.file);
-        
+        const response = await sendAnexoAction(fileData.file);
+
         clearInterval(progressInterval);
-        
-        setUploadingFiles(prev => 
-          prev.map(f => 
-            f.file === fileData.file 
-              ? { ...f, progress: 100, status: 'completed', anexo: response.data }
+
+        setUploadingFiles((prev) =>
+          prev.map((f) =>
+            f.file === fileData.file
+              ? {
+                  ...f,
+                  progress: 100,
+                  status: "completed",
+                  anexo: response.data,
+                }
               : f
           )
         );
 
         // Atualizar lista de anexos
         onFilesUploaded([...anexos, response.data]);
-
       } catch (error) {
-        setUploadingFiles(prev => 
-          prev.map(f => 
-            f.file === fileData.file 
-              ? { ...f, status: 'error', error: 'Erro no upload' }
+        setUploadingFiles((prev) =>
+          prev.map((f) =>
+            f.file === fileData.file
+              ? { ...f, status: "error", error: "Erro no upload" }
               : f
           )
         );
@@ -84,20 +88,20 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const removeFile = (anexoId: number) => {
-    const updatedAnexos = anexos.filter(anexo => anexo.id !== anexoId);
+    const updatedAnexos = anexos.filter((anexo) => anexo.id !== anexoId);
     onFilesUploaded(updatedAnexos);
   };
 
   const removeUploadingFile = (file: File) => {
-    setUploadingFiles(prev => prev.filter(f => f.file !== file));
+    setUploadingFiles((prev) => prev.filter((f) => f.file !== file));
   };
 
   return (
@@ -111,12 +115,13 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
       >
         <Upload size={48} className="mx-auto mb-2" />
         <p className="font-afacad text-sm font-bold mb-2">
-          Grave um vídeo e tire fotos contextualizando o problema. Mostre o local afetado e descreva o que ocorreu.*
+          Grave um vídeo e tire fotos contextualizando o problema. Mostre o
+          local afetado e descreva o que ocorreu.*
         </p>
         <p className="text-xs">
           Escolha arquivos no formato JPG, PNG ou MP4 de no máximo 500MB
         </p>
-        
+
         <input
           ref={fileInputRef}
           type="file"
@@ -130,44 +135,48 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
       {/* Uploading Files */}
       {uploadingFiles.map((fileData, index) => (
         <div key={index} className="bg-blue-100 rounded-xl p-4">
-                     <div className="flex items-center justify-between mb-2">
-             <div className="flex items-center gap-3">
-               <File size={20} className="text-[#1F45FF]" />
-               <div>
-                 <p className="font-medium text-sm text-black">{fileData.file.name}</p>
-                <p className="text-xs text-gray-600">{formatFileSize(fileData.file.size)}</p>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <File size={20} className="text-[#1F45FF]" />
+              <div>
+                <p className="font-medium text-sm text-black">
+                  {fileData.file.name}
+                </p>
+                <p className="text-xs text-gray-600">
+                  {formatFileSize(fileData.file.size)}
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2">
-                             {fileData.status === 'completed' && (
-                 <CheckCircle size={20} className="text-green-500" />
-               )}
-               {fileData.status === 'error' && (
-                 <button
-                   onClick={() => removeUploadingFile(fileData.file)}
-                   className="text-red-500 hover:text-red-700"
-                 >
-                   <Trash size={16} />
-                 </button>
-               )}
+              {fileData.status === "completed" && (
+                <CheckCircle size={20} className="text-green-500" />
+              )}
+              {fileData.status === "error" && (
+                <button
+                  onClick={() => removeUploadingFile(fileData.file)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash size={16} />
+                </button>
+              )}
             </div>
           </div>
-          
-          {fileData.status === 'uploading' && (
+
+          {fileData.status === "uploading" && (
             <div className="w-full bg-blue-200 rounded-full h-2">
-              <div 
+              <div
                 className="bg-[#1F45FF] h-2 rounded-full transition-all"
                 style={{ width: `${fileData.progress}%` }}
               />
             </div>
           )}
-          
-          {fileData.status === 'completed' && (
+
+          {fileData.status === "completed" && (
             <p className="text-xs text-green-600">✓ Carregando seu documento</p>
           )}
-          
-          {fileData.status === 'error' && (
+
+          {fileData.status === "error" && (
             <p className="text-xs text-red-600">Erro: {fileData.error}</p>
           )}
         </div>
@@ -176,26 +185,26 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
       {/* Uploaded Files */}
       {anexos.map((anexo) => (
         <div key={anexo.id} className="bg-blue-100 rounded-xl p-4">
-                     <div className="flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <File size={20} className="text-[#1F45FF]" />
-               <div>
-                 <p className="font-medium text-sm text-black">
-                   {anexo.title || 'Documento'}
-                 </p>
-                 <p className="text-xs text-green-600">✓ Concluído</p>
-               </div>
-             </div>
-             
-             <button
-               onClick={() => removeFile(anexo.id)}
-               className="text-red-500 hover:text-red-700"
-             >
-               <Trash size={16} />
-             </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <File size={20} className="text-[#1F45FF]" />
+              <div>
+                <p className="font-medium text-sm text-black">
+                  {anexo.title || "Documento"}
+                </p>
+                <p className="text-xs text-green-600">✓ Concluído</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => removeFile(anexo.id)}
+              className="text-red-500 hover:text-red-700"
+            >
+              <Trash size={16} />
+            </button>
           </div>
         </div>
       ))}
     </div>
   );
-} 
+}

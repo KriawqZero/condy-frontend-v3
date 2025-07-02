@@ -9,6 +9,13 @@ export interface User {
   dataNascimento?: string;
 }
 
+export type ResponsePayload<T> = {
+  success: boolean | undefined;
+  data?: T;
+  error?: string | undefined;
+  message?: string | undefined;
+};
+
 export type UserType =
   | "SINDICO_RESIDENTE"
   | "SINDICO_PROFISSIONAL"
@@ -42,40 +49,7 @@ export interface AuthResponse {
   };
 }
 
-// Imovel Types
-export interface Imovel {
-  id: number;
-  cnpj: string;
-  nome_fantasia: string;
-  razao_social: string;
-  cep: string;
-  endereco: string;
-  cidade: string;
-  uf: string;
-  regime_tributario: RegimeTributario;
-  quantidade_moradias: number;
-  areas_comuns: string[];
-  estatuto_url?: string;
-  created_at: string;
-  updated_at: string;
-  ativos?: Ativo[];
-}
-
-export type RegimeTributario = "SIMPLES" | "LUCRO_PRESUMIDO" | "LUCRO_REAL";
-
-export interface CreateImovelRequest {
-  cnpj: string;
-  nome_fantasia: string;
-  razao_social: string;
-  cep: string;
-  endereco: string;
-  cidade: string;
-  uf: string;
-  regime_tributario: RegimeTributario;
-  quantidade_moradias: number;
-  areas_comuns: string[];
-  estatuto_url?: string;
-}
+// Tipos antigos removidos - usar apenas a definição atualizada de Imovel abaixo
 
 // Ativo Types
 export interface Ativo {
@@ -128,6 +102,7 @@ export interface CreateAtivoRequest {
 
 export interface Imovel {
   id: number;
+  gestorId: string;
   cep: string;
   endereco: string;
   cidade: string;
@@ -135,9 +110,9 @@ export interface Imovel {
   numero: string;
   uf: string;
   complemento?: string;
-  quantidade_moradias: number;
-  createdAt?: string;
-  updatedAt?: string;
+  quantidadeMoradias: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Chamado Types (baseado nos requisitos)
@@ -228,6 +203,8 @@ export interface Anexo {
 export interface AnexoUploadResponse {
   status: string;
   data: Anexo;
+  error?: string;
+  message?: string;
 }
 
 // Novo Chamado Types

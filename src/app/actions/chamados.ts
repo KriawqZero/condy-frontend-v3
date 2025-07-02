@@ -1,7 +1,7 @@
 "use server";
 
-import { getChamadoById, getChamados } from "@/lib/api";
-import { Chamado } from "@/types";
+import { createChamadoClient, getChamadoById, getChamados } from "@/lib/api";
+import { Chamado, ResponsePayload } from "@/types";
 import { z } from "zod";
 
 /* Schemas de validação
@@ -13,13 +13,6 @@ const ativoManualSchema = z.object({
   modelo: z.string().min(1, "Modelo é obrigatório"),
   local_instalacao: z.string().min(1, "Local de instalação é obrigatório"),
 });*/
-
-type ResponsePayload<T> = {
-  success: boolean | undefined;
-  data?: T;
-  error?: string | undefined;
-  message?: string | undefined;
-};
 
 const createChamadoSchema = z
   .object({
@@ -47,6 +40,38 @@ const createChamadoSchema = z
   observacao_prestador: z.string().optional(),
   nf_recibo_url: z.string().url().optional(),
 });*/
+// Server Action para criar chamado
+export async function createChamadoAction(data: {
+  descricaoOcorrido: string;
+  prioridade: "BAIXA" | "MEDIA" | "ALTA";
+  imovelId: number;
+  escopo: "SERVICO_IMEDIATO" | "ORCAMENTO";
+  informacoesAdicionais?: string;
+}): Promise<ResponsePayload<Chamado>> {
+  try {
+    const validatedData = createChamadoSchema.parse(data);
+    // Chame a API real aqui, por exemplo:
+    const response = await createChamadoClient(validatedData);
+    // return { success: true, data: response.data };
+
+    return {
+      success: true,
+      data: response.data,
+      message: `Chamado ${response.data.numero_chamado} criado com sucesso! Aguarde o contato por WhatsApp.`,
+    };
+  } catch (error: any) {
+    if (error.name === "ZodError") {
+      return {
+        success: false,
+        error: "Dados inválidos",
+      };
+    }
+    return {
+      success: false,
+      error: error.message || "Erro interno do servidor",
+    };
+  }
+}
 
 // Server Action para listar chamados
 export async function getChamadosAction(): Promise<ResponsePayload<Chamado[]>> {

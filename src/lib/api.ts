@@ -9,7 +9,7 @@ import {
 import axios, { AxiosResponse } from "axios";
 import { getSession } from "./session";
 
-const API_BASE_URL = process.env.API_URL || "http://localhost:3000/api";
+const API_BASE_URL = process.env.PRIVATE_API_URL || "http://localhost:3000/api";
 
 // Cliente API que só executa no servidor para máxima segurança
 const apiClient = axios.create({
@@ -236,28 +236,6 @@ export async function createChamado(chamadoData: any) {
   }
 }
 
-// Anexos API
-export async function uploadAnexo(file: File, title?: string) {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    if (title) {
-      formData.append("title", title);
-    }
-
-    const response = await apiClient.post("/anexo", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error: any) {
-    throw new Error(
-      error.response?.data?.message || "Erro ao fazer upload do anexo"
-    );
-  }
-}
-
 export async function updateAnexoChamadoId(anexoId: number, chamadoId: number) {
   try {
     const response = await apiClient.patch(`/anexo/${anexoId}`, { chamadoId });
@@ -279,16 +257,7 @@ export async function getImoveisWithPagination(
   }
 }
 
-export async function createImovelSimples(imovelData: {
-  cep: string;
-  endereco: string;
-  cidade: string;
-  bairro: string;
-  numero: string;
-  uf: string;
-  quantidade_moradias: number;
-  complemento?: string;
-}) {
+export async function createImovelSimples(imovelData: NovoImovelData) {
   try {
     const response = await apiClient.post("/imovel", imovelData);
     return response.data;
@@ -348,7 +317,7 @@ export async function uploadAnexoClient(
       formData.append("title", title);
     }
 
-    const response = await apiClient.post("/anexo", formData, {
+    const response = await apiClient.post("/anexo/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -370,7 +339,7 @@ export async function getImoveisClient(page: number = 1, limit: number = 5) {
     );
     return response.data;
   } catch (error: any) {
-    throw new Error("Erro ao buscar imóveis");
+    throw new Error("Erro ao buscar imóveis: " + error.message);
   }
 }
 

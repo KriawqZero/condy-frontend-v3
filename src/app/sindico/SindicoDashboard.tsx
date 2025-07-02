@@ -44,7 +44,6 @@ function getStatusBadge(status: Chamado["status"]) {
 }
 
 export default function SindicoDashboard({ user }: { user: User }) {
-  const [hasTickets, setHasTickets] = useState(true);
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loadingChamados, setLoadingChamados] = useState(true);
 
@@ -102,8 +101,8 @@ export default function SindicoDashboard({ user }: { user: User }) {
   return (
     <div className="relative pb-20 mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
       {mostrarModal && (
-        <ModalNovoChamado 
-          onClose={() => setMostrarModal(false)} 
+        <ModalNovoChamado
+          onClose={() => setMostrarModal(false)}
           onSuccess={() => {
             // Recarregar lista de chamados
             async function fetchChamados() {

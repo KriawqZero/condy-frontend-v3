@@ -1,13 +1,12 @@
-import {
-  createChamadoClient,
-  getImoveisClient,
-  updateAnexoChamadoIdClient,
-} from "@/lib/api";
+import { updateAnexoChamadoIdAction } from "@/app/actions/anexos";
+import { createChamadoAction } from "@/app/actions/chamados";
+import { getImoveisAction } from "@/app/actions/imoveis";
 import { Anexo, Imovel, NovoChamadoData } from "@/types";
-import { Building, HelpCircle, MapPin } from "lucide-react";
+import { Building, X, MapPin, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CondySelect } from "../forms/CondySelect";
 import { FileUpload } from "../forms/FileUpload";
+import { ModalCadastroImovel } from "./ModalCadastroImovel";
 
 interface ModalNovoChamadoProps {
   onClose: () => void;
@@ -30,6 +29,9 @@ export function ModalNovoChamado({
   const [escopo, setEscopo] = useState<string>("");
   const [anexos, setAnexos] = useState<Anexo[]>([]);
 
+  // Estado para modal de cadastro de imóvel
+  const [mostrarModalImovel, setMostrarModalImovel] = useState(false);
+
   // Carregar imóveis na inicialização
   useEffect(() => {
     carregarImoveis();
@@ -37,7 +39,7 @@ export function ModalNovoChamado({
 
   const carregarImoveis = async () => {
     try {
-      const response = await getImoveisClient();
+      const response = await getImoveisAction();
       setImoveis(response.data || []);
     } catch (error) {
       console.error("Erro ao carregar imóveis:", error);
@@ -58,13 +60,6 @@ export function ModalNovoChamado({
 
   const opcoesLocalInstalacao = [
     { value: "torre-a-terreo", label: "Torre A – Térreo" },
-    { value: "torre-b-terreo", label: "Torre B – Térreo" },
-    { value: "torre-a-1andar", label: "Torre A – 1º Andar" },
-    { value: "torre-b-1andar", label: "Torre B – 1º Andar" },
-    { value: "area-comum", label: "Área Comum" },
-    { value: "garagem", label: "Garagem" },
-    { value: "piscina", label: "Piscina" },
-    { value: "playground", label: "Playground" },
   ];
 
   const opcoesPrioridade = [
@@ -110,13 +105,16 @@ export function ModalNovoChamado({
         escopo: escopo as "SERVICO_IMEDIATO" | "ORCAMENTO",
       };
 
-      const chamadoResponse = await createChamadoClient(chamadoData);
+      const chamadoResponse = await createChamadoAction(chamadoData);
 
       // Atualizar anexos com o ID do chamado criado
       if (anexos.length > 0 && chamadoResponse.data?.id) {
         await Promise.all(
           anexos.map((anexo) =>
-            updateAnexoChamadoIdClient(anexo.id, chamadoResponse.data.id)
+            updateAnexoChamadoIdAction(
+              anexo.id,
+              Number(chamadoResponse.data?.id)
+            )
           )
         );
       }
@@ -143,7 +141,7 @@ export function ModalNovoChamado({
             className="text-gray-400 hover:text-gray-600"
             onClick={onClose}
           >
-            <HelpCircle size={24} />
+            <X size={24} />
           </button>
         </div>
 
@@ -184,13 +182,28 @@ export function ModalNovoChamado({
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <CondySelect
-                  label="Selecione o condomínio ou empresa"
-                  options={opcoesImovel}
-                  value={imovelSelecionado}
-                  onChange={setImovelSelecionado}
-                  placeholder="Selecione um imóvel"
-                />
+                <div>
+                  <CondySelect
+                    label="Selecione o condomínio ou empresa"
+                    options={opcoesImovel}
+                    value={imovelSelecionado}
+                    onChange={setImovelSelecionado}
+                    placeholder="Selecione um imóvel"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrarModalImovel(true)}
+                    className={`mt-2 w-full flex items-center justify-center gap-2 px-3 text-sm text-[#1F45FF] bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors ${
+                      imoveis.length === 0 ? 'py-3' : 'py-1.5'
+                    }`}
+                  >
+                    <Plus size={16} />
+                    {imoveis.length === 0 
+                      ? "Não possui um imóvel cadastrado? Cadastre aqui pela primeira vez!"
+                      : "Cadastrar novo imóvel"
+                    }
+                  </button>
+                </div>
 
                 <CondySelect
                   label="Local da instalação"
@@ -208,13 +221,16 @@ export function ModalNovoChamado({
                   </label>
                   <div className="border-2 border-[#1F45FF] rounded-xl px-4 py-3 bg-gray-50 flex items-center gap-2">
                     <MapPin size={16} className="text-[#1F45FF]" />
-                    <span className="text-sm">
-                      {imovelSelecionadoData.endereco},{" "}
-                      {imovelSelecionadoData.numero} –{" "}
-                      {imovelSelecionadoData.bairro} –{" "}
-                      {imovelSelecionadoData.cidade} |{" "}
-                      {imovelSelecionadoData.uf}
-                    </span>
+                                          <span className="text-sm">
+                       {imovelSelecionadoData.endereco},{" "}
+                       {imovelSelecionadoData.numero} –{" "}
+                       {imovelSelecionadoData.bairro} –{" "}
+                       {imovelSelecionadoData.cidade} |{" "}
+                       {imovelSelecionadoData.uf}
+                       {imovelSelecionadoData.complemento && 
+                         ` - ${imovelSelecionadoData.complemento}`
+                       }
+                      </span>
                   </div>
                 </div>
               )}
@@ -326,6 +342,17 @@ export function ModalNovoChamado({
           </button>
         </div>
       </div>
+
+      {/* Modal de Cadastro de Imóvel */}
+      {mostrarModalImovel && (
+        <ModalCadastroImovel
+          onClose={() => setMostrarModalImovel(false)}
+          onSuccess={() => {
+            // Recarregar lista de imóveis após cadastro
+            carregarImoveis();
+          }}
+        />
+      )}
     </div>
   );
 }
