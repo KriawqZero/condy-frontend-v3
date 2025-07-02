@@ -1,5 +1,5 @@
 import { createImovelAction } from "@/app/actions/imoveis";
-import { X, Building2 } from "lucide-react";
+import { Building2, X } from "lucide-react";
 import { useState } from "react";
 
 interface ModalCadastroImovelProps {
@@ -7,7 +7,10 @@ interface ModalCadastroImovelProps {
   onSuccess: () => void;
 }
 
-export function ModalCadastroImovel({ onClose, onSuccess }: ModalCadastroImovelProps) {
+export function ModalCadastroImovel({
+  onClose,
+  onSuccess,
+}: ModalCadastroImovelProps) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -17,7 +20,7 @@ export function ModalCadastroImovel({ onClose, onSuccess }: ModalCadastroImovelP
     try {
       const formData = new FormData(e.currentTarget);
       const response = await createImovelAction(formData);
-      
+
       if (response.success) {
         onSuccess();
         onClose();
@@ -57,9 +60,22 @@ export function ModalCadastroImovel({ onClose, onSuccess }: ModalCadastroImovelP
           </button>
         </div>
 
-                 {/* Formulário */}
+        {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 gap-4">
+            {/* Nome do Imóvel */}
+            <div>
+              <label className="block text-sm font-afacad text-[#1F45FF] mb-1">
+                Nome do Imóvel *
+              </label>
+              <input
+                type="text"
+                name="nome"
+                required
+                className="w-full border-2 border-[#1F45FF] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                placeholder="Nome do Imóvel"
+              />
+            </div>
             {/* CEP e Número */}
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -194,4 +210,4 @@ export function ModalCadastroImovel({ onClose, onSuccess }: ModalCadastroImovelP
       </div>
     </div>
   );
-} 
+}

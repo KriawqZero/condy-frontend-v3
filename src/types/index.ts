@@ -209,6 +209,7 @@ export interface AnexoUploadResponse {
 
 // Novo Chamado Types
 export interface NovoImovelData {
+  nome: string;
   cep: string;
   endereco: string;
   cidade: string;
