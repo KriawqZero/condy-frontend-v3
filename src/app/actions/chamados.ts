@@ -53,7 +53,7 @@ export async function createChamadoAction(data: {
     // Chame a API real aqui, por exemplo:
     const response = await createChamadoClient(validatedData);
     // return { success: true, data: response.data };
-
+    console.log("Chamado criado com sucesso:", response.data);
     return {
       success: true,
       data: response.data,
@@ -66,6 +66,7 @@ export async function createChamadoAction(data: {
         error: "Dados inválidos",
       };
     }
+    console.log("Erro ao criar chamado:", error);
     return {
       success: false,
       error: error.message || "Erro interno do servidor",
