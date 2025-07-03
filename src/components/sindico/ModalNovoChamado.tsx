@@ -6,7 +6,7 @@ import { Building, X, MapPin, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CondySelect } from "../forms/CondySelect";
 import { FileUpload } from "../forms/FileUpload";
-import { ModalCadastroImovel } from "./ModalCadastroImovel";
+
 
 interface ModalNovoChamadoProps {
   onClose: () => void;
@@ -29,8 +29,7 @@ export function ModalNovoChamado({
   const [escopo, setEscopo] = useState<string>("");
   const [anexos, setAnexos] = useState<Anexo[]>([]);
 
-  // Estado para modal de cadastro de imóvel
-  const [mostrarModalImovel, setMostrarModalImovel] = useState(false);
+
 
   // Carregar imóveis na inicialização
   useEffect(() => {
@@ -190,19 +189,24 @@ export function ModalNovoChamado({
                     onChange={setImovelSelecionado}
                     placeholder="Selecione um imóvel"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setMostrarModalImovel(true)}
-                    className={`mt-2 w-full flex items-center justify-center gap-2 px-3 text-sm text-[#1F45FF] bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors ${
-                      imoveis.length === 0 ? 'py-3' : 'py-1.5'
+                  <div
+                    className={`mt-2 w-full flex flex-col items-center justify-center gap-1 px-3 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed ${
+                      imoveis.length === 0 ? 'py-4' : 'py-2'
                     }`}
                   >
-                    <Plus size={16} />
-                    {imoveis.length === 0 
-                      ? "Não possui um imóvel cadastrado? Cadastre aqui pela primeira vez!"
-                      : "Cadastrar novo imóvel"
-                    }
-                  </button>
+                    <div className="flex items-center gap-2">
+                      <Plus size={16} className="text-gray-400" />
+                      <span className="font-medium">
+                        {imoveis.length === 0 
+                          ? "Nenhum imóvel cadastrado"
+                          : "Cadastrar novo imóvel"
+                        }
+                      </span>
+                    </div>
+                    <span className="text-xs text-gray-400 text-center">
+                      Funcionalidade indisponível. Entre em contato com seu atendente para cadastrar novos imóveis.
+                    </span>
+                  </div>
                 </div>
 
                 <CondySelect
@@ -343,16 +347,7 @@ export function ModalNovoChamado({
         </div>
       </div>
 
-      {/* Modal de Cadastro de Imóvel */}
-      {mostrarModalImovel && (
-        <ModalCadastroImovel
-          onClose={() => setMostrarModalImovel(false)}
-          onSuccess={() => {
-            // Recarregar lista de imóveis após cadastro
-            carregarImoveis();
-          }}
-        />
-      )}
+
     </div>
   );
 }
