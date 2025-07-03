@@ -102,6 +102,7 @@ export interface CreateAtivoRequest {
 
 export interface Imovel {
   id: number;
+  nome: string;
   gestorId: string;
   cep: string;
   endereco: string;

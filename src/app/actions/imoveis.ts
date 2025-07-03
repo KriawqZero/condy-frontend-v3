@@ -21,6 +21,7 @@ export async function createImovelAction(
 ): Promise<ResponsePayload<Imovel>> {
   try {
     const rawData = {
+      nome: formData.get("nome") as string,
       cep: formData.get("cep") as string,
       endereco: formData.get("endereco") as string,
       cidade: formData.get("cidade") as string,
@@ -31,7 +32,7 @@ export async function createImovelAction(
         formData.get("quantidade_moradias") as string,
         10
       ),
-      complemento: formData.get("complemento") as string || undefined,
+      complemento: (formData.get("complemento") as string) || undefined,
     };
 
     // Aqui você deve chamar a função de criação de imóvel no backend

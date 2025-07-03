@@ -2,11 +2,10 @@ import { updateAnexoChamadoIdAction } from "@/app/actions/anexos";
 import { createChamadoAction } from "@/app/actions/chamados";
 import { getImoveisAction } from "@/app/actions/imoveis";
 import { Anexo, Imovel, NovoChamadoData } from "@/types";
-import { Building, X, MapPin, Plus } from "lucide-react";
+import { Building, MapPin, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CondySelect } from "../forms/CondySelect";
 import { FileUpload } from "../forms/FileUpload";
-
 
 interface ModalNovoChamadoProps {
   onClose: () => void;
@@ -28,8 +27,6 @@ export function ModalNovoChamado({
   const [prioridade, setPrioridade] = useState<string>("");
   const [escopo, setEscopo] = useState<string>("");
   const [anexos, setAnexos] = useState<Anexo[]>([]);
-
-
 
   // Carregar imóveis na inicialização
   useEffect(() => {
@@ -54,7 +51,7 @@ export function ModalNovoChamado({
 
   const opcoesImovel = imoveis.map((imovel) => ({
     value: imovel.id.toString(),
-    label: `${imovel.endereco}, ${imovel.numero} - ${imovel.cidade}/${imovel.uf}`,
+    label: `${imovel.nome}: ${imovel.endereco}, ${imovel.numero} - ${imovel.cidade}/${imovel.uf}`,
   }));
 
   const opcoesLocalInstalacao = [
@@ -191,20 +188,20 @@ export function ModalNovoChamado({
                   />
                   <div
                     className={`mt-2 w-full flex flex-col items-center justify-center gap-1 px-3 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed ${
-                      imoveis.length === 0 ? 'py-4' : 'py-2'
+                      imoveis.length === 0 ? "py-4" : "py-2"
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <Plus size={16} className="text-gray-400" />
                       <span className="font-medium">
-                        {imoveis.length === 0 
+                        {imoveis.length === 0
                           ? "Nenhum imóvel cadastrado"
-                          : "Cadastrar novo imóvel"
-                        }
+                          : "Cadastrar novo imóvel"}
                       </span>
                     </div>
                     <span className="text-xs text-gray-400 text-center">
-                      Funcionalidade indisponível. Entre em contato com seu atendente para cadastrar novos imóveis.
+                      Funcionalidade indisponível. Entre em contato com seu
+                      atendente para cadastrar novos imóveis.
                     </span>
                   </div>
                 </div>
@@ -225,16 +222,16 @@ export function ModalNovoChamado({
                   </label>
                   <div className="border-2 border-[#1F45FF] rounded-xl px-4 py-3 bg-gray-50 flex items-center gap-2">
                     <MapPin size={16} className="text-[#1F45FF]" />
-                                          <span className="text-sm">
-                       {imovelSelecionadoData.endereco},{" "}
-                       {imovelSelecionadoData.numero} –{" "}
-                       {imovelSelecionadoData.bairro} –{" "}
-                       {imovelSelecionadoData.cidade} |{" "}
-                       {imovelSelecionadoData.uf}
-                       {imovelSelecionadoData.complemento && 
-                         ` - ${imovelSelecionadoData.complemento}`
-                       }
-                      </span>
+                    <span className="text-sm">
+                      {imovelSelecionadoData.nome}:{" "}
+                      {imovelSelecionadoData.endereco},{" "}
+                      {imovelSelecionadoData.numero} –{" "}
+                      {imovelSelecionadoData.bairro} –{" "}
+                      {imovelSelecionadoData.cidade} |{" "}
+                      {imovelSelecionadoData.uf}
+                      {imovelSelecionadoData.complemento &&
+                        ` - ${imovelSelecionadoData.complemento}`}
+                    </span>
                   </div>
                 </div>
               )}
@@ -346,8 +343,6 @@ export function ModalNovoChamado({
           </button>
         </div>
       </div>
-
-
     </div>
   );
 }
