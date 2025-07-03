@@ -110,58 +110,6 @@ export default function LoginPageContent() {
       </div>
 
       <Footer />
-
-      {/* Modal de erro }
-      {showError && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full">
-            <div className="text-center">
-              <img
-                src="/horizontal_logo.svg"
-                alt="Condy"
-                className="h-8 mx-auto mb-6"
-              />
-
-              <div className="mb-6">
-                <div className="w-16 h-16 mx-auto flex items-center justify-center bg-red-100 rounded-full">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-red-500"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
-
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
-                {errorTitle}
-              </h2>
-              <p className="text-gray-600 mb-6">{errorMessage}</p>
-
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-                <button
-                  onClick={() => setShowError(false)}
-                  className="w-full py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
-                >
-                  Fechar
-                </button>
-                <button
-                  onClick={() => setShowError(false)}
-                  className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                >
-                  Tentar novamente
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )*/}
     </div>
   );
 }
