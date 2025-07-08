@@ -57,7 +57,38 @@ Adicionar logs mais detalhados nas funções Client para debuggar problemas.
 ### 4. Unificar Configuração
 Garantir que todas as funções Client tenham configuração consistente.
 
-## Status
+## Correções Implementadas
+
+### ✅ 1. Padronização de Endpoints
+- Alterado `updateChamado()`: `/chamados/${id}` → `/chamado/${id}`
+- Alterado `deleteChamado()`: `/chamados/${id}` → `/chamado/${id}`  
+- Alterado `getChamadosByStatus()`: `/chamados?status=` → `/chamado?status=`
+- Agora todos os endpoints usam `/chamado` (singular) consistentemente
+
+### ✅ 2. Correção de Autenticação
+- Interceptor agora funciona tanto no servidor quanto no cliente
+- No cliente: busca token do localStorage ou cookies
+- No servidor: continua usando getSession()
+- Adicionado fallback para createChamadoClient com cliente axios direto
+
+### ✅ 3. Logs Detalhados para Debug
+- Adicionados logs em `createChamadoClient()` para rastrear requisições
+- Adicionados logs em `uploadAnexoClient()` para comparação
+- Melhorado tratamento de erro em `createChamadoAction()` com detalhes Zod
+- Logs incluem status HTTP, headers, e dados de resposta
+
+### ✅ 4. Mecanismo de Fallback
+- `createChamadoClient()` agora tenta duas abordagens:
+  1. Cliente API padrão com interceptor
+  2. Cliente axios direto com token manual (caso falhe)
+
+## Branch e PR
+- **Branch**: `cursor/investigate-ticket-submission-issue-85b8`
+- **Commit**: `5edc371` - fix: resolve ticket submission issues
+- **PR Link**: https://github.com/KriawqZero/condy-frontend-v3/pull/new/cursor/investigate-ticket-submission-issue-85b8
+
+## Status Final
 ✅ Anexos funcionam  
-❌ Criação de chamados não funciona  
-🔄 Correções propostas implementadas
+🔧 Criação de chamados - correções implementadas  
+✅ Correções aplicadas e testáveis  
+🚀 PR criado para review
