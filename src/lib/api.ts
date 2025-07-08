@@ -22,16 +22,27 @@ const apiClient = axios.create({
 
 // Interceptor para adicionar token automaticamente
 apiClient.interceptors.request.use(async (config) => {
-  // Só funciona no servidor
-  if (typeof window === "undefined") {
-    try {
+  // Funciona tanto no servidor quanto no cliente
+  try {
+    // No servidor, usa getSession()
+    if (typeof window === "undefined") {
       const session = await getSession();
       if (session.token) {
         config.headers.Authorization = `Bearer ${session.token}`;
       }
-    } catch (error) {
-      console.error("Erro ao obter token da sessão:", error);
+    } else {
+      // No cliente, tenta obter o token do localStorage ou cookies
+      const token = localStorage.getItem('auth_token') || document.cookie
+        .split('; ')
+        .find(row => row.startsWith('auth_token='))
+        ?.split('=')[1];
+      
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
+  } catch (error) {
+    console.error("Erro ao obter token da sessão:", error);
   }
   return config;
 });
@@ -268,7 +279,7 @@ export async function createImovelSimples(imovelData: NovoImovelData) {
 
 export async function updateChamado(id: string, chamadoData: any) {
   try {
-    const response = await apiClient.patch(`/chamados/${id}`, chamadoData);
+    const response = await apiClient.patch(`/chamado/${id}`, chamadoData);
     return response.data;
   } catch (error: any) {
     throw new Error(
@@ -279,7 +290,7 @@ export async function updateChamado(id: string, chamadoData: any) {
 
 export async function deleteChamado(id: string) {
   try {
-    const response = await apiClient.delete(`/chamados/${id}`);
+    const response = await apiClient.delete(`/chamado/${id}`);
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Erro ao deletar chamado");
@@ -288,7 +299,7 @@ export async function deleteChamado(id: string) {
 
 export async function getChamadosByStatus(status: string) {
   try {
-    const response = await apiClient.get(`/chamados?status=${status}`);
+    const response = await apiClient.get(`/chamado?status=${status}`);
     return response.data;
   } catch (error: any) {
     throw new Error(
@@ -311,6 +322,7 @@ export async function uploadAnexoClient(
   title?: string
 ): Promise<AnexoUploadResponse> {
   try {
+    console.log("Enviando anexo para API:", { fileName: file.name, title });
     const formData = new FormData();
     formData.append("file", file);
     if (title) {
@@ -323,9 +335,21 @@ export async function uploadAnexoClient(
       },
       withCredentials: true,
     });
+    console.log("Resposta da API (anexo):", response.data);
     return response.data;
   } catch (error: any) {
-    throw new Error("Erro ao fazer upload do anexo");
+    console.error("Erro detalhado ao fazer upload:", {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers
+    });
+    throw new Error(
+      error.response?.data?.message || 
+      error.response?.data?.error || 
+      `Erro ao fazer upload: ${error.response?.status || error.message}`
+    );
   }
 }
 
@@ -359,15 +383,60 @@ export async function createImovelClient(imovelData: NovoImovelData) {
 
 export async function createChamadoClient(chamadoData: NovoChamadoData) {
   try {
-    const response = await apiClient.post("/chamado", chamadoData, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      withCredentials: true,
-    });
-    return response.data;
+    console.log("Enviando chamado para API:", chamadoData);
+    
+    // Primeira tentativa: usando o apiClient padrão
+    try {
+      const response = await apiClient.post("/chamado", chamadoData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
+      console.log("Resposta da API (tentativa 1):", response.data);
+      return response.data;
+    } catch (firstError: any) {
+      console.warn("Primeira tentativa falhou:", firstError.response?.status);
+      
+      // Segunda tentativa: cliente axios direto com token manual
+      const token = localStorage.getItem('auth_token') || document.cookie
+        .split('; ')
+        .find(row => row.startsWith('auth_token='))
+        ?.split('=')[1];
+      
+      if (token) {
+        const directClient = axios.create({
+          baseURL: API_BASE_URL,
+          timeout: 10000,
+        });
+        
+        const response = await directClient.post("/chamado", chamadoData, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          withCredentials: true,
+        });
+        console.log("Resposta da API (tentativa 2):", response.data);
+        return response.data;
+      }
+      
+      throw firstError;
+    }
   } catch (error: any) {
-    throw new Error("Erro ao criar chamado");
+    console.error("Erro detalhado ao criar chamado:", {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers,
+      config: error.config
+    });
+    throw new Error(
+      error.response?.data?.message || 
+      error.response?.data?.error || 
+      `Erro ao criar chamado: ${error.response?.status || error.message}`
+    );
   }
 }
 
