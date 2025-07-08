@@ -49,24 +49,28 @@ export async function createChamadoAction(data: {
   informacoesAdicionais?: string;
 }): Promise<ResponsePayload<Chamado>> {
   try {
+    console.log("Validando dados do chamado:", data);
     const validatedData = createChamadoSchema.parse(data);
-    // Chame a API real aqui, por exemplo:
+    console.log("Dados validados:", validatedData);
+    
+    // Chama a API real
     const response = await createChamadoClient(validatedData);
-    // return { success: true, data: response.data };
+    
     console.log("Chamado criado com sucesso:", response.data);
     return {
       success: true,
       data: response.data,
-      message: `Chamado ${response.data.numero_chamado} criado com sucesso! Aguarde o contato por WhatsApp.`,
+      message: `Chamado ${response.data?.numeroChamado || response.data?.numero_chamado || 'criado'} com sucesso! Aguarde o contato por WhatsApp.`,
     };
   } catch (error: any) {
     if (error.name === "ZodError") {
+      console.error("Erro de validação Zod:", error.errors);
       return {
         success: false,
-        error: "Dados inválidos",
+        error: "Dados inválidos: " + error.errors.map((e: any) => e.message).join(", "),
       };
     }
-    console.log("Erro ao criar chamado:", error);
+    console.error("Erro completo ao criar chamado:", error);
     return {
       success: false,
       error: error.message || "Erro interno do servidor",
