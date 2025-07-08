@@ -11,6 +11,127 @@ import { getSession } from "./session";
 
 const API_BASE_URL = process.env.PRIVATE_API_URL || "http://localhost:3000/api";
 
+// Constantes para localStorage
+const ANEXOS_PENDENTES_KEY = "anexos_pendentes_chamado";
+
+// Funções para gerenciar anexos pendentes no localStorage
+export function salvarAnexoPendente(anexoId: number): void {
+  if (typeof window === "undefined") {
+    console.warn("⚠️ salvarAnexoPendente chamado no servidor - ignorando");
+    return;
+  }
+  
+  try {
+    const anexosPendentes = getAnexosPendentes();
+    if (!anexosPendentes.includes(anexoId)) {
+      anexosPendentes.push(anexoId);
+      localStorage.setItem(ANEXOS_PENDENTES_KEY, JSON.stringify(anexosPendentes));
+      console.log("✅ ANEXO SALVO COMO PENDENTE:", anexoId, "| Lista atual:", anexosPendentes);
+    } else {
+      console.log("⚠️ Anexo já existe na lista de pendentes:", anexoId);
+    }
+  } catch (error) {
+    console.error("❌ Erro ao salvar anexo pendente:", error);
+  }
+}
+
+export function getAnexosPendentes(): number[] {
+  if (typeof window === "undefined") {
+    console.warn("⚠️ getAnexosPendentes chamado no servidor - retornando array vazio");
+    return [];
+  }
+  
+  try {
+    const stored = localStorage.getItem(ANEXOS_PENDENTES_KEY);
+    const anexos = stored ? JSON.parse(stored) : [];
+    console.log("📋 ANEXOS PENDENTES OBTIDOS:", anexos.length > 0 ? anexos : "Nenhum anexo encontrado");
+    return anexos;
+  } catch (error) {
+    console.error("❌ Erro ao obter anexos pendentes:", error);
+    return [];
+  }
+}
+
+export function limparAnexosPendentes(): void {
+  if (typeof window === "undefined") return;
+  
+  try {
+    const stored = localStorage.getItem(ANEXOS_PENDENTES_KEY);
+    const anexosAntes = stored ? JSON.parse(stored) : [];
+    localStorage.removeItem(ANEXOS_PENDENTES_KEY);
+    console.log("🧹 Anexos pendentes limpos do localStorage. Eram:", anexosAntes);
+  } catch (error) {
+    console.error("❌ Erro ao limpar anexos pendentes:", error);
+  }
+}
+
+export function removerAnexoPendente(anexoId: number): void {
+  if (typeof window === "undefined") return;
+  
+  try {
+    const anexosPendentes = getAnexosPendentes();
+    const novosAnexos = anexosPendentes.filter(id => id !== anexoId);
+    localStorage.setItem(ANEXOS_PENDENTES_KEY, JSON.stringify(novosAnexos));
+    console.log("Anexo removido dos pendentes:", anexoId);
+  } catch (error) {
+    console.error("Erro ao remover anexo pendente:", error);
+  }
+}
+
+export function hasAnexosPendentes(): boolean {
+  return getAnexosPendentes().length > 0;
+}
+
+// Função para debug - verificar estado atual do localStorage
+export function debugAnexosPendentes(): void {
+  if (typeof window === "undefined") return;
+  
+  try {
+    const stored = localStorage.getItem(ANEXOS_PENDENTES_KEY);
+    console.log("🔍 DEBUG localStorage anexos pendentes:", {
+      raw: stored,
+      parsed: stored ? JSON.parse(stored) : null,
+      length: stored ? JSON.parse(stored).length : 0
+    });
+  } catch (error) {
+    console.error("❌ Erro no debug de anexos pendentes:", error);
+  }
+}
+
+// Função para forçar associação de anexos pendentes a um chamado específico
+export async function associarAnexosPendentesAoChamado(chamadoId: number): Promise<void> {
+  const anexosPendentes = getAnexosPendentes();
+  
+  if (anexosPendentes.length === 0) {
+    console.log("Nenhum anexo pendente para associar");
+    return;
+  }
+  
+  console.log(`Associando ${anexosPendentes.length} anexos pendentes ao chamado ${chamadoId}`);
+  
+  try {
+    const resultados = await Promise.allSettled(
+      anexosPendentes.map(anexoId => 
+        updateAnexoChamadoIdClient(anexoId, chamadoId)
+      )
+    );
+    
+    const sucessos = resultados.filter(result => result.status === 'fulfilled').length;
+    const erros = resultados.filter(result => result.status === 'rejected').length;
+    
+    console.log(`Associação concluída: ${sucessos} sucessos, ${erros} erros`);
+    
+    if (sucessos > 0) {
+      limparAnexosPendentes();
+      console.log("Anexos pendentes removidos após associação manual");
+    }
+    
+  } catch (error) {
+    console.error("Erro na associação manual de anexos:", error);
+    throw error;
+  }
+}
+
 // Cliente API que só executa no servidor para máxima segurança
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -336,6 +457,15 @@ export async function uploadAnexoClient(
       withCredentials: true,
     });
     console.log("Resposta da API (anexo):", response.data);
+    
+    // Se o upload foi bem-sucedido, salvar o ID do anexo como pendente
+    if (response.data?.status === 'success' && response.data?.data?.id) {
+      salvarAnexoPendente(response.data.data.id);
+      console.log("Anexo salvo como pendente para associação futura:", response.data.data.id);
+    } else {
+      console.warn("Anexo não foi salvo como pendente. Estrutura da resposta:", response.data);
+    }
+    
     return response.data;
   } catch (error: any) {
     console.error("Erro detalhado ao fazer upload:", {
@@ -385,16 +515,17 @@ export async function createChamadoClient(chamadoData: NovoChamadoData) {
   try {
     console.log("Enviando chamado para API:", chamadoData);
     
+    let chamadoResponse;
+    
     // Primeira tentativa: usando o apiClient padrão
     try {
-      const response = await apiClient.post("/chamado", chamadoData, {
+      chamadoResponse = await apiClient.post("/chamado", chamadoData, {
         headers: {
           "Content-Type": "application/json",
         },
         withCredentials: true,
       });
-      console.log("Resposta da API (tentativa 1):", response.data);
-      return response.data;
+      console.log("Resposta da API (tentativa 1):", chamadoResponse.data);
     } catch (firstError: any) {
       console.warn("Primeira tentativa falhou:", firstError.response?.status);
       
@@ -410,19 +541,24 @@ export async function createChamadoClient(chamadoData: NovoChamadoData) {
           timeout: 10000,
         });
         
-        const response = await directClient.post("/chamado", chamadoData, {
+        chamadoResponse = await directClient.post("/chamado", chamadoData, {
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
           },
           withCredentials: true,
         });
-        console.log("Resposta da API (tentativa 2):", response.data);
-        return response.data;
+        console.log("Resposta da API (tentativa 2):", chamadoResponse.data);
+      } else {
+        throw firstError;
       }
-      
-      throw firstError;
     }
+
+    // Nota: A associação de anexos agora é feita no cliente após a criação do chamado
+    console.log("📋 Chamado criado, retornando dados:", chamadoResponse.data);
+    
+    return chamadoResponse.data;
+    
   } catch (error: any) {
     console.error("Erro detalhado ao criar chamado:", {
       message: error.message,
@@ -445,6 +581,8 @@ export async function updateAnexoChamadoIdClient(
   chamadoId: number
 ) {
   try {
+    console.log(`🔗 Associando anexo ${anexoId} ao chamado ${chamadoId}`);
+    
     const response = await apiClient.patch(
       `/anexo/${anexoId}`,
       { chamadoId },
@@ -455,8 +593,16 @@ export async function updateAnexoChamadoIdClient(
         withCredentials: true,
       }
     );
+    
+    console.log(`✅ Anexo ${anexoId} associado com sucesso:`, response.data);
     return response.data;
   } catch (error: any) {
-    throw new Error("Erro ao atualizar anexo");
+    console.error(`❌ Erro ao associar anexo ${anexoId}:`, {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw new Error(`Erro ao atualizar anexo ${anexoId}: ${error.response?.data?.message || error.message}`);
   }
 }

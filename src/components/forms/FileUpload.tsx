@@ -1,4 +1,5 @@
 import { sendAnexoAction } from "@/app/actions/anexos";
+import { removerAnexoPendente } from "@/lib/api";
 import { Anexo } from "@/types";
 import { CheckCircle, File, Trash, Upload } from "lucide-react";
 import { useRef, useState } from "react";
@@ -98,6 +99,10 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
   const removeFile = (anexoId: number) => {
     const updatedAnexos = anexos.filter((anexo) => anexo.id !== anexoId);
     onFilesUploaded(updatedAnexos);
+    
+    // Remover também dos anexos pendentes no localStorage
+    removerAnexoPendente(anexoId);
+    console.log("Anexo removido da interface e dos pendentes:", anexoId);
   };
 
   const removeUploadingFile = (file: File) => {

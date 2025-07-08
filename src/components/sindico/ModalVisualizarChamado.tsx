@@ -1,7 +1,7 @@
 "use client";
 
 import { Chamado } from "@/types";
-import { X, MapPin, Building, Clock, User, FileText, Phone, Calendar, DollarSign } from "lucide-react";
+import { X, MapPin, Building, Clock, User, FileText, Phone, Calendar, DollarSign, Download, ZoomIn } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useState } from "react";
 
@@ -86,6 +86,7 @@ export function ModalVisualizarChamado({
   onClose,
 }: ModalVisualizarChamadoProps) {
   const [abaAtiva, setAbaAtiva] = useState("geral");
+  const [imagemAmpliada, setImagemAmpliada] = useState<string | null>(null);
 
   const abas = [
     { id: "geral", label: "Geral" },
@@ -95,9 +96,27 @@ export function ModalVisualizarChamado({
   ];
 
   const tipoDescricao = chamado.escopo === "ORCAMENTO" ? "Solicitação de orçamento" : "Manutenção preventiva";
+  
+  const isImageFile = (url: string) => {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    return imageExtensions.some(ext => url.toLowerCase().includes(ext));
+  };
+
+  const downloadAnexo = (url: string, title?: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = title || 'anexo';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
+    <>
+      <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl relative max-h-[90vh] overflow-hidden">
         
         {/* Header */}
@@ -309,14 +328,107 @@ export function ModalVisualizarChamado({
 
                                      <div>
                      <label className="block text-sm font-medium text-gray-600 mb-2">
-                       Anexos:
+                       Anexos ({chamado.anexos?.length || 0}):
                      </label>
-                     <div className="bg-gray-50 rounded-lg p-8 text-center">
-                       <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                       <p className="text-gray-400">
-                         Nenhum anexo disponível
-                       </p>
-                     </div>
+                     
+                     {chamado.anexos && chamado.anexos.length > 0 ? (
+                       <div className="space-y-4">
+                         {/* Grid de Imagens */}
+                         {chamado.anexos.filter(anexo => isImageFile(anexo.url)).length > 0 && (
+                           <div>
+                             <h4 className="font-afacad font-semibold text-black mb-3">Imagens</h4>
+                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                               {chamado.anexos
+                                 .filter(anexo => isImageFile(anexo.url))
+                                 .map((anexo) => (
+                                   <div
+                                     key={anexo.id}
+                                     className="relative group cursor-pointer"
+                                   >
+                                     <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                                       <img
+                                         src={anexo.url}
+                                         alt={anexo.title || `Anexo ${anexo.id}`}
+                                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                         onClick={() => setImagemAmpliada(anexo.url)}
+                                       />
+                                     </div>
+                                     
+                                     {/* Overlay com ações */}
+                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                       <div className="flex gap-2">
+                                         <button
+                                           onClick={() => setImagemAmpliada(anexo.url)}
+                                           className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors"
+                                           title="Ampliar imagem"
+                                         >
+                                           <ZoomIn className="w-4 h-4 text-gray-700" />
+                                         </button>
+                                         <button
+                                           onClick={() => downloadAnexo(anexo.url, anexo.title || `anexo-${anexo.id}`)}
+                                           className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors"
+                                           title="Baixar imagem"
+                                         >
+                                           <Download className="w-4 h-4 text-gray-700" />
+                                         </button>
+                                       </div>
+                                     </div>
+                                     
+                                     {anexo.title && (
+                                       <p className="text-xs text-gray-600 mt-1 truncate">
+                                         {anexo.title}
+                                       </p>
+                                     )}
+                                   </div>
+                                 ))}
+                             </div>
+                           </div>
+                         )}
+                         
+                         {/* Lista de Outros Arquivos */}
+                         {chamado.anexos.filter(anexo => !isImageFile(anexo.url)).length > 0 && (
+                           <div>
+                             <h4 className="font-afacad font-semibold text-black mb-3">Outros arquivos</h4>
+                             <div className="space-y-2">
+                               {chamado.anexos
+                                 .filter(anexo => !isImageFile(anexo.url))
+                                 .map((anexo) => (
+                                   <div
+                                     key={anexo.id}
+                                     className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                   >
+                                     <div className="flex items-center gap-3">
+                                       <FileText className="w-5 h-5 text-gray-500" />
+                                       <div>
+                                         <p className="font-medium text-sm text-black">
+                                           {anexo.title || `Anexo ${anexo.id}`}
+                                         </p>
+                                         <p className="text-xs text-gray-500">
+                                           Criado em {formatarData(anexo.createdAt)}
+                                         </p>
+                                       </div>
+                                     </div>
+                                     <button
+                                       onClick={() => downloadAnexo(anexo.url, anexo.title || `anexo-${anexo.id}`)}
+                                       className="p-2 text-gray-500 hover:text-[#1F45FF] hover:bg-blue-50 rounded-lg transition-colors"
+                                       title="Baixar arquivo"
+                                     >
+                                       <Download className="w-4 h-4" />
+                                     </button>
+                                   </div>
+                                 ))}
+                             </div>
+                           </div>
+                         )}
+                       </div>
+                     ) : (
+                       <div className="bg-gray-50 rounded-lg p-8 text-center">
+                         <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                         <p className="text-gray-400">
+                           Nenhum anexo disponível
+                         </p>
+                       </div>
+                     )}
                    </div>
                 </div>
               </div>
@@ -396,7 +508,31 @@ export function ModalVisualizarChamado({
           </div>
         </div>
 
+              </div>
       </div>
-    </div>
+
+      {/* Lightbox para ampliar imagens */}
+      {imagemAmpliada && (
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100]"
+          onClick={() => setImagemAmpliada(null)}
+        >
+          <div className="relative max-w-screen-lg max-h-screen-lg p-4">
+            <button
+              onClick={() => setImagemAmpliada(null)}
+              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <img
+              src={imagemAmpliada}
+              alt="Imagem ampliada"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 } 

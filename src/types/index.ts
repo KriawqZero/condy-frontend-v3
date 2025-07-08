@@ -131,8 +131,11 @@ export interface Chamado {
   imovelId: number;
   imovel?: Imovel;
   solicitanteId: string;
+  solicitante?: User;
   ativoId?: number;
   prestadorId?: string;
+  prestadorAssignadoId?: string;
+  anexos?: Anexo[];
 
   createdAt: Date;
   updatedAt: Date;
@@ -222,7 +225,7 @@ export interface NovoImovelData {
 }
 
 export interface NovoChamadoData {
-  descricaoOcorrido: string;
+  descricaoOcorrido?: string;
   prioridade: "BAIXA" | "MEDIA" | "ALTA";
   imovelId: number;
   escopo: "SERVICO_IMEDIATO" | "ORCAMENTO";

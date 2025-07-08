@@ -16,9 +16,7 @@ const ativoManualSchema = z.object({
 
 const createChamadoSchema = z
   .object({
-    descricaoOcorrido: z
-      .string()
-      .min(10, "Descrição do ocorrido é obrigatória"),
+    descricaoOcorrido: z.string().optional(),
     informacoesAdicionais: z.string().optional(),
     prioridade: z.enum(["BAIXA", "MEDIA", "ALTA"]),
     imovelId: z.number().min(1, "ID do imóvel é obrigatório"),
@@ -52,22 +50,34 @@ export async function createChamadoAction(data: {
     console.log("Validando dados do chamado:", data);
     const validatedData = createChamadoSchema.parse(data);
     console.log("Dados validados:", validatedData);
-    
+
     // Chama a API real
     const response = await createChamadoClient(validatedData);
+
+    console.log("Resposta completa da API:", response);
+    console.log("Dados do chamado (response.data):", response.data);
     
-    console.log("Chamado criado com sucesso:", response.data);
+    // Extrair apenas os dados do chamado da resposta da API
+    // A resposta já vem com a estrutura correta: { status: 'success', data: { id, ... } }
+    const chamadoData = response.data;
+    
     return {
       success: true,
-      data: response.data,
-      message: `Chamado ${response.data?.numeroChamado || response.data?.numero_chamado || 'criado'} com sucesso! Aguarde o contato por WhatsApp.`,
+      data: chamadoData,
+      message: `Chamado ${
+        chamadoData?.numeroChamado ||
+        chamadoData?.numero_chamado ||
+        "criado"
+      } com sucesso! Aguarde o contato por WhatsApp.`,
     };
   } catch (error: any) {
     if (error.name === "ZodError") {
       console.error("Erro de validação Zod:", error.errors);
       return {
         success: false,
-        error: "Dados inválidos: " + error.errors.map((e: any) => e.message).join(", "),
+        error:
+          "Dados inválidos: " +
+          error.errors.map((e: any) => e.message).join(", "),
       };
     }
     console.error("Erro completo ao criar chamado:", error);

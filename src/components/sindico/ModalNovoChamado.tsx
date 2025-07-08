@@ -1,6 +1,6 @@
-import { updateAnexoChamadoIdAction } from "@/app/actions/anexos";
 import { createChamadoAction } from "@/app/actions/chamados";
 import { getImoveisAction } from "@/app/actions/imoveis";
+import { debugAnexosPendentes, getAnexosPendentes, limparAnexosPendentes, updateAnexoChamadoIdClient } from "@/lib/api";
 import { Anexo, Imovel, NovoChamadoData } from "@/types";
 import { Building, MapPin, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -11,6 +11,14 @@ interface ModalNovoChamadoProps {
   onClose: () => void;
   onSuccess?: () => void;
 }
+
+// Função para lidar com o fechamento do modal
+const handleCloseModal = (onClose: () => void) => {
+  // Opcionalmente, limpar anexos pendentes se o usuário cancelar
+  // Descomente a linha abaixo se quiser limpar anexos ao cancelar
+  // limparAnexosPendentes();
+  onClose();
+};
 
 export function ModalNovoChamado({
   onClose,
@@ -31,6 +39,8 @@ export function ModalNovoChamado({
   // Carregar imóveis na inicialização
   useEffect(() => {
     carregarImoveis();
+    // Debug do estado atual dos anexos pendentes
+    debugAnexosPendentes();
   }, []);
 
   const carregarImoveis = async () => {
@@ -94,6 +104,10 @@ export function ModalNovoChamado({
         return;
       }
 
+      // Verificar anexos pendentes no cliente (antes da server action)
+      const anexosPendentes = getAnexosPendentes();
+      console.log("🔍 Cliente - Anexos pendentes encontrados:", anexosPendentes);
+
       const chamadoData: NovoChamadoData = {
         descricaoOcorrido,
         prioridade: prioridade as "BAIXA" | "MEDIA" | "ALTA",
@@ -101,24 +115,65 @@ export function ModalNovoChamado({
         escopo: escopo as "SERVICO_IMEDIATO" | "ORCAMENTO",
       };
 
+      // Criar o chamado primeiro
       const chamadoResponse = await createChamadoAction(chamadoData);
 
-      // Atualizar anexos com o ID do chamado criado
-      if (anexos.length > 0 && chamadoResponse.data?.id) {
-        await Promise.all(
-          anexos.map((anexo) =>
-            updateAnexoChamadoIdAction(
-              anexo.id,
-              Number(chamadoResponse.data?.id)
+      console.log("📋 Resposta do chamado:", {
+        success: chamadoResponse.success,
+        data: chamadoResponse.data,
+        chamadoId: chamadoResponse.data?.id,
+        anexosPendentes: anexosPendentes.length
+      });
+
+      // Se o chamado foi criado com sucesso E há anexos pendentes, associá-los no cliente
+      if (chamadoResponse.success && chamadoResponse.data?.id && anexosPendentes.length > 0) {
+        console.log(`📎 Associando ${anexosPendentes.length} anexos ao chamado ${chamadoResponse.data.id}`);
+        
+        try {
+          // Associar todos os anexos pendentes ao chamado criado
+          const resultadosAssociacao = await Promise.allSettled(
+            anexosPendentes.map(anexoId => 
+              updateAnexoChamadoIdClient(anexoId, Number(chamadoResponse.data?.id))
             )
-          )
-        );
+          );
+          
+          const sucessos = resultadosAssociacao.filter(result => result.status === 'fulfilled').length;
+          const erros = resultadosAssociacao.filter(result => result.status === 'rejected').length;
+          
+          console.log(`✅ Anexos associados: ${sucessos} sucessos, ${erros} erros`);
+          
+          if (erros > 0) {
+            console.warn("⚠️ Alguns anexos não puderam ser associados:", 
+              resultadosAssociacao
+                .filter(result => result.status === 'rejected')
+                .map((result: any) => result.reason)
+            );
+          }
+          
+          // Limpar anexos pendentes após associação bem-sucedida
+          if (sucessos > 0) {
+            limparAnexosPendentes();
+            console.log("🧹 Anexos pendentes removidos após associação");
+          }
+          
+        } catch (error) {
+          console.error("❌ Erro ao associar anexos:", error);
+          // Não falhar a criação do chamado por erro na associação
+        }
+      } else if (anexosPendentes.length > 0) {
+        console.warn("⚠️ Havia anexos pendentes mas chamado não foi criado ou sem ID", {
+          success: chamadoResponse.success,
+          hasId: !!chamadoResponse.data?.id,
+          anexosCount: anexosPendentes.length
+        });
+      } else {
+        console.log("ℹ️ Nenhum anexo pendente para associar");
       }
 
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error("Erro ao criar chamado:", error);
+      console.error("❌ Erro ao criar chamado:", error);
       alert("Erro ao criar chamado. Tente novamente.");
     } finally {
       setLoading(false);
@@ -135,7 +190,7 @@ export function ModalNovoChamado({
           </h2>
           <button
             className="text-gray-400 hover:text-gray-600"
-            onClick={onClose}
+            onClick={() => handleCloseModal(onClose)}
           >
             <X size={24} />
           </button>
