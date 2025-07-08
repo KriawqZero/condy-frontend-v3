@@ -8,6 +8,7 @@ import { NoteIcon } from "@/components/icons/NoteIcon";
 import { StatisticsIcon } from "@/components/icons/StatisticsIcon";
 import { WhatsappIcon } from "@/components/icons/WhatsappIcon";
 import { ModalNovoChamado } from "@/components/sindico/ModalNovoChamado";
+import { ModalVisualizarChamado } from "@/components/sindico/ModalVisualizarChamado";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -48,6 +49,15 @@ export default function SindicoDashboard({ user }: { user: User }) {
   const [loadingChamados, setLoadingChamados] = useState(true);
 
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [chamadoSelecionado, setChamadoSelecionado] = useState<Chamado | null>(null);
+
+  const abrirModalVisualizacao = (chamado: Chamado) => {
+    setChamadoSelecionado(chamado);
+  };
+
+  const fecharModalVisualizacao = () => {
+    setChamadoSelecionado(null);
+  };
 
   function formatarValor(valor: unknown, moeda: boolean = true): string {
     const numero = Number(valor);
@@ -115,6 +125,13 @@ export default function SindicoDashboard({ user }: { user: User }) {
             }
             fetchChamados();
           }}
+        />
+      )}
+
+      {chamadoSelecionado && (
+        <ModalVisualizarChamado
+          chamado={chamadoSelecionado}
+          onClose={fecharModalVisualizacao}
         />
       )}
 
@@ -224,6 +241,7 @@ export default function SindicoDashboard({ user }: { user: User }) {
                         <div
                           key={chamado.id}
                           className="px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[700px]"
+                          onClick={() => abrirModalVisualizacao(chamado)}
                         >
                           <div className="grid grid-cols-7 gap-4 items-center">
                             <div className="font-afacad text-sm font-bold text-black">
