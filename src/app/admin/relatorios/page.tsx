@@ -14,9 +14,15 @@ export default function AdminRelatoriosPage() {
 
   const loadStats = async () => {
     setLoading(true);
-    const response = await getSystemStatsAction();
-    if (response.success && response.data) {
-      setStats(response.data);
+    try {
+      const response = await getSystemStatsAction();
+      if (response.success && response.data) {
+        setStats(response.data);
+      } else {
+        console.error('Erro ao carregar estatísticas:', response.error);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
     }
     setLoading(false);
   };

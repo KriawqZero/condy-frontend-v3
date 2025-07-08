@@ -1,6 +1,51 @@
 "use client";
 
+import { useState, useEffect } from 'react';
+import { getChamadosAction } from '@/app/actions/chamados';
+import { getSystemStatsAction } from '@/app/actions/admin';
+
 export default function AdminPage() {
+  const [stats, setStats] = useState({
+    totalChamados: 0,
+    chamadosPendentes: 0,
+    totalUsuarios: 0,
+    totalCondominios: 0
+  });
+  const [recentChamados, setRecentChamados] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    try {
+      // Carregar estatísticas do sistema
+      const statsResponse = await getSystemStatsAction();
+      if (statsResponse.success && statsResponse.data) {
+        setStats({
+          totalChamados: statsResponse.data.totalChamados,
+          chamadosPendentes: statsResponse.data.chamadosPendentes,
+          totalUsuarios: statsResponse.data.totalUsuarios,
+          totalCondominios: statsResponse.data.totalCondominios
+        });
+      }
+
+      // Carregar chamados recentes
+      const chamadosResponse = await getChamadosAction();
+      if (chamadosResponse.success && chamadosResponse.data) {
+        // Pegar os 3 chamados mais recentes
+        const recent = chamadosResponse.data
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 3);
+        setRecentChamados(recent);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados do dashboard:', error);
+    }
+    setLoading(false);
+  };
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -68,7 +113,7 @@ export default function AdminPage() {
                       Total Chamados
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      247
+                      {loading ? '...' : stats.totalChamados}
                     </dd>
                   </dl>
                 </div>
@@ -92,7 +137,7 @@ export default function AdminPage() {
                       Pendentes
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      42
+                      {loading ? '...' : stats.chamadosPendentes}
                     </dd>
                   </dl>
                 </div>
@@ -116,7 +161,7 @@ export default function AdminPage() {
                       Usuários Ativos
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      1,394
+                      {loading ? '...' : stats.totalUsuarios.toLocaleString()}
                     </dd>
                   </dl>
                 </div>
@@ -140,7 +185,7 @@ export default function AdminPage() {
                       Condomínios
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      89
+                      {loading ? '...' : stats.totalCondominios}
                     </dd>
                   </dl>
                 </div>
@@ -158,38 +203,57 @@ export default function AdminPage() {
                 Chamados Recentes
               </h3>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">#CH001 - Elevador com problema</p>
-                      <p className="text-xs text-gray-600">Condomínio Aurora - há 5 min</p>
-                    </div>
+                {loading ? (
+                  <div className="p-4 text-center">
+                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
+                    <p className="mt-2 text-sm text-gray-600">Carregando...</p>
                   </div>
-                  <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">URGENTE</span>
-                </div>
-                
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">#CH002 - Limpeza piscina</p>
-                      <p className="text-xs text-gray-600">Condomínio Vista - há 15 min</p>
-                    </div>
-                  </div>
-                  <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">MÉDIA</span>
-                </div>
+                ) : recentChamados.length > 0 ? (
+                  recentChamados.map((chamado: any) => {
+                    const getPrioridadeColor = (prioridade: string) => {
+                      switch (prioridade) {
+                        case 'ALTA': return { dot: 'bg-red-500', badge: 'bg-red-100 text-red-800', text: 'URGENTE' };
+                        case 'MEDIA': return { dot: 'bg-yellow-500', badge: 'bg-yellow-100 text-yellow-800', text: 'MÉDIA' };
+                        case 'BAIXA': return { dot: 'bg-green-500', badge: 'bg-green-100 text-green-800', text: 'BAIXA' };
+                        default: return { dot: 'bg-gray-500', badge: 'bg-gray-100 text-gray-800', text: 'N/A' };
+                      }
+                    };
+                    
+                    const statusColor = chamado.status === 'CONCLUIDO' ? 
+                      { dot: 'bg-green-500', badge: 'bg-green-100 text-green-800', text: 'CONCLUÍDO' } :
+                      getPrioridadeColor(chamado.prioridade);
+                    
+                    const timeAgo = new Date(chamado.createdAt);
+                    const now = new Date();
+                    const diffMinutes = Math.floor((now.getTime() - timeAgo.getTime()) / (1000 * 60));
+                    const timeText = diffMinutes < 60 ? `há ${diffMinutes} min` : 
+                                   diffMinutes < 1440 ? `há ${Math.floor(diffMinutes / 60)}h` : 
+                                   `há ${Math.floor(diffMinutes / 1440)} dias`;
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">#CH003 - Manutenção jardim</p>
-                      <p className="text-xs text-gray-600">Condomínio Flores - há 1h</p>
-                    </div>
+                    return (
+                      <div key={chamado.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center">
+                          <div className={`w-2 h-2 ${statusColor.dot} rounded-full mr-3`}></div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {chamado.numeroChamado} - {chamado.descricaoOcorrido.substring(0, 30)}...
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              {chamado.imovel?.nome || 'Sem condomínio'} - {timeText}
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`px-2 py-1 text-xs ${statusColor.badge} rounded-full`}>
+                          {statusColor.text}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    <p>Nenhum chamado recente encontrado</p>
                   </div>
-                  <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">CONCLUÍDO</span>
-                </div>
+                )}
               </div>
               <div className="mt-6">
                 <a href="/admin/chamados" className="text-sm font-medium text-red-600 hover:text-red-500">

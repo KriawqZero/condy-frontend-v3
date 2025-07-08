@@ -81,7 +81,12 @@ export async function middleware(request: NextRequest) {
       );
 
       if (!hasAccess) {
-        // Redirecionar para a rota padrão do tipo de usuário
+        // Para admins, sempre redirecionar para /admin se não tiver acesso à rota atual
+        if (userType === 'ADMIN_PLATAFORMA') {
+          return NextResponse.redirect(new URL("/admin", request.url));
+        }
+        
+        // Para outros usuários, redirecionar para a rota padrão do tipo
         const defaultRoute = allowedRoutes[0];
         return NextResponse.redirect(new URL(defaultRoute, request.url));
       }

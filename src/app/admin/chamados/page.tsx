@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getChamadosAction } from '@/app/actions/chamados';
+import { updateChamadoAdminAction } from '@/app/actions/admin';
 import type { Chamado } from '@/types';
 
 export default function AdminChamadosPage() {
@@ -17,9 +18,15 @@ export default function AdminChamadosPage() {
 
   const loadChamados = async () => {
     setLoading(true);
-    const response = await getChamadosAction();
-    if (response.success && response.data) {
-      setChamados(response.data);
+    try {
+      const response = await getChamadosAction();
+      if (response.success && response.data) {
+        setChamados(response.data);
+      } else {
+        console.error('Erro ao carregar chamados:', response.error);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar chamados:', error);
     }
     setLoading(false);
   };
@@ -49,6 +56,41 @@ export default function AdminChamadosPage() {
                          chamado.descricaoOcorrido.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  const handleSaveChanges = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedChamado) return;
+
+    const formData = new FormData(event.currentTarget);
+    const updateData = {
+      status: formData.get('status') as string,
+      prioridade: formData.get('prioridade') as string,
+      prestadorId: formData.get('prestadorId') as string,
+      valorEstimado: formData.get('valorEstimado') ? parseFloat(formData.get('valorEstimado') as string) : undefined,
+      observacoesInternas: formData.get('observacoesInternas') as string,
+    };
+
+    try {
+      const response = await updateChamadoAdminAction(selectedChamado.id, updateData);
+      if (response.success) {
+        // Atualizar o chamado na lista local
+        setChamados(chamados.map(c => 
+          c.id === selectedChamado.id 
+            ? { ...c, ...updateData }
+            : c
+        ));
+        setSelectedChamado(null);
+        // Recarregar dados para garantir sincronização
+        loadChamados();
+        alert('Chamado atualizado com sucesso!');
+      } else {
+        alert('Erro ao atualizar chamado: ' + response.error);
+      }
+    } catch (error) {
+      console.error('Erro ao salvar alterações:', error);
+      alert('Erro ao salvar alterações');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -268,7 +310,7 @@ export default function AdminChamadosPage() {
                         {chamado.prestadorId || 'Não alocado'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {chamado.valorEstimado ? `R$ ${chamado.valorEstimado.toFixed(2)}` : 'N/A'}
+                        {chamado.valorEstimado && typeof chamado.valorEstimado === 'number' ? `R$ ${chamado.valorEstimado.toFixed(2)}` : 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
@@ -308,11 +350,12 @@ export default function AdminChamadosPage() {
                   </button>
                 </div>
 
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSaveChanges}>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Status</label>
                       <select 
+                        name="status"
                         defaultValue={selectedChamado.status}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                       >
@@ -326,6 +369,7 @@ export default function AdminChamadosPage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Prioridade</label>
                       <select 
+                        name="prioridade"
                         defaultValue={selectedChamado.prioridade}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                       >
@@ -340,6 +384,7 @@ export default function AdminChamadosPage() {
                     <label className="block text-sm font-medium text-gray-700">Prestador (CNPJ)</label>
                     <input
                       type="text"
+                      name="prestadorId"
                       defaultValue={selectedChamado.prestadorId || ''}
                       placeholder="Digite o CNPJ do prestador"
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
@@ -351,7 +396,8 @@ export default function AdminChamadosPage() {
                     <input
                       type="number"
                       step="0.01"
-                      defaultValue={selectedChamado.valorEstimado || ''}
+                      name="valorEstimado"
+                      defaultValue={selectedChamado.valorEstimado && typeof selectedChamado.valorEstimado === 'number' ? selectedChamado.valorEstimado.toString() : ''}
                       placeholder="0.00"
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                     />
@@ -361,6 +407,7 @@ export default function AdminChamadosPage() {
                     <label className="block text-sm font-medium text-gray-700">Observações Internas</label>
                     <textarea
                       rows={3}
+                      name="observacoesInternas"
                       placeholder="Observações visíveis apenas para administradores"
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                     />

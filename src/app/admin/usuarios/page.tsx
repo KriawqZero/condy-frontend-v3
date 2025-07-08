@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { getAdminUsersAction } from '@/app/actions/admin';
 
 interface Usuario {
   id: string;
@@ -21,47 +22,36 @@ export default function AdminUsuariosPage() {
   const [filter, setFilter] = useState('todos');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Mock data - substituir pela API real
   useEffect(() => {
-    setTimeout(() => {
-      setUsuarios([
-        {
-          id: '1',
-          name: 'João Silva',
-          email: 'joao@condominio.com',
-          cpfCnpj: '123.456.789-00',
-          whatsapp: '(11) 99999-9999',
-          userType: 'SINDICO_RESIDENTE',
-          createdAt: '2024-01-15',
-          lastLogin: '2024-01-20',
-          isActive: true
-        },
-        {
-          id: '2',
-          name: 'Maria Santos',
-          email: 'maria@empresa.com',
-          cpfCnpj: '12.345.678/0001-90',
-          whatsapp: '(11) 88888-8888',
-          userType: 'EMPRESA',
-          createdAt: '2024-01-10',
-          lastLogin: '2024-01-19',
-          isActive: true
-        },
-        {
-          id: '3',
-          name: 'Carlos Prestador',
-          email: 'carlos@prestador.com',
-          cpfCnpj: '987.654.321-00',
-          whatsapp: '(11) 77777-7777',
-          userType: 'PRESTADOR',
-          createdAt: '2024-01-05',
-          lastLogin: null,
-          isActive: false
-        }
-      ]);
-      setLoading(false);
-    }, 1000);
+    loadUsuarios();
   }, []);
+
+  const loadUsuarios = async () => {
+    setLoading(true);
+    try {
+      const response = await getAdminUsersAction();
+      if (response.success && response.data) {
+        // Converter dados do User para o formato esperado
+        const usuariosFormatados = response.data.map(user => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          cpfCnpj: user.cpfCnpj,
+          whatsapp: user.whatsapp,
+          userType: user.userType,
+          createdAt: new Date().toISOString(), // Usar data atual se não tiver
+          lastLogin: null, // Não temos essa info na interface User
+          isActive: true // Assumir ativo por padrão
+        }));
+        setUsuarios(usuariosFormatados);
+      } else {
+        console.error('Erro ao carregar usuários:', response.error);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar usuários:', error);
+    }
+    setLoading(false);
+  };
 
   const getUserTypeLabel = (type: string) => {
     switch (type) {

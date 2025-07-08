@@ -25,9 +25,15 @@ export default function AdminSistemaPage() {
 
   const loadLogs = async () => {
     setLoading(true);
-    const response = await getSystemLogsAction();
-    if (response.success && response.data) {
-      setLogs(response.data);
+    try {
+      const response = await getSystemLogsAction();
+      if (response.success && response.data) {
+        setLogs(response.data);
+      } else {
+        console.error('Erro ao carregar logs:', response.error);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar logs:', error);
     }
     setLoading(false);
   };
