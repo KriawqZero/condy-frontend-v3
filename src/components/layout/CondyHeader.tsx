@@ -9,11 +9,15 @@ interface CondyHeaderProps {
 }
 
 export default function CondyHeader({ user, title }: CondyHeaderProps) {
+  const isAdmin = user?.userType === 'ADMIN_PLATAFORMA';
+  
   return (
     <header
       className="h-92 relative overflow-hidden"
       style={{
-        background: "linear-gradient(90deg, #DFE0F9 0%, #FBD9B9 100%)",
+        background: isAdmin 
+          ? "linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 100%)" 
+          : "linear-gradient(90deg, #DFE0F9 0%, #FBD9B9 100%)",
       }}
     >
       {/* Header Content */}
@@ -21,6 +25,11 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
         {/* Logo */}
         <div className="flex items-center gap-3">
           <img src="/horizontal_logo.svg" alt="Condy" className="h-10" />
+          {isAdmin && (
+            <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-black text-sm rounded-full font-bold">
+              ADMIN
+            </span>
+          )}
         </div>
 
         {/* Logout Button */}
@@ -30,7 +39,7 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
       {/* Welcome Message - Ajustado para não conflitar com os cards */}
       <div className="relative max-w-screen-2xl px-4 sm:px-6 lg:px-8 mx-auto mt-6">
         <h1 className="font-afacad text-4xl lg:text-5xl font-bold leading-tight">
-          Olá, {user?.name || "Síndico"}!
+          {isAdmin ? `Olá, Administrador!` : `Olá, ${user?.name || "Síndico"}!`}
         </h1>
         <p className="font-afacad text-lg mt-1">{title}</p>
       </div>

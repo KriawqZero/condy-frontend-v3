@@ -235,7 +235,7 @@ export async function checkCpfCnpj(
 // Imóveis API
 export async function getImoveis() {
   try {
-    const response = await apiClient.get("/imoveis");
+    const response = await apiClient.get("/imovel");
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Erro ao obter imóveis");
