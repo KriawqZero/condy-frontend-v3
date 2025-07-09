@@ -1,6 +1,6 @@
 "use server";
 
-import { getChamados } from "@/lib/api";
+import { getChamados, getImoveis } from "@/lib/api";
 import { ResponsePayload, Chamado, User } from "@/types";
 
 // Action para admin obter todos os chamados (sem restrições)
@@ -52,10 +52,10 @@ export async function updateChamadoAdminAction(
 // Action para admin obter todos os usuários
 export async function getAdminUsersAction(): Promise<ResponsePayload<User[]>> {
   try {
-    // TODO: Implementar chamada API real
+    // TODO: Implementar chamada API real - Futura implementação
     // const response = await getUsers();
     
-    // Mock data por enquanto
+    // Mock data por enquanto - será implementado futuramente
     const mockUsers: User[] = [
       {
         id: '1',
@@ -182,7 +182,7 @@ export async function alocarPrestadorAction(
   }
 }
 
-// Action para admin obter estatísticas do sistema
+// Action para admin obter estatísticas do sistema - USANDO DADOS REAIS
 export async function getSystemStatsAction(): Promise<ResponsePayload<{
   totalChamados: number;
   chamadosPendentes: number;
@@ -194,24 +194,49 @@ export async function getSystemStatsAction(): Promise<ResponsePayload<{
   satisfacaoMedia: number;
 }>> {
   try {
-    // TODO: Implementar chamada API real
-    // const response = await getSystemStats();
-    
-    // Mock data por enquanto
+    // Buscar dados reais da API
+    const [chamadosResponse, imoveisResponse] = await Promise.all([
+      getChamados(),
+      getImoveis()
+    ]);
+
+    const chamados = chamadosResponse.data.items || [];
+    const imoveis = imoveisResponse.data.items || [];
+
+    // Calcular estatísticas reais
+    const totalChamados = chamados.length;
+    const chamadosPendentes = chamados.filter(
+      (c: Chamado) => c.status !== 'CONCLUIDO'
+    ).length;
+    const totalCondominios = imoveis.length;
+
+    // Calcular média de tempo de resolução (apenas para chamados concluídos)
+    const chamadosConcluidos = chamados.filter((c: Chamado) => c.status === 'CONCLUIDO');
+    let mediaTempoResolucao = 0;
+    if (chamadosConcluidos.length > 0) {
+      const tempos = chamadosConcluidos.map((c: Chamado) => {
+        const created = new Date(c.createdAt);
+        const updated = new Date(c.updatedAt);
+        return (updated.getTime() - created.getTime()) / (1000 * 60 * 60); // em horas
+      });
+      mediaTempoResolucao = tempos.reduce((acc, tempo) => acc + tempo, 0) / tempos.length;
+    }
+
     return {
       success: true,
       data: {
-        totalChamados: 247,
-        chamadosPendentes: 42,
-        totalUsuarios: 1394,
-        usuariosAtivos: 1285,
-        totalCondominios: 89,
-        prestadoresAtivos: 156,
-        mediaTempoResolucao: 4.2, // em horas
-        satisfacaoMedia: 4.7 // de 1 a 5
+        totalChamados,
+        chamadosPendentes,
+        totalUsuarios: 0, // Será implementado quando tivermos endpoint de usuários
+        usuariosAtivos: 0, // Será implementado quando tivermos endpoint de usuários
+        totalCondominios,
+        prestadoresAtivos: 0, // Será implementado quando tivermos dados de prestadores
+        mediaTempoResolucao: Math.round(mediaTempoResolucao * 10) / 10, // Arredondar para 1 casa decimal
+        satisfacaoMedia: 0 // Será implementado quando tivermos sistema de avaliação
       }
     };
   } catch (error: any) {
+    console.error('Erro ao buscar estatísticas do sistema:', error);
     return {
       success: false,
       error: error.message || "Erro ao buscar estatísticas",
@@ -229,10 +254,10 @@ export async function getSystemLogsAction(): Promise<ResponsePayload<{
   action?: string;
 }[]>> {
   try {
-    // TODO: Implementar chamada API real
+    // TODO: Implementar chamada API real para logs do sistema
     // const response = await getSystemLogs();
     
-    // Mock data por enquanto
+    // Mock data por enquanto - funcionalidade futura
     return {
       success: true,
       data: [
@@ -240,24 +265,8 @@ export async function getSystemLogsAction(): Promise<ResponsePayload<{
           id: '1',
           timestamp: new Date().toISOString(),
           level: 'info',
-          message: 'Usuário fez login no sistema',
-          userId: 'user123',
-          action: 'LOGIN'
-        },
-        {
-          id: '2',
-          timestamp: new Date(Date.now() - 300000).toISOString(),
-          level: 'warning',
-          message: 'Tentativa de acesso negada - permissões insuficientes',
-          userId: 'user456',
-          action: 'ACCESS_DENIED'
-        },
-        {
-          id: '3',
-          timestamp: new Date(Date.now() - 600000).toISOString(),
-          level: 'error',
-          message: 'Erro na integração com WhatsApp API',
-          action: 'WHATSAPP_ERROR'
+          message: 'Sistema de logs será implementado futuramente',
+          action: 'SYSTEM_INFO'
         }
       ]
     };

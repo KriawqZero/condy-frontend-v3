@@ -19,7 +19,6 @@ const protectedRoutes = [
   "/admin",
   "/empresa",
   "/prestador",
-  "/dashboard",
 ];
 
 // Rotas de admin que requerem permissão específica
@@ -31,7 +30,7 @@ const routesByUserType = {
   SINDICO_PROFISSIONAL: ["/sindico"],
   EMPRESA: ["/empresa"],
   PRESTADOR: ["/prestador"],
-  ADMIN_PLATAFORMA: ["/admin", "/sindico", "/empresa", "/prestador"],
+  ADMIN_PLATAFORMA: ["/admin"],
 };
 
 export async function middleware(request: NextRequest) {
