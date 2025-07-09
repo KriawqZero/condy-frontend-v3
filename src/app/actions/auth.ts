@@ -88,7 +88,7 @@ export async function loginAction(formData: FormData) {
       };
     }
   } catch (error: any) {
-    console.error("Login error:", error);
+    // Login error
 
     if (error.name === "ZodError") {
       return {

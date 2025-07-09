@@ -47,15 +47,13 @@ export async function createChamadoAction(data: {
   informacoesAdicionais?: string;
 }): Promise<ResponsePayload<Chamado>> {
   try {
-    console.log("Validando dados do chamado:", data);
+    // Validando dados do chamado
     const validatedData = createChamadoSchema.parse(data);
-    console.log("Dados validados:", validatedData);
 
     // Chama a API real
     const response = await createChamadoClient(validatedData);
 
-    console.log("Resposta completa da API:", response);
-    console.log("Dados do chamado (response.data):", response.data);
+    // Resposta da API recebida
     
     // Extrair apenas os dados do chamado da resposta da API
     // A resposta já vem com a estrutura correta: { status: 'success', data: { id, ... } }
@@ -72,7 +70,7 @@ export async function createChamadoAction(data: {
     };
   } catch (error: any) {
     if (error.name === "ZodError") {
-      console.error("Erro de validação Zod:", error.errors);
+      // Erro de validação Zod
       return {
         success: false,
         error:
@@ -80,7 +78,7 @@ export async function createChamadoAction(data: {
           error.errors.map((e: any) => e.message).join(", "),
       };
     }
-    console.error("Erro completo ao criar chamado:", error);
+    // Erro completo ao criar chamado
     return {
       success: false,
       error: error.message || "Erro interno do servidor",

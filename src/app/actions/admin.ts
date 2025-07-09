@@ -236,7 +236,7 @@ export async function getSystemStatsAction(): Promise<ResponsePayload<{
       }
     };
   } catch (error: any) {
-    console.error('Erro ao buscar estatísticas do sistema:', error);
+    // Erro ao buscar estatísticas do sistema
     return {
       success: false,
       error: error.message || "Erro ao buscar estatísticas",

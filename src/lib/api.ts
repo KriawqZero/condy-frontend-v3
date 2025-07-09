@@ -17,7 +17,6 @@ const ANEXOS_PENDENTES_KEY = "anexos_pendentes_chamado";
 // Funções para gerenciar anexos pendentes no localStorage
 export function salvarAnexoPendente(anexoId: number): void {
   if (typeof window === "undefined") {
-    console.warn("⚠️ salvarAnexoPendente chamado no servidor - ignorando");
     return;
   }
   
@@ -26,9 +25,6 @@ export function salvarAnexoPendente(anexoId: number): void {
     if (!anexosPendentes.includes(anexoId)) {
       anexosPendentes.push(anexoId);
       localStorage.setItem(ANEXOS_PENDENTES_KEY, JSON.stringify(anexosPendentes));
-      console.log("✅ ANEXO SALVO COMO PENDENTE:", anexoId, "| Lista atual:", anexosPendentes);
-    } else {
-      console.log("⚠️ Anexo já existe na lista de pendentes:", anexoId);
     }
   } catch (error) {
     console.error("❌ Erro ao salvar anexo pendente:", error);
@@ -37,14 +33,12 @@ export function salvarAnexoPendente(anexoId: number): void {
 
 export function getAnexosPendentes(): number[] {
   if (typeof window === "undefined") {
-    console.warn("⚠️ getAnexosPendentes chamado no servidor - retornando array vazio");
     return [];
   }
   
   try {
     const stored = localStorage.getItem(ANEXOS_PENDENTES_KEY);
     const anexos = stored ? JSON.parse(stored) : [];
-    console.log("📋 ANEXOS PENDENTES OBTIDOS:", anexos.length > 0 ? anexos : "Nenhum anexo encontrado");
     return anexos;
   } catch (error) {
     console.error("❌ Erro ao obter anexos pendentes:", error);
@@ -56,10 +50,7 @@ export function limparAnexosPendentes(): void {
   if (typeof window === "undefined") return;
   
   try {
-    const stored = localStorage.getItem(ANEXOS_PENDENTES_KEY);
-    const anexosAntes = stored ? JSON.parse(stored) : [];
     localStorage.removeItem(ANEXOS_PENDENTES_KEY);
-    console.log("🧹 Anexos pendentes limpos do localStorage. Eram:", anexosAntes);
   } catch (error) {
     console.error("❌ Erro ao limpar anexos pendentes:", error);
   }
@@ -72,7 +63,6 @@ export function removerAnexoPendente(anexoId: number): void {
     const anexosPendentes = getAnexosPendentes();
     const novosAnexos = anexosPendentes.filter(id => id !== anexoId);
     localStorage.setItem(ANEXOS_PENDENTES_KEY, JSON.stringify(novosAnexos));
-    console.log("Anexo removido dos pendentes:", anexoId);
   } catch (error) {
     console.error("Erro ao remover anexo pendente:", error);
   }
@@ -88,11 +78,7 @@ export function debugAnexosPendentes(): void {
   
   try {
     const stored = localStorage.getItem(ANEXOS_PENDENTES_KEY);
-    console.log("🔍 DEBUG localStorage anexos pendentes:", {
-      raw: stored,
-      parsed: stored ? JSON.parse(stored) : null,
-      length: stored ? JSON.parse(stored).length : 0
-    });
+    // Debug logs removidos para produção
   } catch (error) {
     console.error("❌ Erro no debug de anexos pendentes:", error);
   }
@@ -103,11 +89,8 @@ export async function associarAnexosPendentesAoChamado(chamadoId: number): Promi
   const anexosPendentes = getAnexosPendentes();
   
   if (anexosPendentes.length === 0) {
-    console.log("Nenhum anexo pendente para associar");
     return;
   }
-  
-  console.log(`Associando ${anexosPendentes.length} anexos pendentes ao chamado ${chamadoId}`);
   
   try {
     const resultados = await Promise.allSettled(
@@ -117,13 +100,9 @@ export async function associarAnexosPendentesAoChamado(chamadoId: number): Promi
     );
     
     const sucessos = resultados.filter(result => result.status === 'fulfilled').length;
-    const erros = resultados.filter(result => result.status === 'rejected').length;
-    
-    console.log(`Associação concluída: ${sucessos} sucessos, ${erros} erros`);
     
     if (sucessos > 0) {
       limparAnexosPendentes();
-      console.log("Anexos pendentes removidos após associação manual");
     }
     
   } catch (error) {
@@ -443,7 +422,6 @@ export async function uploadAnexoClient(
   title?: string
 ): Promise<AnexoUploadResponse> {
   try {
-    console.log("Enviando anexo para API:", { fileName: file.name, title });
     const formData = new FormData();
     formData.append("file", file);
     if (title) {
@@ -456,14 +434,10 @@ export async function uploadAnexoClient(
       },
       withCredentials: true,
     });
-    console.log("Resposta da API (anexo):", response.data);
     
     // Se o upload foi bem-sucedido, salvar o ID do anexo como pendente
     if (response.data?.status === 'success' && response.data?.data?.id) {
       salvarAnexoPendente(response.data.data.id);
-      console.log("Anexo salvo como pendente para associação futura:", response.data.data.id);
-    } else {
-      console.warn("Anexo não foi salvo como pendente. Estrutura da resposta:", response.data);
     }
     
     return response.data;
@@ -513,8 +487,6 @@ export async function createImovelClient(imovelData: NovoImovelData) {
 
 export async function createChamadoClient(chamadoData: NovoChamadoData) {
   try {
-    console.log("Enviando chamado para API:", chamadoData);
-    
     let chamadoResponse;
     
     // Primeira tentativa: usando o apiClient padrão
@@ -525,10 +497,7 @@ export async function createChamadoClient(chamadoData: NovoChamadoData) {
         },
         withCredentials: true,
       });
-      console.log("Resposta da API (tentativa 1):", chamadoResponse.data);
     } catch (firstError: any) {
-      console.warn("Primeira tentativa falhou:", firstError.response?.status);
-      
       // Segunda tentativa: cliente axios direto com token manual
       const token = localStorage.getItem('auth_token') || document.cookie
         .split('; ')
@@ -548,15 +517,11 @@ export async function createChamadoClient(chamadoData: NovoChamadoData) {
           },
           withCredentials: true,
         });
-        console.log("Resposta da API (tentativa 2):", chamadoResponse.data);
       } else {
         throw firstError;
       }
     }
 
-    // Nota: A associação de anexos agora é feita no cliente após a criação do chamado
-    console.log("📋 Chamado criado, retornando dados:", chamadoResponse.data);
-    
     return chamadoResponse.data;
     
   } catch (error: any) {
@@ -581,8 +546,6 @@ export async function updateAnexoChamadoIdClient(
   chamadoId: number
 ) {
   try {
-    console.log(`🔗 Associando anexo ${anexoId} ao chamado ${chamadoId}`);
-    
     const response = await apiClient.patch(
       `/anexo/${anexoId}`,
       { chamadoId },
@@ -594,7 +557,6 @@ export async function updateAnexoChamadoIdClient(
       }
     );
     
-    console.log(`✅ Anexo ${anexoId} associado com sucesso:`, response.data);
     return response.data;
   } catch (error: any) {
     console.error(`❌ Erro ao associar anexo ${anexoId}:`, {

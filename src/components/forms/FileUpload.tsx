@@ -102,7 +102,6 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
     
     // Remover também dos anexos pendentes no localStorage
     removerAnexoPendente(anexoId);
-    console.log("Anexo removido da interface e dos pendentes:", anexoId);
   };
 
   const removeUploadingFile = (file: File) => {

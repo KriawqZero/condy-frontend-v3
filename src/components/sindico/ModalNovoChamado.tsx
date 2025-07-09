@@ -48,7 +48,7 @@ export function ModalNovoChamado({
       const response = await getImoveisAction();
       setImoveis(response.data || []);
     } catch (error) {
-      console.error("Erro ao carregar imóveis:", error);
+      // Erro ao carregar imóveis
     }
   };
 
@@ -106,7 +106,6 @@ export function ModalNovoChamado({
 
       // Verificar anexos pendentes no cliente (antes da server action)
       const anexosPendentes = getAnexosPendentes();
-      console.log("🔍 Cliente - Anexos pendentes encontrados:", anexosPendentes);
 
       const chamadoData: NovoChamadoData = {
         descricaoOcorrido,
@@ -118,17 +117,8 @@ export function ModalNovoChamado({
       // Criar o chamado primeiro
       const chamadoResponse = await createChamadoAction(chamadoData);
 
-      console.log("📋 Resposta do chamado:", {
-        success: chamadoResponse.success,
-        data: chamadoResponse.data,
-        chamadoId: chamadoResponse.data?.id,
-        anexosPendentes: anexosPendentes.length
-      });
-
       // Se o chamado foi criado com sucesso E há anexos pendentes, associá-los no cliente
       if (chamadoResponse.success && chamadoResponse.data?.id && anexosPendentes.length > 0) {
-        console.log(`📎 Associando ${anexosPendentes.length} anexos ao chamado ${chamadoResponse.data.id}`);
-        
         try {
           // Associar todos os anexos pendentes ao chamado criado
           const resultadosAssociacao = await Promise.allSettled(
@@ -138,36 +128,16 @@ export function ModalNovoChamado({
           );
           
           const sucessos = resultadosAssociacao.filter(result => result.status === 'fulfilled').length;
-          const erros = resultadosAssociacao.filter(result => result.status === 'rejected').length;
-          
-          console.log(`✅ Anexos associados: ${sucessos} sucessos, ${erros} erros`);
-          
-          if (erros > 0) {
-            console.warn("⚠️ Alguns anexos não puderam ser associados:", 
-              resultadosAssociacao
-                .filter(result => result.status === 'rejected')
-                .map((result: any) => result.reason)
-            );
-          }
           
           // Limpar anexos pendentes após associação bem-sucedida
           if (sucessos > 0) {
             limparAnexosPendentes();
-            console.log("🧹 Anexos pendentes removidos após associação");
           }
           
         } catch (error) {
           console.error("❌ Erro ao associar anexos:", error);
           // Não falhar a criação do chamado por erro na associação
         }
-      } else if (anexosPendentes.length > 0) {
-        console.warn("⚠️ Havia anexos pendentes mas chamado não foi criado ou sem ID", {
-          success: chamadoResponse.success,
-          hasId: !!chamadoResponse.data?.id,
-          anexosCount: anexosPendentes.length
-        });
-      } else {
-        console.log("ℹ️ Nenhum anexo pendente para associar");
       }
 
       onSuccess?.();

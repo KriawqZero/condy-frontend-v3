@@ -193,7 +193,7 @@ export default function AdminDashboard({ user }: { user: User }) {
           });
         }
       } catch (error) {
-        console.error("Erro ao buscar dados:", error);
+        // Erro ao buscar dados
       }
       
       setLoadingChamados(false);

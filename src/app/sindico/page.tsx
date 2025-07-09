@@ -11,7 +11,6 @@ export default async function SindicoPage() {
     session.user === undefined ||
     session.user === null
   ) {
-    console.error("Usuário não está logado ou dados do usuário inválidos");
     redirect("/login");
   }
 
@@ -21,7 +20,6 @@ export default async function SindicoPage() {
       session.user.userType
     )
   ) {
-    console.error("Usuário não é síndico");
     redirect("/login");
   }
 
