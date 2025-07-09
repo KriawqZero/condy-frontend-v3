@@ -1,11 +1,14 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import { loginAction } from "@/app/actions/auth";
-import { useState } from "react";
+import { emailSchema, passwordSchema, sanitizeInput, detectInjectionAttempt } from "@/lib/security";
 
 type LoginErrorType = {
   errorTitle: string;
   errorMessage: string;
+  isSecurityError?: boolean;
+  rateLimited?: boolean;
 };
 
 export default function LoginForm() {
@@ -17,25 +20,113 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [loginError, setLoginError] = useState<LoginErrorType | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  const [attempts, setAttempts] = useState(0);
+
+  // Limpeza de erro ao modificar campos
+  useEffect(() => {
+    if (loginError) {
+      setLoginError(null);
+    }
+    if (Object.keys(fieldErrors).length > 0) {
+      setFieldErrors({});
+    }
+  }, [formData.email, formData.senha]);
+
+  const validateEmailField = () => {
+    try {
+      emailSchema.parse(formData.email);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const validatePasswordField = () => {
+    try {
+      passwordSchema.parse(formData.senha);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const isValidEmail = () => {
     if (!formData.email) return false;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(formData.email);
+    return validateEmailField();
+  };
+
+  const isValidPassword = () => {
+    if (!formData.senha) return false;
+    return validatePasswordField();
   };
 
   const alternarVisibilidadeSenha = () => {
     setMostrarSenha(!mostrarSenha);
   };
 
+  const handleEmailChange = (e: any) => {
+    const value = sanitizeInput(e.target.value);
+    
+    // Detectar tentativas de injeção
+    if (detectInjectionAttempt(value)) {
+      setLoginError({
+        errorTitle: "Entrada inválida",
+        errorMessage: "Caracteres inválidos detectados no email",
+        isSecurityError: true
+      });
+      return;
+    }
+
+    setFormData((prev: any) => ({ ...prev, email: value }));
+  };
+
+  const handlePasswordChange = (e: any) => {
+    const value = e.target.value;
+    
+    // Limitar tamanho da senha para prevenir ataques
+    if (value.length > 128) {
+      setFieldErrors((prev: any) => ({ 
+        ...prev, 
+        senha: "Senha muito longa" 
+      }));
+      return;
+    }
+
+    setFormData((prev: any) => ({ ...prev, senha: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!isValidEmail() || !formData.senha) {
+    // Verificar limite de tentativas
+    if (attempts >= 5) {
+      setLoginError({
+        errorTitle: "Muitas tentativas",
+        errorMessage: "Muitas tentativas de login. Recarregue a página para tentar novamente.",
+        rateLimited: true
+      });
+      return;
+    }
+
+    // Validação cliente-side
+    const emailValid = isValidEmail();
+    const passwordValid = isValidPassword();
+
+    if (!emailValid || !passwordValid) {
+      const errors: {[key: string]: string} = {};
+      if (!emailValid && formData.email) {
+        errors.email = "Email inválido";
+      }
+      if (!passwordValid && formData.senha) {
+        errors.senha = "Senha deve ter pelo menos 8 caracteres, uma maiúscula, uma minúscula e um número";
+      }
+      setFieldErrors(errors);
       return;
     }
 
     setLoading(true);
+    setAttempts((prev: number) => prev + 1);
 
     try {
       const formDataToSend = new FormData();
@@ -45,21 +136,65 @@ export default function LoginForm() {
       const result = await loginAction(formDataToSend);
 
       if (result && !result.success) {
-        setLoginError({
-          errorTitle: "Dados incorretos",
-          errorMessage:
-            "Email ou senha incorretos. Verifique seus dados e tente novamente.",
-        });
+        if (result.rateLimited) {
+          setLoginError({
+            errorTitle: "Limite excedido",
+            errorMessage: result.error || "Muitas tentativas de login",
+            rateLimited: true
+          });
+        } else if (result.securityViolation) {
+          setLoginError({
+            errorTitle: "Erro de segurança",
+            errorMessage: "Dados inválidos detectados",
+            isSecurityError: true
+          });
+        } else {
+          setLoginError({
+            errorTitle: "Dados incorretos",
+            errorMessage: result.error || "Email ou senha incorretos. Verifique seus dados e tente novamente.",
+          });
+        }
+
+        if (result.fieldErrors) {
+          const errors: {[key: string]: string} = {};
+          result.fieldErrors.forEach((error: any) => {
+            errors[error.path[0]] = error.message;
+          });
+          setFieldErrors(errors);
+        }
       }
     } catch (error) {
       setLoginError({
         errorTitle: "Erro de conexão",
-        errorMessage:
-          "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.",
+        errorMessage: "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.",
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const getInputClassName = (fieldName: string, isValid: boolean) => {
+    let baseClass = "form-input";
+    
+    if (fieldErrors[fieldName] || (loginError?.isSecurityError && fieldName === 'email')) {
+      baseClass += " error";
+    } else if (formData[fieldName as keyof typeof formData] && !isValid) {
+      baseClass += " error";
+    }
+    
+    return baseClass;
+  };
+
+  const getLabelClassName = (fieldName: string, isValid: boolean) => {
+    let baseClass = "floating-label";
+    
+    if (fieldErrors[fieldName] || 
+        (loginError?.isSecurityError && fieldName === 'email') ||
+        (formData[fieldName as keyof typeof formData] && !isValid)) {
+      baseClass += " text-red-500";
+    }
+    
+    return baseClass;
   };
 
   return (
@@ -176,9 +311,42 @@ export default function LoginForm() {
         .form-input.error ~ .floating-label.text-red-500 {
           color: #ff7387 !important;
         }
+
+        .security-warning {
+          background-color: #fef2f2;
+          border: 1px solid #fca5a5;
+          color: #dc2626;
+          padding: 12px;
+          border-radius: 8px;
+          margin-bottom: 16px;
+          font-size: 14px;
+        }
+
+        .rate-limit-warning {
+          background-color: #fef3c7;
+          border: 1px solid #fcd34d;
+          color: #d97706;
+          padding: 12px;
+          border-radius: 8px;
+          margin-bottom: 16px;
+          font-size: 14px;
+        }
       `}</style>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Alertas de segurança */}
+        {loginError?.isSecurityError && (
+          <div className="security-warning">
+            <strong>⚠️ Aviso de Segurança:</strong> {loginError.errorMessage}
+          </div>
+        )}
+
+        {loginError?.rateLimited && (
+          <div className="rate-limit-warning">
+            <strong>🔒 Limite de Tentativas:</strong> {loginError.errorMessage}
+          </div>
+        )}
+
         {/* Email de cadastro */}
         <div className="form-group">
           <div className="input-container">
@@ -188,27 +356,24 @@ export default function LoginForm() {
             <input
               id="email-input"
               value={formData.email}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, email: e.target.value }))
-              }
+              onChange={handleEmailChange}
               type="email"
-              className={`form-input ${
-                formData.email && !isValidEmail() ? "error" : ""
-              }`}
+              className={getInputClassName('email', isValidEmail())}
               placeholder=" "
               required
+              maxLength={254}
+              autoComplete="email"
             />
             <label
               htmlFor="email-input"
-              className={`floating-label ${
-                (formData.email && !isValidEmail()) || loginError
-                  ? "text-red-500"
-                  : ""
-              }`}
+              className={getLabelClassName('email', isValidEmail())}
             >
-              {loginError ? loginError.errorMessage : "Email de cadastro"}
+              {fieldErrors.email || 
+               (loginError?.isSecurityError ? "Email com caracteres inválidos" : 
+                loginError?.errorMessage && !loginError.rateLimited ? loginError.errorMessage : 
+                "Email de cadastro")}
             </label>
-            {formData.email && isValidEmail() && (
+            {formData.email && isValidEmail() && !fieldErrors.email && (
               <div className="check-icon">
                 <img
                   src="/svg/checkmark_success.svg"
@@ -217,7 +382,7 @@ export default function LoginForm() {
                 />
               </div>
             )}
-            {formData.email && !isValidEmail() && (
+            {(formData.email && !isValidEmail()) || fieldErrors.email && (
               <div className="check-icon">
                 <img
                   src="/svg/checkmark_error.svg"
@@ -227,6 +392,9 @@ export default function LoginForm() {
               </div>
             )}
           </div>
+          {fieldErrors.email && (
+            <p className="text-red-500 text-sm mt-1">{fieldErrors.email}</p>
+          )}
         </div>
 
         {/* Senha de acesso */}
@@ -238,16 +406,19 @@ export default function LoginForm() {
             <input
               id="senha-input"
               value={formData.senha}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, senha: e.target.value }))
-              }
+              onChange={handlePasswordChange}
               type={mostrarSenha ? "text" : "password"}
-              className="form-input"
+              className={getInputClassName('senha', isValidPassword())}
               placeholder=" "
               required
+              maxLength={128}
+              autoComplete="current-password"
             />
-            <label htmlFor="senha-input" className="floating-label">
-              Senha de acesso
+            <label 
+              htmlFor="senha-input" 
+              className={getLabelClassName('senha', isValidPassword())}
+            >
+              {fieldErrors.senha || "Senha de acesso"}
             </label>
             <div
               className="check-icon cursor-pointer"
@@ -260,6 +431,9 @@ export default function LoginForm() {
               />
             </div>
           </div>
+          {fieldErrors.senha && (
+            <p className="text-red-500 text-sm mt-1">{fieldErrors.senha}</p>
+          )}
         </div>
 
         {/* Loading ou Botão de login */}
@@ -276,11 +450,26 @@ export default function LoginForm() {
             <button
               type="submit"
               className="btn-primary"
-              disabled={loading || !isValidEmail() || !formData.senha}
+              disabled={
+                loading || 
+                !isValidEmail() || 
+                !isValidPassword() || 
+                attempts >= 5 ||
+                loginError?.rateLimited
+              }
             >
-              Acessar minha conta
+              {attempts >= 5 ? "Muitas tentativas" : 
+               loginError?.rateLimited ? "Bloqueado temporariamente" :
+               "Acessar minha conta"}
             </button>
           </span>
+        )}
+
+        {/* Contador de tentativas */}
+        {attempts > 0 && attempts < 5 && (
+          <p className="text-sm text-gray-600 text-center">
+            Tentativas: {attempts}/5
+          </p>
         )}
       </form>
     </>
