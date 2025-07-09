@@ -8,13 +8,14 @@ import {
 } from "@/types";
 import axios, { AxiosResponse } from "axios";
 import { getSession } from "./session";
+import { sanitizeForLog, validateTokenFormat } from "./security";
 
 const API_BASE_URL = process.env.PRIVATE_API_URL || "http://localhost:3000/api";
 
-// Constantes para localStorage
+// Constantes para localStorage (apenas dados não sensíveis)
 const ANEXOS_PENDENTES_KEY = "anexos_pendentes_chamado";
 
-// Funções para gerenciar anexos pendentes no localStorage
+// Funções para gerenciar anexos pendentes no localStorage (dados não sensíveis)
 export function salvarAnexoPendente(anexoId: number): void {
   if (typeof window === "undefined") {
     console.warn("⚠️ salvarAnexoPendente chamado no servidor - ignorando");
@@ -31,7 +32,7 @@ export function salvarAnexoPendente(anexoId: number): void {
       console.log("⚠️ Anexo já existe na lista de pendentes:", anexoId);
     }
   } catch (error) {
-    console.error("❌ Erro ao salvar anexo pendente:", error);
+    console.error("❌ Erro ao salvar anexo pendente:", sanitizeForLog(error));
   }
 }
 
@@ -47,7 +48,7 @@ export function getAnexosPendentes(): number[] {
     console.log("📋 ANEXOS PENDENTES OBTIDOS:", anexos.length > 0 ? anexos : "Nenhum anexo encontrado");
     return anexos;
   } catch (error) {
-    console.error("❌ Erro ao obter anexos pendentes:", error);
+    console.error("❌ Erro ao obter anexos pendentes:", sanitizeForLog(error));
     return [];
   }
 }
@@ -61,7 +62,7 @@ export function limparAnexosPendentes(): void {
     localStorage.removeItem(ANEXOS_PENDENTES_KEY);
     console.log("🧹 Anexos pendentes limpos do localStorage. Eram:", anexosAntes);
   } catch (error) {
-    console.error("❌ Erro ao limpar anexos pendentes:", error);
+    console.error("❌ Erro ao limpar anexos pendentes:", sanitizeForLog(error));
   }
 }
 
@@ -74,7 +75,7 @@ export function removerAnexoPendente(anexoId: number): void {
     localStorage.setItem(ANEXOS_PENDENTES_KEY, JSON.stringify(novosAnexos));
     console.log("Anexo removido dos pendentes:", anexoId);
   } catch (error) {
-    console.error("Erro ao remover anexo pendente:", error);
+    console.error("Erro ao remover anexo pendente:", sanitizeForLog(error));
   }
 }
 
@@ -94,7 +95,7 @@ export function debugAnexosPendentes(): void {
       length: stored ? JSON.parse(stored).length : 0
     });
   } catch (error) {
-    console.error("❌ Erro no debug de anexos pendentes:", error);
+    console.error("❌ Erro no debug de anexos pendentes:", sanitizeForLog(error));
   }
 }
 
@@ -127,58 +128,112 @@ export async function associarAnexosPendentesAoChamado(chamadoId: number): Promi
     }
     
   } catch (error) {
-    console.error("Erro na associação manual de anexos:", error);
+    console.error("Erro na associação manual de anexos:", sanitizeForLog(error));
     throw error;
   }
 }
 
-// Cliente API que só executa no servidor para máxima segurança
+// Cliente API seguro
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 15000, // Aumentado para 15 segundos
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Interceptor para adicionar token automaticamente
-apiClient.interceptors.request.use(async (config) => {
-  // Funciona tanto no servidor quanto no cliente
-  try {
-    // No servidor, usa getSession()
-    if (typeof window === "undefined") {
-      const session = await getSession();
-      if (session.token) {
-        config.headers.Authorization = `Bearer ${session.token}`;
+// Interceptor de requisição mais seguro
+apiClient.interceptors.request.use(
+  async (config: any) => {
+    try {
+      // Apenas no servidor, usar sessão iron-session
+      if (typeof window === "undefined") {
+        const session = await getSession();
+        if (session.token && validateTokenFormat(session.token)) {
+          config.headers.Authorization = `Bearer ${session.token}`;
+        }
       }
-    } else {
-      // No cliente, tenta obter o token do localStorage ou cookies
-      const token = localStorage.getItem('auth_token') || document.cookie
-        .split('; ')
-        .find(row => row.startsWith('auth_token='))
-        ?.split('=')[1];
       
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      // Adicionar header de segurança
+      config.headers['X-Requested-With'] = 'XMLHttpRequest';
+      
+      // Log da requisição (sem dados sensíveis)
+      console.log("📤 API Request:", sanitizeForLog({
+        method: config.method,
+        url: config.url,
+        headers: { ...config.headers, Authorization: config.headers.Authorization ? '***REDACTED***' : undefined }
+      }));
+      
+    } catch (error) {
+      console.error("Erro no interceptor de requisição:", sanitizeForLog(error));
+    }
+    return config;
+  },
+  (error: any) => {
+    console.error("Erro na configuração da requisição:", sanitizeForLog(error));
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor de resposta para tratamento de erros
+apiClient.interceptors.response.use(
+  (response: any) => {
+    // Log da resposta bem-sucedida (sem dados sensíveis)
+    console.log("📥 API Response:", sanitizeForLog({
+      status: response.status,
+      url: response.config.url,
+      method: response.config.method
+    }));
+    return response;
+  },
+  (error: any) => {
+    // Log de erro da API
+    console.error("❌ API Error:", sanitizeForLog({
+      status: error.response?.status,
+      url: error.config?.url,
+      method: error.config?.method,
+      message: error.message
+    }));
+    
+    // Tratar erros específicos
+    if (error.response?.status === 401) {
+      console.warn("Token expirado ou inválido");
+      // Redirecionar para login se necessário
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
       }
     }
-  } catch (error) {
-    console.error("Erro ao obter token da sessão:", error);
+    
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
-// Auth API
+// Auth API com validações de segurança
 export async function loginUser(
   credentials: LoginRequest
 ): Promise<AuthResponse> {
   try {
+    // Validar entrada antes de enviar
+    if (!credentials.email || !credentials.password) {
+      throw new Error("Credenciais incompletas");
+    }
+
     const response: AxiosResponse<AuthResponse> = await apiClient.post(
       "/auth/login",
       credentials
     );
+
+    // Validar resposta
+    if (!response.data || !response.data.data || !response.data.data.token) {
+      throw new Error("Resposta de login inválida");
+    }
+
     return response.data;
   } catch (error: any) {
+    console.error("Erro no login:", sanitizeForLog({
+      email: credentials.email,
+      error: error.message
+    }));
     throw new Error(error.response?.data?.message || "Erro no login");
   }
 }
@@ -187,12 +242,22 @@ export async function registerUser(
   userData: RegisterRequest
 ): Promise<AuthResponse> {
   try {
+    // Validar dados básicos
+    if (!userData.email || !userData.password || !userData.name) {
+      throw new Error("Dados de registro incompletos");
+    }
+
     const response: AxiosResponse<AuthResponse> = await apiClient.post(
       "/auth/register",
       userData
     );
+
     return response.data;
   } catch (error: any) {
+    console.error("Erro no registro:", sanitizeForLog({
+      email: userData.email,
+      error: error.message
+    }));
     throw new Error(error.response?.data?.message || "Erro no registro");
   }
 }
@@ -202,17 +267,23 @@ export async function getCurrentUser() {
     const response = await apiClient.get("/auth/me");
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao obter usuário atual:", sanitizeForLog(error));
     throw new Error(error.response?.data?.message || "Erro ao obter usuário");
   }
 }
 
 export async function checkEmail(email: string): Promise<{ exists: boolean }> {
   try {
+    if (!email || email.length > 254) {
+      throw new Error("Email inválido");
+    }
+
     const response = await apiClient.get("/auth/check-email", {
       params: { query: email },
     });
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao verificar email:", sanitizeForLog({ email, error: error.message }));
     throw new Error(error.response?.data?.message || "Erro ao verificar email");
   }
 }
@@ -221,11 +292,19 @@ export async function checkCpfCnpj(
   cpfCnpj: string
 ): Promise<{ exists: boolean }> {
   try {
+    if (!cpfCnpj || cpfCnpj.length > 18) {
+      throw new Error("CPF/CNPJ inválido");
+    }
+
     const response = await apiClient.get("/auth/check-cpf-cnpj", {
       params: { query: cpfCnpj },
     });
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao verificar CPF/CNPJ:", sanitizeForLog({ 
+      cpfCnpj: cpfCnpj.replace(/\d/g, '*'), 
+      error: error.message 
+    }));
     throw new Error(
       error.response?.data?.message || "Erro ao verificar CPF/CNPJ"
     );
@@ -238,33 +317,47 @@ export async function getImoveis() {
     const response = await apiClient.get("/imovel");
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao obter imóveis:", sanitizeForLog(error));
     throw new Error(error.response?.data?.message || "Erro ao obter imóveis");
   }
 }
 
 export async function getImovelById(id: string) {
   try {
+    if (!id) throw new Error("ID do imóvel é obrigatório");
+    
     const response = await apiClient.get(`/imoveis/${id}`);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao obter imóvel:", sanitizeForLog({ id, error: error.message }));
     throw new Error(error.response?.data?.message || "Erro ao obter imóvel");
   }
 }
 
 export async function createImovel(imovelData: any) {
   try {
+    if (!imovelData || !imovelData.nome) {
+      throw new Error("Dados do imóvel são obrigatórios");
+    }
+
     const response = await apiClient.post("/imoveis", imovelData);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao criar imóvel:", sanitizeForLog(error));
     throw new Error(error.response?.data?.message || "Erro ao criar imóvel");
   }
 }
 
 export async function updateImovel(id: string, imovelData: any) {
   try {
+    if (!id || !imovelData) {
+      throw new Error("ID e dados do imóvel são obrigatórios");
+    }
+
     const response = await apiClient.patch(`/imoveis/${id}`, imovelData);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao atualizar imóvel:", sanitizeForLog({ id, error: error.message }));
     throw new Error(
       error.response?.data?.message || "Erro ao atualizar imóvel"
     );
@@ -273,9 +366,12 @@ export async function updateImovel(id: string, imovelData: any) {
 
 export async function deleteImovel(id: string) {
   try {
+    if (!id) throw new Error("ID do imóvel é obrigatório");
+    
     const response = await apiClient.delete(`/imoveis/${id}`);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao deletar imóvel:", sanitizeForLog({ id, error: error.message }));
     throw new Error(error.response?.data?.message || "Erro ao deletar imóvel");
   }
 }
@@ -283,32 +379,49 @@ export async function deleteImovel(id: string) {
 // Ativos API
 export async function getAtivos(imovelId: string) {
   try {
+    if (!imovelId) throw new Error("ID do imóvel é obrigatório");
+    
     const response = await apiClient.get(`/imoveis/${imovelId}/ativos`);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao obter ativos:", sanitizeForLog({ imovelId, error: error.message }));
     throw new Error(error.response?.data?.message || "Erro ao obter ativos");
   }
 }
 
 export async function getAtivoById(imovelId: string, ativoId: string) {
   try {
+    if (!imovelId || !ativoId) {
+      throw new Error("IDs do imóvel e ativo são obrigatórios");
+    }
+    
     const response = await apiClient.get(
       `/imoveis/${imovelId}/ativos/${ativoId}`
     );
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao obter ativo:", sanitizeForLog({ 
+      imovelId, 
+      ativoId, 
+      error: error.message 
+    }));
     throw new Error(error.response?.data?.message || "Erro ao obter ativo");
   }
 }
 
 export async function createAtivo(imovelId: string, ativoData: any) {
   try {
+    if (!imovelId || !ativoData) {
+      throw new Error("ID do imóvel e dados do ativo são obrigatórios");
+    }
+    
     const response = await apiClient.post(
       `/imoveis/${imovelId}/ativos`,
       ativoData
     );
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao criar ativo:", sanitizeForLog({ imovelId, error: error.message }));
     throw new Error(error.response?.data?.message || "Erro ao criar ativo");
   }
 }
@@ -319,23 +432,41 @@ export async function updateAtivo(
   ativoData: any
 ) {
   try {
+    if (!imovelId || !ativoId || !ativoData) {
+      throw new Error("IDs e dados do ativo são obrigatórios");
+    }
+    
     const response = await apiClient.patch(
       `/imoveis/${imovelId}/ativos/${ativoId}`,
       ativoData
     );
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao atualizar ativo:", sanitizeForLog({ 
+      imovelId, 
+      ativoId, 
+      error: error.message 
+    }));
     throw new Error(error.response?.data?.message || "Erro ao atualizar ativo");
   }
 }
 
 export async function deleteAtivo(imovelId: string, ativoId: string) {
   try {
+    if (!imovelId || !ativoId) {
+      throw new Error("IDs do imóvel e ativo são obrigatórios");
+    }
+    
     const response = await apiClient.delete(
       `/imoveis/${imovelId}/ativos/${ativoId}`
     );
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao deletar ativo:", sanitizeForLog({ 
+      imovelId, 
+      ativoId, 
+      error: error.message 
+    }));
     throw new Error(error.response?.data?.message || "Erro ao deletar ativo");
   }
 }
@@ -346,33 +477,51 @@ export async function getChamados() {
     const response = await apiClient.get("/chamado");
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao obter chamados:", sanitizeForLog(error));
     throw new Error(error.response?.data?.message || "Erro ao obter chamados");
   }
 }
 
 export async function getChamadoById(id: string) {
   try {
+    if (!id) throw new Error("ID do chamado é obrigatório");
+    
     const response = await apiClient.get(`/chamado/${id}`);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao obter chamado:", sanitizeForLog({ id, error: error.message }));
     throw new Error(error.response?.data?.message || "Erro ao obter chamado");
   }
 }
 
 export async function createChamado(chamadoData: any) {
   try {
+    if (!chamadoData) {
+      throw new Error("Dados do chamado são obrigatórios");
+    }
+    
     const response = await apiClient.post("/chamado", chamadoData);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao criar chamado:", sanitizeForLog(error));
     throw new Error(error.response?.data?.message || "Erro ao criar chamado");
   }
 }
 
 export async function updateAnexoChamadoId(anexoId: number, chamadoId: number) {
   try {
+    if (!anexoId || !chamadoId) {
+      throw new Error("IDs do anexo e chamado são obrigatórios");
+    }
+    
     const response = await apiClient.patch(`/anexo/${anexoId}`, { chamadoId });
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao atualizar anexo:", sanitizeForLog({ 
+      anexoId, 
+      chamadoId, 
+      error: error.message 
+    }));
     throw new Error(error.response?.data?.message || "Erro ao atualizar anexo");
   }
 }
@@ -382,27 +531,46 @@ export async function getImoveisWithPagination(
   limit: number = 5
 ) {
   try {
+    if (page < 1 || limit < 1 || limit > 100) {
+      throw new Error("Parâmetros de paginação inválidos");
+    }
+    
     const response = await apiClient.get(`/imovel?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao obter imóveis paginados:", sanitizeForLog({ 
+      page, 
+      limit, 
+      error: error.message 
+    }));
     throw new Error(error.response?.data?.message || "Erro ao obter imóveis");
   }
 }
 
 export async function createImovelSimples(imovelData: NovoImovelData) {
   try {
+    if (!imovelData || !imovelData.nome) {
+      throw new Error("Dados do imóvel são obrigatórios");
+    }
+    
     const response = await apiClient.post("/imovel", imovelData);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao criar imóvel simples:", sanitizeForLog(error));
     throw new Error(error.response?.data?.message || "Erro ao criar imóvel");
   }
 }
 
 export async function updateChamado(id: string, chamadoData: any) {
   try {
+    if (!id || !chamadoData) {
+      throw new Error("ID e dados do chamado são obrigatórios");
+    }
+    
     const response = await apiClient.patch(`/chamado/${id}`, chamadoData);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao atualizar chamado:", sanitizeForLog({ id, error: error.message }));
     throw new Error(
       error.response?.data?.message || "Erro ao atualizar chamado"
     );
@@ -411,18 +579,27 @@ export async function updateChamado(id: string, chamadoData: any) {
 
 export async function deleteChamado(id: string) {
   try {
+    if (!id) throw new Error("ID do chamado é obrigatório");
+    
     const response = await apiClient.delete(`/chamado/${id}`);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao deletar chamado:", sanitizeForLog({ id, error: error.message }));
     throw new Error(error.response?.data?.message || "Erro ao deletar chamado");
   }
 }
 
 export async function getChamadosByStatus(status: string) {
   try {
+    if (!status) throw new Error("Status é obrigatório");
+    
     const response = await apiClient.get(`/chamado?status=${status}`);
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao obter chamados por status:", sanitizeForLog({ 
+      status, 
+      error: error.message 
+    }));
     throw new Error(
       error.response?.data?.message || "Erro ao obter chamados por status"
     );
@@ -434,6 +611,7 @@ export async function healthCheck() {
     const response = await apiClient.get("/up");
     return response.data;
   } catch (error: any) {
+    console.error("Erro no health check:", sanitizeForLog(error));
     throw new Error(error.response?.data?.message || "Erro no health check");
   }
 }
@@ -443,7 +621,34 @@ export async function uploadAnexoClient(
   title?: string
 ): Promise<AnexoUploadResponse> {
   try {
-    console.log("Enviando anexo para API:", { fileName: file.name, title });
+    if (!file) {
+      throw new Error("Arquivo é obrigatório");
+    }
+
+    // Validar tamanho do arquivo (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      throw new Error("Arquivo muito grande. Tamanho máximo: 10MB");
+    }
+
+    // Validar tipo do arquivo
+    const allowedTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+      'application/pdf', 'text/plain', 'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error("Tipo de arquivo não permitido");
+    }
+
+    console.log("Enviando anexo para API:", sanitizeForLog({ 
+      fileName: file.name, 
+      fileSize: file.size,
+      fileType: file.type,
+      title 
+    }));
+
     const formData = new FormData();
     formData.append("file", file);
     if (title) {
@@ -456,25 +661,27 @@ export async function uploadAnexoClient(
       },
       withCredentials: true,
     });
-    console.log("Resposta da API (anexo):", response.data);
+
+    console.log("Resposta da API (anexo):", sanitizeForLog(response.data));
     
     // Se o upload foi bem-sucedido, salvar o ID do anexo como pendente
     if (response.data?.status === 'success' && response.data?.data?.id) {
       salvarAnexoPendente(response.data.data.id);
       console.log("Anexo salvo como pendente para associação futura:", response.data.data.id);
     } else {
-      console.warn("Anexo não foi salvo como pendente. Estrutura da resposta:", response.data);
+      console.warn("Anexo não foi salvo como pendente. Estrutura da resposta:", sanitizeForLog(response.data));
     }
     
     return response.data;
   } catch (error: any) {
-    console.error("Erro detalhado ao fazer upload:", {
+    console.error("Erro detalhado ao fazer upload:", sanitizeForLog({
+      fileName: file?.name,
+      fileSize: file?.size,
       message: error.message,
       status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      headers: error.response?.headers
-    });
+      statusText: error.response?.statusText
+    }));
+    
     throw new Error(
       error.response?.data?.message || 
       error.response?.data?.error || 
@@ -485,6 +692,10 @@ export async function uploadAnexoClient(
 
 export async function getImoveisClient(page: number = 1, limit: number = 5) {
   try {
+    if (page < 1 || limit < 1 || limit > 100) {
+      throw new Error("Parâmetros de paginação inválidos");
+    }
+    
     const response = await apiClient.get(
       `/imovel?page=${page}&limit=${limit}`,
       {
@@ -493,86 +704,44 @@ export async function getImoveisClient(page: number = 1, limit: number = 5) {
     );
     return response.data;
   } catch (error: any) {
+    console.error("Erro ao buscar imóveis:", sanitizeForLog({ 
+      page, 
+      limit, 
+      error: error.message 
+    }));
     throw new Error("Erro ao buscar imóveis: " + error.message);
   }
 }
 
 export async function createImovelClient(imovelData: NovoImovelData) {
   try {
+    if (!imovelData || !imovelData.nome) {
+      throw new Error("Dados do imóvel são obrigatórios");
+    }
+    
     const response = await apiClient.post("/imovel", imovelData, {
-      headers: {
-        "Content-Type": "application/json",
-      },
       withCredentials: true,
     });
     return response.data;
   } catch (error: any) {
-    throw new Error("Erro ao criar imóvel");
+    console.error("Erro ao criar imóvel:", sanitizeForLog(error));
+    throw new Error("Erro ao criar imóvel: " + error.message);
   }
 }
 
 export async function createChamadoClient(chamadoData: NovoChamadoData) {
   try {
-    console.log("Enviando chamado para API:", chamadoData);
-    
-    let chamadoResponse;
-    
-    // Primeira tentativa: usando o apiClient padrão
-    try {
-      chamadoResponse = await apiClient.post("/chamado", chamadoData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      });
-      console.log("Resposta da API (tentativa 1):", chamadoResponse.data);
-    } catch (firstError: any) {
-      console.warn("Primeira tentativa falhou:", firstError.response?.status);
-      
-      // Segunda tentativa: cliente axios direto com token manual
-      const token = localStorage.getItem('auth_token') || document.cookie
-        .split('; ')
-        .find(row => row.startsWith('auth_token='))
-        ?.split('=')[1];
-      
-      if (token) {
-        const directClient = axios.create({
-          baseURL: API_BASE_URL,
-          timeout: 10000,
-        });
-        
-        chamadoResponse = await directClient.post("/chamado", chamadoData, {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          withCredentials: true,
-        });
-        console.log("Resposta da API (tentativa 2):", chamadoResponse.data);
-      } else {
-        throw firstError;
-      }
+    if (!chamadoData) {
+      throw new Error("Dados do chamado são obrigatórios");
     }
-
-    // Nota: A associação de anexos agora é feita no cliente após a criação do chamado
-    console.log("📋 Chamado criado, retornando dados:", chamadoResponse.data);
     
-    return chamadoResponse.data;
-    
-  } catch (error: any) {
-    console.error("Erro detalhado ao criar chamado:", {
-      message: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      headers: error.response?.headers,
-      config: error.config
+    const response = await apiClient.post("/chamado", chamadoData, {
+      withCredentials: true,
     });
-    throw new Error(
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      `Erro ao criar chamado: ${error.response?.status || error.message}`
-    );
+    return response.data;
+  } catch (error: any) {
+    console.error("Erro ao criar chamado:", sanitizeForLog(error));
+    throw new Error("Erro ao criar chamado: " + error.message);
   }
 }
 
@@ -581,28 +750,24 @@ export async function updateAnexoChamadoIdClient(
   chamadoId: number
 ) {
   try {
-    console.log(`🔗 Associando anexo ${anexoId} ao chamado ${chamadoId}`);
+    if (!anexoId || !chamadoId) {
+      throw new Error("IDs do anexo e chamado são obrigatórios");
+    }
     
     const response = await apiClient.patch(
       `/anexo/${anexoId}`,
       { chamadoId },
       {
-        headers: {
-          "Content-Type": "application/json",
-        },
         withCredentials: true,
       }
     );
-    
-    console.log(`✅ Anexo ${anexoId} associado com sucesso:`, response.data);
     return response.data;
   } catch (error: any) {
-    console.error(`❌ Erro ao associar anexo ${anexoId}:`, {
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message
-    });
-    throw new Error(`Erro ao atualizar anexo ${anexoId}: ${error.response?.data?.message || error.message}`);
+    console.error("Erro ao atualizar anexo:", sanitizeForLog({ 
+      anexoId, 
+      chamadoId, 
+      error: error.message 
+    }));
+    throw new Error("Erro ao atualizar anexo: " + error.message);
   }
 }
