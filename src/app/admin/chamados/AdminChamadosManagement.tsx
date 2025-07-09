@@ -116,11 +116,9 @@ export default function AdminChamadosManagement({ user }: { user: User }) {
       const response = await getAdminChamadosAction();
       if (response.success && response.data) {
         setChamados(response.data);
-      } else {
-        console.error('Erro ao carregar chamados:', response.error);
       }
     } catch (error) {
-      console.error('Erro ao carregar chamados:', error);
+      // Erro ao carregar chamados
     }
     setLoadingChamados(false);
   };
@@ -162,7 +160,7 @@ export default function AdminChamadosManagement({ user }: { user: User }) {
         alert('Erro ao atualizar chamado: ' + response.error);
       }
     } catch (error) {
-      console.error('Erro ao salvar alterações:', error);
+      // Erro ao salvar alterações
       alert('Erro ao salvar alterações');
     }
   };

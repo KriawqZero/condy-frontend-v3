@@ -8,17 +8,17 @@ export async function sendAnexoAction(
   title?: string
 ): Promise<{ success: boolean; error?: string; data?: any }> {
   try {
-    console.log("📤 Enviando anexo via action:", anexo.name);
+    // Enviando anexo via action
     const response = await uploadAnexoClient(anexo, title);
 
     if (!response.status || response.status !== "success" || !response.data) {
       throw new Error(response.error || "Erro ao enviar anexo");
     }
 
-    console.log("✅ Anexo enviado com sucesso via action, ID:", response.data.id);
+    // Anexo enviado com sucesso
     return { success: true, data: response.data };
   } catch (error: any) {
-    console.error("❌ Erro na action de envio de anexo:", error.message);
+    // Erro na action de envio de anexo
     return { success: false, error: error.message || "Erro ao enviar anexo" };
   }
 }

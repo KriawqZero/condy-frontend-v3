@@ -16,7 +16,7 @@ export function LogoutModal({ open, onClose }: LogoutModalProps) {
     try {
       await logoutAction();
     } catch (error) {
-      console.error("Erro ao fazer logout:", error);
+      // Erro ao fazer logout
     } finally {
       setLoading(false);
     }

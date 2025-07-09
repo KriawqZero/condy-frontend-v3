@@ -87,8 +87,6 @@ export default function SindicoDashboard({ user }: { user: User }) {
       const response = await getChamadosAction();
       if (response.success && response.data) {
         setChamados(response.data);
-      } else {
-        console.error("Erro ao buscar chamados:", response.error);
       }
       setLoadingChamados(false);
     }
