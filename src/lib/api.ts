@@ -32,11 +32,13 @@ apiClient.interceptors.request.use(async (config) => {
       }
     } else {
       // No cliente, tenta obter o token do localStorage ou cookies
-      const token = localStorage.getItem('auth_token') || document.cookie
-        .split('; ')
-        .find(row => row.startsWith('auth_token='))
-        ?.split('=')[1];
-      
+      const token =
+        localStorage.getItem("auth_token") ||
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("auth_token="))
+          ?.split("=")[1];
+
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -343,12 +345,12 @@ export async function uploadAnexoClient(
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
-      headers: error.response?.headers
+      headers: error.response?.headers,
     });
     throw new Error(
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      `Erro ao fazer upload: ${error.response?.status || error.message}`
+      error.response?.data?.message ||
+        error.response?.data?.error ||
+        `Erro ao fazer upload: ${error.response?.status || error.message}`
     );
   }
 }
@@ -382,47 +384,16 @@ export async function createImovelClient(imovelData: NovoImovelData) {
 }
 
 export async function createChamadoClient(chamadoData: NovoChamadoData) {
+  // Primeira tentativa: usando o apiClient padrão
   try {
-    console.log("Enviando chamado para API:", chamadoData);
-    
-    // Primeira tentativa: usando o apiClient padrão
-    try {
-      const response = await apiClient.post("/chamado", chamadoData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      });
-      console.log("Resposta da API (tentativa 1):", response.data);
-      return response.data;
-    } catch (firstError: any) {
-      console.warn("Primeira tentativa falhou:", firstError.response?.status);
-      
-      // Segunda tentativa: cliente axios direto com token manual
-      const token = localStorage.getItem('auth_token') || document.cookie
-        .split('; ')
-        .find(row => row.startsWith('auth_token='))
-        ?.split('=')[1];
-      
-      if (token) {
-        const directClient = axios.create({
-          baseURL: API_BASE_URL,
-          timeout: 10000,
-        });
-        
-        const response = await directClient.post("/chamado", chamadoData, {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          withCredentials: true,
-        });
-        console.log("Resposta da API (tentativa 2):", response.data);
-        return response.data;
-      }
-      
-      throw firstError;
-    }
+    const response = await apiClient.post("/chamado", chamadoData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    });
+    console.log("Resposta da API (tentativa 1):", response.data);
+    return response.data;
   } catch (error: any) {
     console.error("Erro detalhado ao criar chamado:", {
       message: error.message,
@@ -430,12 +401,12 @@ export async function createChamadoClient(chamadoData: NovoChamadoData) {
       statusText: error.response?.statusText,
       data: error.response?.data,
       headers: error.response?.headers,
-      config: error.config
+      config: error.config,
     });
     throw new Error(
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      `Erro ao criar chamado: ${error.response?.status || error.message}`
+      error.response?.data?.message ||
+        error.response?.data?.error ||
+        `Erro ao criar chamado: ${error.response?.status || error.message}`
     );
   }
 }

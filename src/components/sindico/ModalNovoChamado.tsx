@@ -89,7 +89,7 @@ export function ModalNovoChamado({
     try {
       setLoading(true);
 
-      if (!imovelSelecionado || !descricaoOcorrido || !prioridade || !escopo) {
+      if (!imovelSelecionado || !prioridade || !escopo) {
         alert("Por favor, preencha todos os campos obrigatórios.");
         return;
       }
@@ -102,6 +102,11 @@ export function ModalNovoChamado({
       };
 
       const chamadoResponse = await createChamadoAction(chamadoData);
+
+      if (!chamadoResponse.success) {
+        alert(`Erro ao criar chamado: ${chamadoResponse.error}`);
+        return;
+      }
 
       // Atualizar anexos com o ID do chamado criado
       if (anexos.length > 0 && chamadoResponse.data?.id) {
