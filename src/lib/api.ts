@@ -457,15 +457,6 @@ export async function uploadAnexoClient(
       withCredentials: true,
     });
     console.log("Resposta da API (anexo):", response.data);
-    
-    // Se o upload foi bem-sucedido, salvar o ID do anexo como pendente
-    if (response.data?.status === 'success' && response.data?.data?.id) {
-      salvarAnexoPendente(response.data.data.id);
-      console.log("Anexo salvo como pendente para associação futura:", response.data.data.id);
-    } else {
-      console.warn("Anexo não foi salvo como pendente. Estrutura da resposta:", response.data);
-    }
-    
     return response.data;
   } catch (error: any) {
     console.error("Erro detalhado ao fazer upload:", {
