@@ -1,7 +1,7 @@
 import { sendAnexoAction } from "@/app/actions/anexos";
-import { removerAnexoPendente } from "@/lib/api";
+import { removerAnexoPendente, salvarAnexoPendente } from "@/lib/api";
 import { Anexo } from "@/types";
-import { CheckCircle, File, Trash, Upload } from "lucide-react";
+import { Trash, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 
 interface FileUploadProps {
@@ -14,6 +14,7 @@ interface FileWithProgress {
   progress: number;
   status: "uploading" | "completed" | "error";
   anexo?: Anexo;
+  preview: string;
   error?: string;
 }
 
@@ -26,6 +27,7 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
       file,
       progress: 0,
       status: "uploading" as const,
+      preview: URL.createObjectURL(file),
     }));
 
     setUploadingFiles((prev) => [...prev, ...newFiles]);
@@ -45,26 +47,25 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
           );
         }, 200);
 
-        const response = await sendAnexoAction(fileData.file);
+        const response = await sendAnexoAction(fileData.file, fileData.file.name);
 
         clearInterval(progressInterval);
 
-        setUploadingFiles((prev) =>
-          prev.map((f) =>
-            f.file === fileData.file
-              ? {
-                  ...f,
-                  progress: 100,
-                  status: "completed",
-                  anexo: response.data,
-                }
-              : f
-          )
-        );
+        if (!response.success) {
+          throw new Error(response.error || "Erro ao enviar anexo");
+        }
+
+        salvarAnexoPendente(response.data.id);
 
         // Atualizar lista de anexos
         onFilesUploaded([...anexos, response.data]);
+
+        URL.revokeObjectURL(fileData.preview);
+        setUploadingFiles((prev) =>
+          prev.filter((f) => f.file !== fileData.file)
+        );
       } catch (error) {
+        console.error(error);
         setUploadingFiles((prev) =>
           prev.map((f) =>
             f.file === fileData.file
@@ -106,7 +107,13 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
   };
 
   const removeUploadingFile = (file: File) => {
-    setUploadingFiles((prev) => prev.filter((f) => f.file !== file));
+    setUploadingFiles((prev) => {
+      const fileToRemove = prev.find((f) => f.file === file);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.preview);
+      }
+      return prev.filter((f) => f.file !== file);
+    });
   };
 
   return (
@@ -142,7 +149,19 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
         <div key={index} className="bg-blue-100 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
-              <File size={20} className="text-[#1F45FF]" />
+              {fileData.file.type === "video/mp4" ? (
+                <video
+                  src={fileData.preview}
+                  className="w-20 h-20 object-cover rounded"
+                  controls
+                />
+              ) : (
+                <img
+                  src={fileData.preview}
+                  alt={fileData.file.name}
+                  className="w-20 h-20 object-cover rounded"
+                />
+              )}
               <div>
                 <p className="font-medium text-sm text-black">
                   {fileData.file.name}
@@ -154,9 +173,6 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
             </div>
 
             <div className="flex items-center gap-2">
-              {fileData.status === "completed" && (
-                <CheckCircle size={20} className="text-green-500" />
-              )}
               {fileData.status === "error" && (
                 <button
                   onClick={() => removeUploadingFile(fileData.file)}
@@ -177,10 +193,6 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
             </div>
           )}
 
-          {fileData.status === "completed" && (
-            <p className="text-xs text-green-600">✓ Carregando seu documento</p>
-          )}
-
           {fileData.status === "error" && (
             <p className="text-xs text-red-600">Erro: {fileData.error}</p>
           )}
@@ -192,10 +204,22 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
         <div key={anexo.id} className="bg-blue-100 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <File size={20} className="text-[#1F45FF]" />
+              {anexo.url.endsWith(".mp4") ? (
+                <video
+                  src={anexo.url}
+                  className="w-20 h-20 object-cover rounded"
+                  controls
+                />
+              ) : (
+                <img
+                  src={anexo.url}
+                  alt={anexo.title}
+                  className="w-20 h-20 object-cover rounded"
+                />
+              )}
               <div>
                 <p className="font-medium text-sm text-black">
-                  {anexo.title || "Documento"}
+                  {anexo.title}
                 </p>
                 <p className="text-xs text-green-600">✓ Concluído</p>
               </div>
