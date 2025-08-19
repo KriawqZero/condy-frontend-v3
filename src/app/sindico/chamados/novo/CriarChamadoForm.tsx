@@ -70,7 +70,7 @@ export default function CriarChamadoForm() {
       } else {
         setError(result.error || 'Erro ao criar chamado');
       }
-    } catch (err: any) {
+    } catch {
       setError('Erro interno. Tente novamente.');
     } finally {
       setLoading(false);

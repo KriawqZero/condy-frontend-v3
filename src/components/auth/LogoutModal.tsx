@@ -8,8 +8,8 @@ interface LogoutModalProps {
 }
 
 export function LogoutModal({ open, onClose }: LogoutModalProps) {
-  if (!open) return null;
   const [loading, setLoading] = useState(false);
+  if (!open) return null;
 
   const handleLogout = async () => {
     setLoading(true);

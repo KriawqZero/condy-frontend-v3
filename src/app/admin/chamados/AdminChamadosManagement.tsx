@@ -98,7 +98,7 @@ const AdminIcon = () => (
   </svg>
 );
 
-export default function AdminChamadosManagement({ user }: { user: User }) {
+export default function AdminChamadosManagement({ _user }: { _user: User }) {
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loadingChamados, setLoadingChamados] = useState(true);
   const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null);

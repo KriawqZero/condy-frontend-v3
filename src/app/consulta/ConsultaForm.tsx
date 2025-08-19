@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Button from '@/components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 
 // Mock data - em produção consultaria a API
@@ -85,7 +85,7 @@ export default function ConsultaForm() {
       } else {
         setError('Chamado não encontrado. Verifique o número e tente novamente.');
       }
-    } catch (err) {
+    } catch {
       setError('Erro na consulta. Tente novamente.');
     } finally {
       setLoading(false);

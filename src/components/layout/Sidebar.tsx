@@ -20,7 +20,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
   // Navegação baseada no tipo de usuário
   const getNavItems = (): NavItem[] => {
-    const baseItems: NavItem[] = [];
+    const _baseItems: NavItem[] = [];
 
     switch (user.user_type) {
       case 'SINDICO_RESIDENTE':

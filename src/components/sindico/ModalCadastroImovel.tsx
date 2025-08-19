@@ -27,7 +27,7 @@ export function ModalCadastroImovel({
       } else {
         alert("Erro ao cadastrar imóvel: " + response.error);
       }
-    } catch (error) {
+    } catch {
       alert("Erro ao cadastrar imóvel");
     } finally {
       setLoading(false);

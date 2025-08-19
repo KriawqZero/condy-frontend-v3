@@ -1,7 +1,7 @@
 "use client";
 
 import { Chamado } from "@/types";
-import { X, MapPin, Building, Clock, User, FileText, Phone, Calendar, DollarSign, Download, ZoomIn } from "lucide-react";
+import { X, User, FileText, Download, ZoomIn } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useState } from "react";
 
@@ -72,14 +72,7 @@ function formatarData(data: Date | string): string {
   }).format(date);
 }
 
-function formatarDataSimples(data: Date | string): string {
-  const date = typeof data === "string" ? new Date(data) : data;
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(date);
-}
+// formatarDataSimples não utilizado no momento
 
 export function ModalVisualizarChamado({
   chamado,

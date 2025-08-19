@@ -11,28 +11,7 @@ const loginSchema = z.object({
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
-const registerSchema = z
-  .object({
-    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-    cpf_cnpj: z.string().min(11, "CPF/CNPJ inválido"),
-    whatsapp: z.string().min(10, "WhatsApp inválido"),
-    email: z.string().email("Email inválido"),
-    password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
-    password_confirmation: z.string(),
-    user_type: z.enum([
-      "SINDICO_RESIDENTE",
-      "SINDICO_PROFISSIONAL",
-      "ADMIN_IMOVEIS",
-      "PRESTADOR",
-      "ADMIN_PLATAFORMA",
-    ]),
-    data_nascimento: z.string().optional(),
-    email_pessoal: z.string().email().optional(),
-  })
-  .refine((data) => data.password === data.password_confirmation, {
-    message: "Senhas não coincidem",
-    path: ["password_confirmation"],
-  });
+// Nota: registerSchema removido por não ser utilizado atualmente
 
 // Server Action para login
 export async function loginAction(formData: FormData) {

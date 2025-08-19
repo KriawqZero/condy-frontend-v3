@@ -25,7 +25,7 @@ export default function CondyInput({
   onToggleVisibility,
   isPasswordVisible,
   onChange,
-  className,
+  _className,
   ...props
 }: CondyInputProps) {
   const isValid = value && !error && showValidation;

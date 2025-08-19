@@ -21,8 +21,8 @@ const protectedRoutes = [
   "/prestador",
 ];
 
-// Rotas de admin que requerem permissão específica
-const adminRoutes = ["/admin"];
+// Rotas de admin que requerem permissão específica (não utilizado)
+// const adminRoutes = ["/admin"];
 
 // Rotas por tipo de usuário
 const routesByUserType = {

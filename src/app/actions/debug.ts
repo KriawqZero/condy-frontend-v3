@@ -1,6 +1,6 @@
 "use server";
 
-function handleConsoleLog(
+export function handleConsoleLog(
   message: string,
   type: "log" | "error" | "warn" | "info" = "log"
 ) {

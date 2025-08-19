@@ -3,23 +3,10 @@
 import Footer from "@/components/Footer";
 import LoginForm from "@/components/auth/LoginForm";
 import Head from "next/head";
-import { useState } from "react";
+import { useState as _useState } from "react";
 
 export default function LoginPageContent() {
-  const [showError, setShowError] = useState(false);
-  const [errorTitle, setErrorTitle] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [hasLoginError, setHasLoginError] = useState(false);
-
-  const handleShowError = (error: {
-    errorTitle: string;
-    errorMessage: string;
-  }) => {
-    setShowError(true);
-    setErrorTitle(error.errorTitle);
-    setErrorMessage(error.errorMessage);
-    setHasLoginError(true);
-  };
+  
 
   const handleWhatsAppClick = () => {
     const whatsappNumber =

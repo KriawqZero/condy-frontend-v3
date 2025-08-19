@@ -51,7 +51,7 @@ export default function LoginForm() {
             "Email ou senha incorretos. Verifique seus dados e tente novamente.",
         });
       }
-    } catch (error) {
+    } catch {
       setLoginError({
         errorTitle: "Erro de conexão",
         errorMessage:

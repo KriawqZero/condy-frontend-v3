@@ -171,7 +171,7 @@ export interface CreateChamadoRequest {
 }
 
 // API Response Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
@@ -191,7 +191,8 @@ export interface LoginForm {
   password: string;
 }
 
-export interface RegisterForm extends RegisterRequest {}
+// manter para compatibilidade
+export type RegisterForm = RegisterRequest;
 
 // Anexo Types
 export interface Anexo {

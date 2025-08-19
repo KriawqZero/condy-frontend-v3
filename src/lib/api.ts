@@ -497,7 +497,7 @@ export async function createImovelClient(imovelData: NovoImovelData) {
       withCredentials: true,
     });
     return response.data;
-  } catch (error: any) {
+  } catch (_error: any) {
     throw new Error("Erro ao criar imóvel");
   }
 }
@@ -550,19 +550,19 @@ export async function createChamadoClient(chamadoData: NovoChamadoData) {
     
     return chamadoResponse.data;
     
-  } catch (error: any) {
+  } catch (_error: any) {
     console.error("Erro detalhado ao criar chamado:", {
-      message: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      headers: error.response?.headers,
-      config: error.config
+      message: _error.message,
+      status: _error.response?.status,
+      statusText: _error.response?.statusText,
+      data: _error.response?.data,
+      headers: _error.response?.headers,
+      config: _error.config
     });
     throw new Error(
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      `Erro ao criar chamado: ${error.response?.status || error.message}`
+      _error.response?.data?.message || 
+      _error.response?.data?.error || 
+      `Erro ao criar chamado: ${_error.response?.status || _error.message}`
     );
   }
 }

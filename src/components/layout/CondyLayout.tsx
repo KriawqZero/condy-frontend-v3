@@ -17,7 +17,7 @@ export default function CondyLayout({
   user,
   showFooter = true,
   title,
-  maxWidth = "full",
+  _maxWidth = "full",
   background = "gray",
 }: CondyLayoutProps) {
   const getBackgroundClass = () => {
@@ -31,20 +31,7 @@ export default function CondyLayout({
     }
   };
 
-  const getMaxWidthClass = () => {
-    switch (maxWidth) {
-      case "sm":
-        return "max-w-md mx-auto";
-      case "md":
-        return "max-w-2xl mx-auto";
-      case "lg":
-        return "max-w-4xl mx-auto";
-      case "xl":
-        return "max-w-6xl mx-auto";
-      default:
-        return "w-full";
-    }
-  };
+  // getMaxWidthClass não utilizado por enquanto
 
   return (
     <div className={`min-h-screen flex flex-col ${getBackgroundClass()}`}>

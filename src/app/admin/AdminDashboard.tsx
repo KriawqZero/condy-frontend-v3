@@ -2,7 +2,6 @@
 
 import { getAdminChamadosAction, getSystemStatsAction } from "@/app/actions/admin";
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
-import { ClipboardTickIcon } from "@/components/icons/ClipboardClipIcon";
 import { EmptyStateIllustration } from "@/components/icons/EmptyStateIllustration";
 import { NoteIcon } from "@/components/icons/NoteIcon";
 import { StatisticsIcon } from "@/components/icons/StatisticsIcon";
@@ -138,7 +137,7 @@ const UsersIcon = () => (
   </svg>
 );
 
-export default function AdminDashboard({ user }: { user: User }) {
+export default function AdminDashboard({ _user }: { _user: User }) {
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loadingChamados, setLoadingChamados] = useState(true);
   const [stats, setStats] = useState({
@@ -202,17 +201,7 @@ export default function AdminDashboard({ user }: { user: User }) {
     fetchData();
   }, []);
 
-  const totalInvested = chamados.reduce(
-    (acc, chamado) => acc + Number(chamado.valorEstimado || 0),
-    0
-  );
-
-  const activeTicketsCount = chamados.filter(
-    (chamado) => chamado.status !== "CONCLUIDO"
-  ).length;
-  const completedTicketsCount = chamados.filter(
-    (chamado) => chamado.status === "CONCLUIDO"
-  ).length;
+  
 
   const urgentTicketsCount = chamados.filter(
     (chamado) => chamado.prioridade === "ALTA"
