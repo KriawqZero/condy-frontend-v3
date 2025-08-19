@@ -50,7 +50,6 @@ export default function LoginForm() {
           errorMessage:
             "Email ou senha incorretos. Verifique seus dados e tente novamente.",
         });
-        console.log(result);
       }
     } catch {
       setLoginError({

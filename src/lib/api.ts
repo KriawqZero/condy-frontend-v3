@@ -9,7 +9,10 @@ import {
 import axios, { AxiosResponse } from "axios";
 import { getSession } from "./session";
 
-const API_BASE_URL = process.env.PRIVATE_API_URL || "http://localhost:4000/api";
+// Usa URL pública no browser e privada no servidor
+const API_BASE_URL = (typeof window !== "undefined")
+  ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api")
+  : (process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api");
 
 // Constantes para localStorage
 const ANEXOS_PENDENTES_KEY = "anexos_pendentes_chamado";
@@ -179,7 +182,6 @@ export async function loginUser(
     );
     return response.data;
   } catch (error: any) {
-    console.log(error);
     throw new Error(error.response?.data?.message || "Erro no login");
   }
 }
