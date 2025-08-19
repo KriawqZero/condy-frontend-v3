@@ -58,6 +58,15 @@ export async function loginAction(formData: FormData) {
       // Login bem sucedido
       await createSession(response.data.token, response.data.user);
 
+      // Disponibilizar o token para o cliente (axios no browser)
+      const cookieStore = await import("next/headers").then(m => m.cookies());
+      cookieStore.set("auth_token", response.data.token, {
+        httpOnly: false,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      });
       // Determinar rota de redirecionamento
       switch (response.data.user.userType) {
         case "ADMIN_PLATAFORMA":
@@ -155,6 +164,8 @@ export async function registerAction(formData: FormData) {
 // Server Action para logout
 export async function logoutAction() {
   await destroySession();
+  const cookieStore = await import("next/headers").then(m => m.cookies());
+  cookieStore.delete("auth_token");
   redirect("/login");
 }
 
