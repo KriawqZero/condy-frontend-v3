@@ -9,7 +9,7 @@ import {
 import axios, { AxiosResponse } from "axios";
 import { getSession } from "./session";
 
-const API_BASE_URL = process.env.PRIVATE_API_URL || "http://localhost:3000/api";
+const API_BASE_URL = process.env.PRIVATE_API_URL || "http://localhost:4000/api";
 
 // Constantes para localStorage
 const ANEXOS_PENDENTES_KEY = "anexos_pendentes_chamado";
@@ -457,15 +457,6 @@ export async function uploadAnexoClient(
       withCredentials: true,
     });
     console.log("Resposta da API (anexo):", response.data);
-    
-    // Se o upload foi bem-sucedido, salvar o ID do anexo como pendente
-    if (response.data?.status === 'success' && response.data?.data?.id) {
-      salvarAnexoPendente(response.data.data.id);
-      console.log("Anexo salvo como pendente para associação futura:", response.data.data.id);
-    } else {
-      console.warn("Anexo não foi salvo como pendente. Estrutura da resposta:", response.data);
-    }
-    
     return response.data;
   } catch (error: any) {
     console.error("Erro detalhado ao fazer upload:", {
@@ -597,7 +588,7 @@ export async function updateAnexoChamadoIdClient(
     console.log(`✅ Anexo ${anexoId} associado com sucesso:`, response.data);
     return response.data;
   } catch (error: any) {
-    console.error(`❌ Erro ao associar anexo ${anexoId}:`, {
+    console.error(`❌ Erro ao associar anexo ${anexoId}: ${error}`, {
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
