@@ -11,18 +11,22 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
 export const metadata: Metadata = {
   title: "Condy - Sistema de Gestão Condominial",
   description: "Sistema completo para gestão de condomínios, chamados e ativos",
   manifest: "/manifest.json",
-  themeColor: "#2563EB",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Condy",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#2563EB",
 };
 
 export default function RootLayout({
