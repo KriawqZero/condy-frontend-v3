@@ -63,7 +63,7 @@ export default function SindicoDashboard({ user }: { user: User }) {
     const numero = Number(valor);
 
     if (!valor || isNaN(numero)) {
-      return "Não definido";
+      return "0,00";
     }
 
     const options: Intl.NumberFormatOptions = {
