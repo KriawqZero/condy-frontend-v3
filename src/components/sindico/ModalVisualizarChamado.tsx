@@ -107,7 +107,7 @@ export function ModalVisualizarChamado({
   };
 
   const linkVisitante =
-    (typeof window !== "undefined" ? window.location.origin : "https://condy.com.br") +
+    (typeof window !== "undefined" ? window.location.origin : "https://dev.condy.com.br") +
     `/visitante?busca=${chamado.numeroChamado}`;
 
   const qrCodeUrl =
