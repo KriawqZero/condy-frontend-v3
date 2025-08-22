@@ -147,7 +147,7 @@ export default function SindicoDashboard({ user }: { user: User }) {
             {/* Total Invested */}
             <Card className="bg-white rounded-[20px] p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
                   <StatisticsIcon />
                 </div>
                 <div>
@@ -165,7 +165,7 @@ export default function SindicoDashboard({ user }: { user: User }) {
             {/* Active Tickets */}
             <Card className="bg-white rounded-[20px] p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
+                <div className="w-14 h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
                   <NoteIcon />
                 </div>
                 <div>
@@ -182,7 +182,7 @@ export default function SindicoDashboard({ user }: { user: User }) {
             {/* Completed Tickets */}
             <Card className="bg-white rounded-[20px] p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
                   <ClipboardTickIcon />
                 </div>
                 <div>
