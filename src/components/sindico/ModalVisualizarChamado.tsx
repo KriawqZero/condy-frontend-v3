@@ -80,6 +80,7 @@ export function ModalVisualizarChamado({
 }: ModalVisualizarChamadoProps) {
   const [abaAtiva, setAbaAtiva] = useState("geral");
   const [imagemAmpliada, setImagemAmpliada] = useState<string | null>(null);
+  const [mostrarQRCode, setMostrarQRCode] = useState(false);
 
   const abas = [
     { id: "geral", label: "Geral" },
@@ -104,6 +105,14 @@ export function ModalVisualizarChamado({
     link.click();
     document.body.removeChild(link);
   };
+
+  const linkVisitante =
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000") +
+    `/visitante?busca=${chamado.numeroChamado}`;
+
+  const qrCodeUrl =
+    "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" +
+    encodeURIComponent(linkVisitante);
 
 
 
@@ -491,11 +500,17 @@ export function ModalVisualizarChamado({
         <div className="border-t bg-gray-50 px-6 py-4">
           <div className="flex flex-col sm:flex-row gap-3 sm:justify-between">
             <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-afacad font-semibold hover:bg-gray-300 transition-colors"
+                onClick={() => setMostrarQRCode(true)}
+              >
+                Gerar QR Code
+              </button>
               <button className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-afacad font-semibold hover:bg-gray-300 transition-colors">
-                Baixar Recibo / NF
+                Carregar Recibo / NF
               </button>
               <button className="px-6 py-3 bg-[#1F45FF] text-white rounded-lg font-afacad font-semibold hover:bg-[#1F45FF]/90 transition-colors shadow-md">
-                Atualizar status
+                Atualizar chamado
               </button>
             </div>
           </div>
@@ -523,6 +538,22 @@ export function ModalVisualizarChamado({
               className="max-w-full max-h-full object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Modal QR Code */}
+      {mostrarQRCode && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100]" onClick={() => setMostrarQRCode(false)}>
+          <div className="bg-white p-6 rounded-lg relative" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setMostrarQRCode(false)}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img src={qrCodeUrl} alt="QR Code do chamado" className="w-48 h-48" />
+            <p className="mt-4 text-sm text-center break-all">{linkVisitante}</p>
           </div>
         </div>
       )}
