@@ -103,7 +103,6 @@ export default function ConsultaForm() {
   return (
     <div className="space-y-10">
       <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-        {/*}
         <form onSubmit={handleSubmit} className="flex w-full max-w-xl gap-4">
           <div className="relative flex-grow">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -127,7 +126,7 @@ export default function ConsultaForm() {
           src="/3d_illustration.png"
           alt="Ilustração de Prédio"
           className="w-64 h-64 object-cover drop-shadow-xl"
-        />*/}
+        />
       </div>
 
       {!hasSearched && !chamado && !error && (
@@ -162,7 +161,8 @@ export default function ConsultaForm() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+          {/* Desktop table */}
+          <div className="bg-white rounded-2xl overflow-hidden shadow-sm hidden md:block">
             <div className="bg-white/30 px-6 py-4 border-b border-[#EFF0FF]">
               <div className="grid grid-cols-6 gap-4 text-sm font-afacad font-bold text-black">
                 <div>Tipo do chamado</div>
@@ -199,6 +199,50 @@ export default function ConsultaForm() {
                     {createdAt ?? '-'}
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile card */}
+          <div className="bg-white rounded-2xl overflow-hidden shadow-sm md:hidden">
+            <div className="px-6 py-4 space-y-3">
+              <div className="flex justify-between">
+                <span className="font-afacad text-sm font-bold text-black">Tipo do chamado</span>
+                <span className="font-afacad text-sm font-bold text-black text-right">
+                  {chamado.escopo ?? '-'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-afacad text-sm font-bold text-black">Descrição</span>
+                <span className="font-afacad text-sm font-bold text-black text-right">
+                  {chamado.descricaoOcorrido ?? '-'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-afacad text-sm font-bold text-black">Valor estimado</span>
+                <span className="font-afacad text-sm font-bold text-black text-right">
+                  {typeof chamado.valorEstimado === 'number'
+                    ? `R$ ${Number(chamado.valorEstimado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                    : 'Sem valor'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-afacad text-sm font-bold text-black">Chamado</span>
+                <span className="font-afacad text-sm font-bold text-black text-right">
+                  {chamado.numeroChamado}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-afacad text-sm font-bold text-black">Status do chamado</span>
+                <span className={`font-afacad text-sm font-bold text-black inline-flex items-center px-3 py-1 rounded-full border ${getStatusColor(chamado.status)}`}>
+                  {getStatusText(chamado.status)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-afacad text-sm font-bold text-black">Data de abertura</span>
+                <span className="font-afacad text-sm font-bold text-black text-right">
+                  {createdAt ?? '-'}
+                </span>
               </div>
             </div>
           </div>
