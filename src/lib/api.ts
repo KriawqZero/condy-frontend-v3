@@ -445,7 +445,7 @@ export async function healthCheck() {
 export async function getChamadoPublicoPorCodigo(code: string) {
   try {
     const response = await apiClient.get(`/chamado/codigo/${code}`);
-    return response.data;
+    return response.data?.data;
   } catch (error: any) {
     if (error.response?.status === 404) return null;
     throw new Error(error.response?.data?.message || "Erro ao consultar chamado público");
