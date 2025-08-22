@@ -103,6 +103,7 @@ export default function ConsultaForm() {
   return (
     <div className="space-y-10">
       <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+        {/*}
         <form onSubmit={handleSubmit} className="flex w-full max-w-xl gap-4">
           <div className="relative flex-grow">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -126,7 +127,7 @@ export default function ConsultaForm() {
           src="/3d_illustration.png"
           alt="Ilustração de Prédio"
           className="w-64 h-64 object-cover drop-shadow-xl"
-        />
+        />*/}
       </div>
 
       {!hasSearched && !chamado && !error && (
