@@ -6,9 +6,10 @@ import { User } from "@/types";
 interface CondyHeaderProps {
   user?: User;
   title?: string;
+  visitante?: boolean;
 }
 
-export default function CondyHeader({ user, title }: CondyHeaderProps) {
+export default function CondyHeader({ user, title, visitante = false }: CondyHeaderProps) {
   const isAdmin = user?.userType === 'ADMIN_PLATAFORMA';
   
   return (
@@ -33,13 +34,15 @@ export default function CondyHeader({ user, title }: CondyHeaderProps) {
         </div>
 
         {/* Logout Button */}
-        <LogoutButton className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-amber-200 transition duration-500 cursor-pointer" />
+        {!visitante && (
+          <LogoutButton className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-amber-200 transition duration-500 cursor-pointer" />
+        )}
       </div>
 
       {/* Welcome Message - Ajustado para não conflitar com os cards */}
       <div className="relative max-w-screen-2xl px-4 sm:px-6 lg:px-8 mx-auto mt-6">
         <h1 className="font-afacad text-4xl lg:text-5xl font-bold leading-tight">
-          {isAdmin ? `Olá, Administrador!` : `Olá, ${user?.name || "Síndico"}!`}
+          {isAdmin ? `Olá, Administrador!` : visitante ? `Olá, Visitante!` : `Olá, ${user?.name || "Síndico"}!`}
         </h1>
         <p className="font-afacad text-lg mt-1">{title}</p>
       </div>

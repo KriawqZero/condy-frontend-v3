@@ -10,6 +10,7 @@ interface CondyLayoutProps {
   title?: string;
   maxWidth?: "sm" | "md" | "lg" | "xl" | "full";
   background?: "white" | "gray" | "gradient";
+  visitante?: boolean;
 }
 
 export default function CondyLayout({
@@ -17,8 +18,8 @@ export default function CondyLayout({
   user,
   showFooter = true,
   title,
-  _maxWidth = "full",
   background = "gray",
+  visitante = false,
 }: CondyLayoutProps) {
   const getBackgroundClass = () => {
     switch (background) {
@@ -36,7 +37,7 @@ export default function CondyLayout({
   return (
     <div className={`min-h-screen flex flex-col ${getBackgroundClass()}`}>
       {/* Header */}
-      <CondyHeader user={user} title={title} />
+      <CondyHeader user={user} title={title} visitante={visitante} />
 
       <main className="relative">
         <div>{children}</div>

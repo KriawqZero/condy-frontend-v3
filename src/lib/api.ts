@@ -441,6 +441,17 @@ export async function healthCheck() {
   }
 }
 
+// Consulta pública de chamado por código (sem auth)
+export async function getChamadoPublicoPorCodigo(code: string) {
+  try {
+    const response = await apiClient.get(`/chamado/codigo/${code}`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 404) return null;
+    throw new Error(error.response?.data?.message || "Erro ao consultar chamado público");
+  }
+}
+
 export async function uploadAnexoClient(
   file: File,
   title?: string
