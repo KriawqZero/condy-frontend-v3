@@ -122,11 +122,7 @@ export default function ConsultaForm() {
             {loading ? 'Buscando...' : 'Buscar'}
           </Button>
         </form>
-        <img
-          src="/3d_illustration.png"
-          alt="Ilustração de Prédio"
-          className="w-64 h-64 object-cover drop-shadow-xl"
-        />
+
       </div>
 
       {!hasSearched && !chamado && !error && (
