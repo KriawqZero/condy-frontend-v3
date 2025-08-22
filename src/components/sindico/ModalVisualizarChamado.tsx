@@ -107,11 +107,11 @@ export function ModalVisualizarChamado({
   };
 
   const linkVisitante =
-    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000") +
+    (typeof window !== "undefined" ? window.location.origin : "https://condy.com.br") +
     `/visitante?busca=${chamado.numeroChamado}`;
 
   const qrCodeUrl =
-    "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" +
+    "https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=" +
     encodeURIComponent(linkVisitante);
 
 
@@ -552,8 +552,7 @@ export function ModalVisualizarChamado({
             >
               <X className="w-5 h-5" />
             </button>
-            <img src={qrCodeUrl} alt="QR Code do chamado" className="w-48 h-48" />
-            <p className="mt-4 text-sm text-center break-all">{linkVisitante}</p>
+            <img src={qrCodeUrl} alt="QR Code do chamado" className="w-96 h-96" />
           </div>
         </div>
       )}
