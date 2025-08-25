@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useEffect, useState } from "react";
-import { apiPrestadorListOrdens, apiPrestadorGetOrdem, apiPrestadorAlterarStatus } from "../../actions/ordens";
+import { apiPrestadorListOrdens, apiPrestadorAlterarStatus } from "../../actions/ordens";
 
 export default function OrdensPage() {
   const [loading, setLoading] = useState(true);
