@@ -1,6 +1,10 @@
 "use client";
 
-import { getAdminChamadosAction, getSystemStatsAction } from "@/app/actions/admin";
+import {
+  getAdminChamadosAction,
+  getSystemStatsAction,
+  updateChamadoAdminAction,
+} from "@/app/actions/admin";
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { EmptyStateIllustration } from "@/components/icons/EmptyStateIllustration";
 import { NoteIcon } from "@/components/icons/NoteIcon";
@@ -11,7 +15,6 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chamado, User } from "@/types";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 function getStatusBadge(status: Chamado["status"]) {
   switch (status) {
@@ -146,7 +149,11 @@ export default function AdminDashboard({ _user }: { _user: User }) {
     totalCondominios: 0,
     mediaTempoResolucao: 0
   });
-  const router = useRouter();
+  const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null);
+  const [editingChamado, setEditingChamado] = useState<Chamado | null>(null);
+  const [activeTab, setActiveTab] = useState<
+    "geral" | "servico" | "acessos" | "resposta"
+  >("geral");
 
   function formatarValor(valor: unknown, moeda: boolean = true): string {
     const numero = Number(valor);
@@ -200,6 +207,40 @@ export default function AdminDashboard({ _user }: { _user: User }) {
 
     fetchData();
   }, []);
+
+  const handleSaveChanges = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+    if (!editingChamado) return;
+
+    const formData = new FormData(event.currentTarget);
+    const updateData = {
+      status: formData.get("status") as string,
+      prestadorId: formData.get("prestadorId") as string,
+      valorEstimado: formData.get("valorEstimado")
+        ? parseFloat(formData.get("valorEstimado") as string)
+        : undefined,
+    };
+
+    try {
+      const response = await updateChamadoAdminAction(
+        editingChamado.id,
+        updateData
+      );
+      if (response.success) {
+        setChamados((prev) =>
+          prev.map((c) =>
+            c.id === editingChamado.id ? { ...c, ...updateData } : c
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar chamado", error);
+    }
+
+    setEditingChamado(null);
+  };
 
   
 
@@ -292,18 +333,12 @@ export default function AdminDashboard({ _user }: { _user: User }) {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
               <div>
                 <h2 className="font-afacad text-3xl font-bold text-black mb-1">
-                  Gerenciar Chamados
+                  Lista de chamados
                 </h2>
                 <p className="font-afacad text-base text-black">
-                  Administre todos os chamados do sistema com acesso completo
+                  Acompanhe e atualize os chamados em tempo real
                 </p>
               </div>
-              <Button
-                className="bg-[#1F45FF] hover:bg-[#1F45FF]/90 text-white font-afacad font-bold text-base px-8 py-3 h-12 rounded-xl shadow-lg"
-                onClick={() => router.push('/admin/chamados')}
-              >
-                Ver todos os chamados
-              </Button>
             </div>
 
             {chamados.length > 0 ? (
@@ -327,11 +362,11 @@ export default function AdminDashboard({ _user }: { _user: User }) {
 
                     {/* Table Body */}
                     <div className="divide-y divide-[#EFF0FF]">
-                      {chamados.slice(0, 10).map((chamado) => (
+                      {chamados.map((chamado) => (
                         <div
                           key={chamado.id}
                           className="px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[800px]"
-                          onClick={() => router.push('/admin/chamados')}
+                          onClick={() => setSelectedChamado(chamado)}
                         >
                           <div className="grid grid-cols-8 gap-4 items-center">
                             <div className="font-afacad text-sm font-bold text-black">
@@ -402,6 +437,243 @@ export default function AdminDashboard({ _user }: { _user: User }) {
                 </div>
               </div>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {selectedChamado && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-afacad text-2xl font-bold text-black">
+                {selectedChamado.descricaoOcorrido || "Detalhes do chamado"}
+              </h3>
+              <button
+                onClick={() => setSelectedChamado(null)}
+                className="text-gray-400 hover:text-gray-600 w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-6 border-b border-[#EFF0FF] flex space-x-6">
+              {[
+                ["geral", "Geral"],
+                ["servico", "Serviço"],
+                ["acessos", "Acessos"],
+                ["resposta", "Resposta"],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key as any)}
+                  className={`pb-2 font-afacad font-bold text-sm hover:text-blue-600 ${
+                    activeTab === key
+                      ? "text-blue-600 border-b-2 border-blue-600"
+                      : "text-black"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === "geral" && (
+              <div className="space-y-4 font-afacad text-sm text-black">
+                <p>
+                  <strong>Número:</strong> {selectedChamado.numeroChamado}
+                </p>
+                <p>
+                  <strong>Condomínio:</strong> {" "}
+                  {selectedChamado.imovel?.nome || "N/A"}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedChamado.status}
+                </p>
+                <p>
+                  <strong>Prioridade:</strong> {selectedChamado.prioridade}
+                </p>
+              </div>
+            )}
+
+            {activeTab === "servico" && (
+              <div className="font-afacad text-sm text-black">
+                Informações do serviço não disponíveis.
+              </div>
+            )}
+
+            {activeTab === "acessos" && (
+              <div className="font-afacad text-sm text-black">
+                Dados de acesso não disponíveis.
+              </div>
+            )}
+
+            {activeTab === "resposta" && (
+              <div className="font-afacad text-sm text-black">
+                Nenhuma resposta registrada.
+              </div>
+            )}
+
+            <div className="flex justify-between pt-6">
+              <label className="cursor-pointer">
+                <input type="file" className="hidden" />
+                <span className="px-6 py-3 border border-[#EFF0FF] rounded-xl text-black font-afacad font-bold">
+                  Carregar Recibo / NF
+                </span>
+              </label>
+              <Button
+                className="bg-[#1F45FF] hover:bg-[#1F45FF]/90 text-white font-afacad font-bold px-6 py-3 rounded-xl"
+                onClick={() => {
+                  setEditingChamado(selectedChamado);
+                  setSelectedChamado(null);
+                }}
+              >
+                Atualizar chamado
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingChamado && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-screen overflow-y-auto p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-afacad text-2xl font-bold text-black">
+                Atualizando chamado
+              </h3>
+              <button
+                onClick={() => setEditingChamado(null)}
+                className="text-gray-400 hover:text-gray-600 w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <form className="space-y-6" onSubmit={handleSaveChanges}>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-afacad text-sm font-bold text-black mb-2">
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    defaultValue={editingChamado.status}
+                    className="w-full border-2 border-[#EFF0FF] rounded-xl px-4 py-3 font-afacad"
+                  >
+                    <option value="NOVO">Novo</option>
+                    <option value="A_CAMINHO">A Caminho</option>
+                    <option value="EM_ATENDIMENTO">Em Atendimento</option>
+                    <option value="CONCLUIDO">Concluído</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-afacad text-sm font-bold text-black mb-2">
+                    Prestador vinculado
+                  </label>
+                  <input
+                    type="text"
+                    name="prestadorId"
+                    defaultValue={editingChamado.prestadorId || ""}
+                    className="w-full border-2 border-[#EFF0FF] rounded-xl px-4 py-3 font-afacad"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-afacad text-sm font-bold text-black mb-2">
+                    Valor estimado
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="valorEstimado"
+                    defaultValue={
+                      editingChamado.valorEstimado &&
+                      typeof editingChamado.valorEstimado === "number"
+                        ? editingChamado.valorEstimado.toString()
+                        : ""
+                    }
+                    className="w-full border-2 border-[#EFF0FF] rounded-xl px-4 py-3 font-afacad"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-afacad text-sm font-bold text-black mb-2">
+                    Prazo de solução
+                  </label>
+                  <input
+                    type="text"
+                    name="prazo"
+                    placeholder="ex: 6 meses"
+                    className="w-full border-2 border-[#EFF0FF] rounded-xl px-4 py-3 font-afacad"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-afacad text-sm font-bold text-black mb-2">
+                    Subir Recibo / NF
+                  </label>
+                  <input
+                    type="file"
+                    className="w-full border-2 border-dashed border-[#EFF0FF] rounded-xl px-4 py-6 font-afacad"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-afacad text-sm font-bold text-black mb-2">
+                    Subir Relatório de fechamento
+                  </label>
+                  <input
+                    type="file"
+                    className="w-full border-2 border-dashed border-[#EFF0FF] rounded-xl px-4 py-6 font-afacad"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-6">
+                <Button
+                  type="button"
+                  onClick={() => setEditingChamado(null)}
+                  className="px-6 py-3 border-2 border-[#EFF0FF] rounded-xl text-black hover:bg-gray-50 font-afacad font-bold"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  className="px-6 py-3 bg-[#1F45FF] text-white rounded-xl hover:bg-[#1F45FF]/90 font-afacad font-bold"
+                >
+                  Salvar alterações
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

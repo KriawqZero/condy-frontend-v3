@@ -36,7 +36,6 @@ export default function Sidebar({ user }: SidebarProps) {
       case 'ADMIN_PLATAFORMA':
         return [
           { name: 'Dashboard', href: '/admin', icon: '📊' },
-          { name: 'Todos os Chamados', href: '/admin/chamados', icon: '📞' },
           { name: 'Usuários', href: '/admin/usuarios', icon: '👥' },
           { name: 'Imóveis', href: '/admin/imoveis', icon: '🏢' },
           { name: 'Relatórios', href: '/admin/relatorios', icon: '📈' },
