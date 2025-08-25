@@ -1,6 +1,7 @@
 "use client";
 
 import { Chamado } from "@/types";
+import { updateChamado } from "@/lib/api";
 import { X, User, FileText, Download, ZoomIn } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useState } from "react";
@@ -8,6 +9,7 @@ import { useState } from "react";
 interface ModalVisualizarChamadoProps {
   chamado: Chamado;
   onClose: () => void;
+  onUpdated?: () => void;
 }
 
 function getStatusBadge(status: Chamado["status"]) {
@@ -77,9 +79,16 @@ function formatarData(data: Date | string): string {
 export function ModalVisualizarChamado({
   chamado,
   onClose,
+  onUpdated,
 }: ModalVisualizarChamadoProps) {
   const [abaAtiva, setAbaAtiva] = useState("geral");
   const [imagemAmpliada, setImagemAmpliada] = useState<string | null>(null);
+  const [editando, setEditando] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+  const [descricao, setDescricao] = useState(chamado.descricaoOcorrido || "");
+  const [infoAdicionais, setInfoAdicionais] = useState(chamado.informacoesAdicionais || "");
+  const [prioridade, setPrioridade] = useState(chamado.prioridade);
+  const [escopo, setEscopo] = useState(chamado.escopo);
   const [mostrarQRCode, setMostrarQRCode] = useState(false);
 
   const abas = [
@@ -110,9 +119,27 @@ export function ModalVisualizarChamado({
     (typeof window !== "undefined" ? window.location.origin : "https://dev.condy.com.br") +
     `/visitante?busca=${chamado.numeroChamado}`;
 
+  // Evitar problemas no Safari gerando QR dinamicamente via serviço com cache-control
   const qrCodeUrl =
-    "https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=" +
-    encodeURIComponent(linkVisitante);
+    `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(linkVisitante)}&format=svg`;
+
+  async function salvarAlteracoes() {
+    setSalvando(true);
+    try {
+      await updateChamado(chamado.id as any, {
+        descricaoOcorrido: descricao,
+        informacoesAdicionais: infoAdicionais,
+        prioridade,
+        escopo,
+      });
+      setEditando(false);
+      onUpdated?.();
+    } catch (e: any) {
+      alert("Erro ao atualizar chamado: " + (e.response?.data?.message || e.message));
+    } finally {
+      setSalvando(false);
+    }
+  }
 
 
 
@@ -163,6 +190,41 @@ export function ModalVisualizarChamado({
         {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
           <div className="p-6">
+            {editando && (
+              <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Descrição do ocorrido</label>
+                    <textarea className="w-full border rounded-lg px-3 py-2" rows={3} value={descricao} onChange={(e)=>setDescricao(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Informações adicionais</label>
+                    <textarea className="w-full border rounded-lg px-3 py-2" rows={2} value={infoAdicionais} onChange={(e)=>setInfoAdicionais(e.target.value)} />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Prioridade</label>
+                      <select className="w-full border rounded-lg px-3 py-2" value={prioridade} onChange={(e)=>setPrioridade(e.target.value as any)}>
+                        <option value="BAIXA">Baixa</option>
+                        <option value="MEDIA">Média</option>
+                        <option value="ALTA">Alta</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Escopo</label>
+                      <select className="w-full border rounded-lg px-3 py-2" value={escopo} onChange={(e)=>setEscopo(e.target.value as any)}>
+                        <option value="ORCAMENTO">Solicitar Orçamento</option>
+                        <option value="SERVICO_IMEDIATO">Serviço Imediato</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <button className="px-4 py-2 rounded-lg bg-gray-200" onClick={()=>setEditando(false)} disabled={salvando}>Cancelar</button>
+                    <button className="px-4 py-2 rounded-lg bg-[#1F45FF] text-white" onClick={salvarAlteracoes} disabled={salvando}>{salvando? 'Salvando...' : 'Salvar alterações'}</button>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* ABA GERAL */}
             {abaAtiva === "geral" && (
@@ -509,9 +571,15 @@ export function ModalVisualizarChamado({
               <button className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-afacad font-semibold hover:bg-gray-300 transition-colors">
                 Carregar Recibo / NF
               </button>
-              <button className="px-6 py-3 bg-[#1F45FF] text-white rounded-lg font-afacad font-semibold hover:bg-[#1F45FF]/90 transition-colors shadow-md">
-                Atualizar chamado
-              </button>
+              {!editando ? (
+                <button className="px-6 py-3 bg-[#1F45FF] text-white rounded-lg font-afacad font-semibold hover:bg-[#1F45FF]/90 transition-colors shadow-md" onClick={() => setEditando(true)}>
+                  Atualizar chamado
+                </button>
+              ) : (
+                <button className="px-6 py-3 bg-green-600 text-white rounded-lg font-afacad font-semibold hover:bg-green-700 transition-colors shadow-md" onClick={salvarAlteracoes} disabled={salvando}>
+                  {salvando ? 'Salvando...' : 'Salvar alterações'}
+                </button>
+              )}
             </div>
           </div>
         </div>

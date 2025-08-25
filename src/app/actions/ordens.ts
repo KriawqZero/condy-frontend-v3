@@ -45,4 +45,16 @@ export async function apiPrestadorAlterarStatus(id: number, status: "EM_ANDAMENT
   }
 }
 
+export async function apiPrestadorCriarOrdemAvulsa(data: { descricao: string; valorAcordado?: number; prazoAcordado?: number; referenciaExterna?: string }): Promise<ApiResponse<any>> {
+  const session = await getSession();
+  try {
+    const res = await axios.post(`${baseUrl()}/prestador/ordens`, data, {
+      headers: { Authorization: `Bearer ${session.token}` },
+    });
+    return { success: true, data: res.data };
+  } catch (e: any) {
+    return { success: false, error: e.response?.data?.message || e.message };
+  }
+}
+
 

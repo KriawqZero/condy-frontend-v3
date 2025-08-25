@@ -14,7 +14,9 @@ export async function apiPrestadorListPropostas(): Promise<ApiResponse<any[]>> {
     const res = await axios.get(`${baseUrl()}/prestador/propostas`, {
       headers: { Authorization: `Bearer ${session.token}` },
     });
-    return { success: true, data: res.data };
+    const raw = res.data;
+    const data = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
+    return { success: true, data };
   } catch (e: any) {
     return { success: false, error: e.response?.data?.message || e.message };
   }
@@ -26,7 +28,8 @@ export async function apiPrestadorAceitarProposta(id: number): Promise<ApiRespon
     const res = await axios.post(`${baseUrl()}/prestador/propostas/${id}/aceitar`, {}, {
       headers: { Authorization: `Bearer ${session.token}` },
     });
-    return { success: true, data: res.data };
+    const raw = res.data;
+    return { success: true, data: raw?.data ?? raw };
   } catch (e: any) {
     return { success: false, error: e.response?.data?.message || e.message };
   }
@@ -38,7 +41,8 @@ export async function apiPrestadorRecusarProposta(id: number, justificativa: str
     const res = await axios.post(`${baseUrl()}/prestador/propostas/${id}/recusar`, { justificativa }, {
       headers: { Authorization: `Bearer ${session.token}` },
     });
-    return { success: true, data: res.data };
+    const raw = res.data;
+    return { success: true, data: raw?.data ?? raw };
   } catch (e: any) {
     return { success: false, error: e.response?.data?.message || e.message };
   }
@@ -53,7 +57,8 @@ export async function apiPrestadorContraproposta(
     const res = await axios.post(`${baseUrl()}/prestador/propostas/${id}/contraproposta`, body, {
       headers: { Authorization: `Bearer ${session.token}` },
     });
-    return { success: true, data: res.data };
+    const raw = res.data;
+    return { success: true, data: raw?.data ?? raw };
   } catch (e: any) {
     return { success: false, error: e.response?.data?.message || e.message };
   }

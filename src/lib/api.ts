@@ -25,6 +25,10 @@ export function salvarAnexoPendente(anexoId: number): void {
   }
   
   try {
+    if (typeof anexoId !== 'number' || !Number.isFinite(anexoId) || anexoId <= 0) {
+      console.warn('⚠️ ID de anexo inválido, ignorando salvarAnexoPendente:', anexoId);
+      return;
+    }
     const anexosPendentes = getAnexosPendentes();
     if (!anexosPendentes.includes(anexoId)) {
       anexosPendentes.push(anexoId);
@@ -46,7 +50,15 @@ export function getAnexosPendentes(): number[] {
   
   try {
     const stored = localStorage.getItem(ANEXOS_PENDENTES_KEY);
-    const anexos = stored ? JSON.parse(stored) : [];
+    const parsed = stored ? JSON.parse(stored) : [];
+    const anexos: number[] = Array.isArray(parsed)
+      ? parsed.filter((id) => typeof id === 'number' && Number.isFinite(id) && id > 0)
+      : [];
+    if (stored && anexos.length !== parsed.length) {
+      // Corrigir lista inválida
+      localStorage.setItem(ANEXOS_PENDENTES_KEY, JSON.stringify(anexos));
+      console.warn('⚠️ Corrigidos IDs inválidos em anexos pendentes:', parsed);
+    }
     console.log("📋 ANEXOS PENDENTES OBTIDOS:", anexos.length > 0 ? anexos : "Nenhum anexo encontrado");
     return anexos;
   } catch (error) {
@@ -471,7 +483,12 @@ export async function uploadAnexoClient(
       withCredentials: true,
     });
     console.log("Resposta da API (anexo):", response.data);
-    return response.data;
+    const raw = response.data;
+    // Desembrulhar respostas aninhadas: { status, data: { status, data: anexo } }
+    const unwrapped = raw?.data?.data
+      ? { status: raw.status, data: raw.data.data, message: raw.message }
+      : raw;
+    return unwrapped as AnexoUploadResponse;
   } catch (error: any) {
     console.error("Erro detalhado ao fazer upload:", {
       message: error.message,
@@ -586,6 +603,14 @@ export async function updateAnexoChamadoIdClient(
   chamadoId: number
 ) {
   try {
+    if (typeof anexoId !== 'number' || !Number.isFinite(anexoId) || anexoId <= 0) {
+      console.warn(`⚠️ Ignorando associação de anexo inválido:`, anexoId);
+      return { status: 'skipped', reason: 'invalid_anexo_id' } as any;
+    }
+    if (typeof chamadoId !== 'number' || !Number.isFinite(chamadoId) || chamadoId <= 0) {
+      console.warn(`⚠️ Ignorando associação com chamado inválido:`, chamadoId);
+      return { status: 'skipped', reason: 'invalid_chamado_id' } as any;
+    }
     console.log(`🔗 Associando anexo ${anexoId} ao chamado ${chamadoId}`);
     
     const response = await apiClient.patch(
@@ -599,8 +624,10 @@ export async function updateAnexoChamadoIdClient(
       }
     );
     
-    console.log(`✅ Anexo ${anexoId} associado com sucesso:`, response.data);
-    return response.data;
+    const raw = response.data;
+    const unwrapped = raw?.data?.data ? raw.data : raw; // manter contrato { status, data }
+    console.log(`✅ Anexo ${anexoId} associado com sucesso:`, unwrapped);
+    return unwrapped;
   } catch (error: any) {
     console.error(`❌ Erro ao associar anexo ${anexoId}: ${error}`, {
       status: error.response?.status,

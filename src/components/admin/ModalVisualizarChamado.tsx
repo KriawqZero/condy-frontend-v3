@@ -4,6 +4,8 @@ import { Chamado } from "@/types";
 import { X, User, FileText, Download, ZoomIn } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useState } from "react";
+import { useEffect } from "react";
+import { adminAssignPrestadorAction, adminListPrestadoresAction } from "@/app/actions/admin";
 
 interface ModalVisualizarChamadoProps {
   chamado: Chamado;
@@ -82,6 +84,15 @@ export function ModalVisualizarChamado({
 }: ModalVisualizarChamadoProps) {
   const [abaAtiva, setAbaAtiva] = useState("geral");
   const [imagemAmpliada, setImagemAmpliada] = useState<string | null>(null);
+  const [abrirVinculo, setAbrirVinculo] = useState(false);
+  const [prestadores, setPrestadores] = useState<any[]>([]);
+  const [prestadorId, setPrestadorId] = useState<string>("");
+
+  useEffect(() => {
+    if (abrirVinculo) {
+      adminListPrestadoresAction().then((r: any) => setPrestadores(r.data || []));
+    }
+  }, [abrirVinculo]);
 
   const abas = [
     { id: "geral", label: "Geral" },
@@ -482,6 +493,11 @@ export function ModalVisualizarChamado({
                      <p className="text-gray-500">
                        Aguardando a administração alocar um prestador para este chamado.
                      </p>
+                     <div className="mt-4">
+                       <button className="px-6 py-3 bg-[#1F45FF] text-white rounded-lg font-afacad font-semibold hover:bg-[#1F45FF]/90 transition-colors shadow-md" onClick={() => setAbrirVinculo(true)}>
+                         Vincular prestador
+                       </button>
+                     </div>
                    </div>
                  )}
                </div>

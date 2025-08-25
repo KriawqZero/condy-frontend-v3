@@ -88,16 +88,22 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
 
   function getPropostaStatusBadge(status: string) {
     switch (status) {
-      case "ACEITA":
+      case "PROPOSTA_ACEITA":
         return (
           <Badge className="bg-green-50 text-green-600 border-green-200">
             Aceita
           </Badge>
         );
-      case "RECUSADA":
+      case "PROPOSTA_RECUSADA":
         return (
           <Badge className="bg-red-50 text-red-600 border-red-200">
             Recusada
+          </Badge>
+        );
+      case "CONTRAPROPOSTA_ENVIADA":
+        return (
+          <Badge className="bg-yellow-50 text-yellow-600 border-yellow-200">
+            Contraproposta
           </Badge>
         );
       default:

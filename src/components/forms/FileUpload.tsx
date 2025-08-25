@@ -51,7 +51,7 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
 
         clearInterval(progressInterval);
 
-        if (!response.success) {
+        if (!response.success || !response.data) {
           throw new Error(response.error || "Erro ao enviar anexo");
         }
 
@@ -204,15 +204,15 @@ export function FileUpload({ onFilesUploaded, anexos }: FileUploadProps) {
         <div key={anexo.id} className="bg-blue-100 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {anexo.url.endsWith(".mp4") ? (
+              {typeof anexo.url === "string" && anexo.url.toLowerCase().endsWith(".mp4") ? (
                 <video
-                  src={anexo.url}
+                  src={anexo.url || ""}
                   className="w-20 h-20 object-cover rounded"
                   controls
                 />
               ) : (
                 <img
-                  src={anexo.url}
+                  src={anexo.url || ""}
                   alt={anexo.title}
                   className="w-20 h-20 object-cover rounded"
                 />

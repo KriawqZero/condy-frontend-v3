@@ -1,6 +1,6 @@
 "use client";
 
-import { getAdminChamadosAction, getSystemStatsAction } from "@/app/actions/admin";
+import { getAdminChamadosAction, getSystemStatsAction, adminListPrestadoresAction, adminEnviarPropostasAction, adminListPropostasPorChamadoAction, adminDecidirContrapropostaAction } from "@/app/actions/admin";
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { EmptyStateIllustration } from "@/components/icons/EmptyStateIllustration";
 import { NoteIcon } from "@/components/icons/NoteIcon";
@@ -149,6 +149,14 @@ export default function AdminDashboard({ _user }: { _user: User }) {
   });
   const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null);
   const [editingChamado, setEditingChamado] = useState<Chamado | null>(null);
+  const [abrirProposta, setAbrirProposta] = useState<Chamado | null>(null);
+  const [prestadores, setPrestadores] = useState<any[]>([]);
+  const [prestadoresSelecionados, setPrestadoresSelecionados] = useState<string[]>([]);
+  const [precoMin, setPrecoMin] = useState<string>("");
+  const [precoMax, setPrecoMax] = useState<string>("");
+  const [prazo, setPrazo] = useState<string>("");
+  const [enviando, setEnviando] = useState(false);
+  const [propostasChamado, setPropostasChamado] = useState<any[]>([]);
 
   function formatarValor(valor: unknown, moeda: boolean = true): string {
     const numero = Number(valor);
@@ -381,6 +389,9 @@ export default function AdminDashboard({ _user }: { _user: User }) {
                                 <ChevronRightIcon />
                               </div>
                             </div>
+                            <div className="mt-2 flex gap-2">
+                              <Button className="bg-[#1F45FF] text-white" onClick={(e)=>{ e.stopPropagation(); setAbrirProposta(chamado); (async()=>{ const list = await adminListPrestadoresAction(); setPrestadores(Array.isArray(list.data) ? list.data : []); const prop = await adminListPropostasPorChamadoAction(Number(chamado.id)); setPropostasChamado(Array.isArray(prop.data) ? prop.data : []); })(); }}>Fazer proposta a prestador</Button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -425,6 +436,86 @@ export default function AdminDashboard({ _user }: { _user: User }) {
           onClose={() => setEditingChamado(null)}
           onUpdated={fetchData}
         />
+      )}
+
+      {abrirProposta && (
+        <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center" onClick={()=>setAbrirProposta(null)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl" onClick={(e)=>e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="font-afacad text-xl font-bold">Fazer proposta a prestador</div>
+              <button onClick={()=>setAbrirProposta(null)} className="text-gray-500 hover:text-gray-700">Fechar</button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="block text-sm font-afacad font-bold text-black mb-2">Selecione prestadores</label>
+                <div className="max-h-48 overflow-auto border rounded-lg p-2">
+                  {(Array.isArray(prestadores) ? prestadores : []).map((p)=> (
+                    <label key={p.id} className="flex items-center gap-2 py-1">
+                      <input type="checkbox" checked={prestadoresSelecionados.includes(p.id)} onChange={(e)=>{
+                        setPrestadoresSelecionados((prev)=> e.target.checked ? [...prev, p.id] : prev.filter(id=>id!==p.id));
+                      }} />
+                      <span className="text-sm">{p.nomeFantasia || p.name} — {p.cpfCnpj}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-afacad font-bold text-black mb-2">Preço sugerido (mínimo)</label>
+                <input className="w-full border rounded-lg px-3 py-2" value={precoMin} onChange={(e)=>setPrecoMin(e.target.value)} placeholder="Opcional" />
+              </div>
+              <div>
+                <label className="block text-sm font-afacad font-bold text-black mb-2">Preço sugerido (máximo)</label>
+                <input className="w-full border rounded-lg px-3 py-2" value={precoMax} onChange={(e)=>setPrecoMax(e.target.value)} placeholder="Opcional" />
+              </div>
+              <div>
+                <label className="block text-sm font-afacad font-bold text-black mb-2">Prazo (dias)</label>
+                <input className="w-full border rounded-lg px-3 py-2" value={prazo} onChange={(e)=>setPrazo(e.target.value)} placeholder="Opcional" />
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <Button className="bg-gray-200 text-black" onClick={()=>setAbrirProposta(null)}>Cancelar</Button>
+              <Button className="bg-[#1F45FF] text-white" disabled={enviando || prestadoresSelecionados.length===0} onClick={async ()=>{
+                try {
+                  setEnviando(true);
+                  await adminEnviarPropostasAction({ chamadoId: Number(abrirProposta.id), prestadores: prestadoresSelecionados, precoMin: precoMin || undefined, precoMax: precoMax || undefined, prazo: prazo ? Number(prazo) : undefined });
+                  const prop = await adminListPropostasPorChamadoAction(Number(abrirProposta.id));
+                  setPropostasChamado(prop.data || []);
+                  setPrestadoresSelecionados([]);
+                } finally {
+                  setEnviando(false);
+                }
+              }}>Enviar propostas</Button>
+            </div>
+
+            {propostasChamado.length > 0 && (
+              <div className="mt-6">
+                <div className="font-afacad text-lg font-bold mb-2">Propostas deste chamado</div>
+                <div className="space-y-2 max-h-64 overflow-auto">
+                  {propostasChamado.map((p)=> (
+                    <div key={p.id} className="border rounded-lg p-3 flex items-center justify-between">
+                      <div className="text-sm">
+                        <div><span className="font-bold">Prestador:</span> {p.prestador?.nomeFantasia || p.prestador?.name}</div>
+                        <div><span className="font-bold">Status:</span> {p.status}</div>
+                        <div><span className="font-bold">Sugestão:</span> {p.precoSugeridoMin || '-'} ~ {p.precoSugeridoMax || '-'}</div>
+                        {p.contrapropostaPrecoMin || p.contrapropostaPrecoMax ? (
+                          <div><span className="font-bold">Contraproposta:</span> {p.contrapropostaPrecoMin || '-'} ~ {p.contrapropostaPrecoMax || '-'} | Prazo: {p.contrapropostaPrazo || '-'}</div>
+                        ) : null}
+                      </div>
+                      {p.status === 'CONTRAPROPOSTA_ENVIADA' && (
+                        <div className="flex gap-2">
+                          <Button className="bg-green-600 text-white" onClick={async ()=>{ await adminDecidirContrapropostaAction(p.id, 'aprovar'); const prop = await adminListPropostasPorChamadoAction(Number(abrirProposta.id)); setPropostasChamado(prop.data || []); fetchData(); }}>Aprovar</Button>
+                          <Button className="bg-red-600 text-white" onClick={async ()=>{ await adminDecidirContrapropostaAction(p.id, 'recusar'); const prop = await adminListPropostasPorChamadoAction(Number(abrirProposta.id)); setPropostasChamado(prop.data || []); }}>Recusar</Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* WhatsApp Float Button */}

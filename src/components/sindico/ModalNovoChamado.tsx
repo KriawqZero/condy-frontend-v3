@@ -56,7 +56,6 @@ export function ModalNovoChamado({
     { numero: "01", ativo: etapa >= 1 },
     { numero: "02", ativo: etapa >= 2 },
     { numero: "03", ativo: etapa >= 3 },
-    { numero: "04", ativo: etapa >= 4 },
   ];
 
   const opcoesImovel = imoveis.map((imovel) => ({
@@ -84,7 +83,7 @@ export function ModalNovoChamado({
   );
 
   const handleAvancar = async () => {
-    if (etapa < 4) {
+    if (etapa < 3) {
       setEtapa(etapa + 1);
     } else {
       await handleEnviarChamado();
@@ -105,7 +104,13 @@ export function ModalNovoChamado({
       }
 
       // Verificar anexos pendentes no cliente (antes da server action)
-      const anexosPendentes = getAnexosPendentes();
+      const anexosPendentesRaw = getAnexosPendentes();
+      const anexosPendentes = anexosPendentesRaw.filter(
+        (id) => typeof id === 'number' && Number.isFinite(id) && id > 0,
+      );
+      if (anexosPendentes.length !== anexosPendentesRaw.length) {
+        console.warn('⚠️ IDs de anexo inválidos foram ignorados:', anexosPendentesRaw);
+      }
       console.log("🔍 Cliente - Anexos pendentes encontrados:", anexosPendentes);
 
       const chamadoData: NovoChamadoData = {
@@ -132,9 +137,9 @@ export function ModalNovoChamado({
         try {
           // Associar todos os anexos pendentes ao chamado criado
           const resultadosAssociacao = await Promise.allSettled(
-            anexosPendentes.map(anexoId => 
-              updateAnexoChamadoIdClient(anexoId, Number(chamadoResponse.data?.id))
-            )
+            anexosPendentes.map((anexoId) =>
+              updateAnexoChamadoIdClient(anexoId, Number(chamadoResponse.data?.id)),
+            ),
           );
           
           const sucessos = resultadosAssociacao.filter(result => result.status === 'fulfilled').length;
@@ -293,30 +298,12 @@ export function ModalNovoChamado({
             </div>
           )}
 
+          {/* Etapa 2 removida conforme solicitação */}
+
           {etapa === 2 && (
             <div>
               <h3 className="text-lg font-bold font-afacad text-black mb-2">
-                2ª Etapa: Informações adicionais
-              </h3>
-              <p className="text-sm text-gray-600 mb-6">
-                Informe o nível de urgência e se deseja apenas um orçamento ou
-                execução imediata do serviço
-              </p>
-
-              <div className="text-center py-12">
-                <Building size={48} className="mx-auto text-[#1F45FF] mb-4" />
-                <p className="text-gray-500">
-                  Esta etapa será expandida em futuras versões para incluir mais
-                  informações específicas do condomínio.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {etapa === 3 && (
-            <div>
-              <h3 className="text-lg font-bold font-afacad text-black mb-2">
-                3ª Etapa: Descrevendo o problema
+                2ª Etapa: Descrevendo o problema
               </h3>
               <p className="text-sm text-gray-600 mb-6">
                 Infoque o nível de urgência e se deseja apenas um orçamento ou
@@ -340,10 +327,10 @@ export function ModalNovoChamado({
             </div>
           )}
 
-          {etapa === 4 && (
+          {etapa === 3 && (
             <div>
               <h3 className="text-lg font-bold font-afacad text-black mb-2">
-                4ª Etapa: Prioridade e escopo
+                3ª Etapa: Prioridade e escopo
               </h3>
               <p className="text-sm text-gray-600 mb-6">
                 Infoque o nível de urgência e se deseja apenas um orçamento ou
@@ -392,7 +379,7 @@ export function ModalNovoChamado({
           >
             {loading
               ? "Processando..."
-              : etapa < 4
+              : etapa < 3
               ? "Avançar"
               : "Enviar chamado"}
           </button>

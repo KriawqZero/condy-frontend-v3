@@ -4,7 +4,8 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Chamado } from "@/types";
-import { updateChamadoAdminAction } from "@/app/actions/admin";
+import { updateChamado } from "@/lib/api";
+import axios from "axios";
 
 interface ModalAtualizarChamadoProps {
   chamado: Chamado;
@@ -29,13 +30,14 @@ export function ModalAtualizarChamado({ chamado, onClose, onUpdated }: ModalAtua
       observacoesInternas: formData.get("observacoesInternas") as string,
     };
 
-    const response = await updateChamadoAdminAction(chamado.id, updateData);
-    setLoading(false);
-    if (response.success) {
+    try {
+      await updateChamado(chamado.id, updateData);
+      setLoading(false);
       onUpdated?.();
       onClose();
-    } else {
-      alert("Erro ao atualizar chamado: " + response.error);
+    } catch (e: any) {
+      setLoading(false);
+      alert("Erro ao atualizar chamado: " + (e.response?.data?.message || e.message));
     }
   };
 
