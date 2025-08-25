@@ -2,7 +2,7 @@ import { createChamadoAction } from "@/app/actions/chamados";
 import { getImoveisAction } from "@/app/actions/imoveis";
 import { debugAnexosPendentes, getAnexosPendentes, limparAnexosPendentes, updateAnexoChamadoIdClient } from "@/lib/api";
 import { Anexo, Imovel, NovoChamadoData } from "@/types";
-import { Building, MapPin, Plus, X } from "lucide-react";
+import { MapPin, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CondySelect } from "../forms/CondySelect";
 import { FileUpload } from "../forms/FileUpload";

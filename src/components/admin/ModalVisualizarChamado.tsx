@@ -5,7 +5,7 @@ import { X, User, FileText, Download, ZoomIn } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useState } from "react";
 import { useEffect } from "react";
-import { adminAssignPrestadorAction, adminListPrestadoresAction } from "@/app/actions/admin";
+import { adminListPrestadoresAction } from "@/app/actions/admin";
 
 interface ModalVisualizarChamadoProps {
   chamado: Chamado;
@@ -85,12 +85,11 @@ export function ModalVisualizarChamado({
   const [abaAtiva, setAbaAtiva] = useState("geral");
   const [imagemAmpliada, setImagemAmpliada] = useState<string | null>(null);
   const [abrirVinculo, setAbrirVinculo] = useState(false);
-  const [prestadores, setPrestadores] = useState<any[]>([]);
-  const [prestadorId, setPrestadorId] = useState<string>("");
+  const [_prestadores, _setPrestadores] = useState<any[]>([]);
 
   useEffect(() => {
     if (abrirVinculo) {
-      adminListPrestadoresAction().then((r: any) => setPrestadores(r.data || []));
+      adminListPrestadoresAction().then((r: any) => _setPrestadores(r.data || []));
     }
   }, [abrirVinculo]);
 

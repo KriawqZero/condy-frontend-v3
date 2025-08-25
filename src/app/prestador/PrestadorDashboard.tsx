@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { apiGetPrestadorDashboard } from "@/app/actions/prestador";
 import { apiPrestadorListOrdens } from "@/app/actions/ordens";
 import { apiPrestadorListPropostas } from "@/app/actions/propostas";
+import { ModalProposta } from "@/components/prestador/ModalProposta";
 
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { EmptyStateIllustration } from "@/components/icons/EmptyStateIllustration";
@@ -36,6 +37,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
   const [ordens, setOrdens] = useState<any[]>([]);
   const [propostas, setPropostas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProposta, setSelectedProposta] = useState<any | null>(null);
   const router = useRouter();
 
   function formatarValor(valor: unknown, moeda: boolean = true): string {
@@ -133,10 +135,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
         if (ord.success) {
           setOrdens(ord.data.items || []);
         }
-        const prop = await apiPrestadorListPropostas();
-        if (prop.success) {
-          setPropostas(prop.data || []);
-        }
+        await loadPropostas();
       } catch (err) {
         console.error(err);
       }
@@ -144,6 +143,13 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
     }
     fetchData();
   }, []);
+
+  async function loadPropostas() {
+    const prop = await apiPrestadorListPropostas();
+    if (prop.success) {
+      setPropostas(prop.data || []);
+    }
+  }
 
   return (
     <div className="relative pb-20 mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
@@ -335,7 +341,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
                         <div
                           key={p.id}
                           className="px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[700px]"
-                          onClick={() => router.push("/prestador/propostas")}
+                          onClick={() => setSelectedProposta(p)}
                         >
                           <div className="grid grid-cols-4 gap-4 items-center">
                             <div className="font-afacad text-sm font-bold text-black">
@@ -375,6 +381,14 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
             )}
           </div>
         </div>
+      )}
+
+      {selectedProposta && (
+        <ModalProposta
+          proposta={selectedProposta}
+          onClose={() => setSelectedProposta(null)}
+          onUpdated={loadPropostas}
+        />
       )}
 
       {/* WhatsApp Float Button */}

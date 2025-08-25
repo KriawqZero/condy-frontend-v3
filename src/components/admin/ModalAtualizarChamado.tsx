@@ -5,7 +5,6 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Chamado } from "@/types";
 import { updateChamado } from "@/lib/api";
-import axios from "axios";
 
 interface ModalAtualizarChamadoProps {
   chamado: Chamado;

@@ -3,11 +3,13 @@
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useEffect, useState } from "react";
-import { apiPrestadorListPropostas, apiPrestadorAceitarProposta, apiPrestadorRecusarProposta, apiPrestadorContraproposta } from "../../actions/propostas";
+import { apiPrestadorListPropostas } from "../../actions/propostas";
+import { ModalProposta } from "@/components/prestador/ModalProposta";
 
 export default function PropostasPage() {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<any[]>([]);
+  const [selected, setSelected] = useState<any | null>(null);
 
   async function load() {
     setLoading(true);
@@ -20,23 +22,6 @@ export default function PropostasPage() {
     load();
   }, []);
 
-  async function aceitar(id: number) {
-    const r = await apiPrestadorAceitarProposta(id);
-    if (r.success) await load();
-  }
-  async function recusar(id: number) {
-    const motivo = prompt("Motivo da recusa?") || "";
-    const r = await apiPrestadorRecusarProposta(id, motivo);
-    if (r.success) await load();
-  }
-  async function contraproposta(id: number) {
-    const precoMin = prompt("Preço mínimo (opcional)") || undefined;
-    const precoMax = prompt("Preço máximo (opcional)") || undefined;
-    const prazo = prompt("Prazo em dias (opcional)");
-    const justificativa = prompt("Justificativa") || "";
-    const r = await apiPrestadorContraproposta(id, { precoMin, precoMax, prazo: prazo ? Number(prazo) : undefined, justificativa });
-    if (r.success) await load();
-  }
 
   return (
     <div className="relative pb-20 mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
@@ -57,11 +42,7 @@ export default function PropostasPage() {
                       <div className="text-sm text-[#7F98BC]">{p.chamado?.imovel?.endereco}</div>
                       <div className="text-sm">Status: {p.status}</div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button onClick={() => aceitar(p.id)} className="bg-green-600 text-white">Aceitar</Button>
-                      <Button onClick={() => recusar(p.id)} className="bg-red-600 text-white">Recusar</Button>
-                      <Button onClick={() => contraproposta(p.id)} className="bg-yellow-600 text-white">Contrapropor</Button>
-                    </div>
+                    <Button onClick={() => setSelected(p)} className="bg-blue-600 text-white">Ver detalhes</Button>
                   </div>
                 </Card>
               ))}
@@ -69,6 +50,13 @@ export default function PropostasPage() {
           )}
         </div>
       </div>
+      {selected && (
+        <ModalProposta
+          proposta={selected}
+          onClose={() => setSelected(null)}
+          onUpdated={load}
+        />
+      )}
     </div>
   );
 }
