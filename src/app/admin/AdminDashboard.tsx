@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chamado, User } from "@/types";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { ModalVisualizarChamado } from "@/components/admin/ModalVisualizarChamado";
+import { ModalAtualizarChamado } from "@/components/admin/ModalAtualizarChamado";
 
 function getStatusBadge(status: Chamado["status"]) {
   switch (status) {
@@ -146,7 +147,8 @@ export default function AdminDashboard({ _user }: { _user: User }) {
     totalCondominios: 0,
     mediaTempoResolucao: 0
   });
-  const router = useRouter();
+  const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null);
+  const [editingChamado, setEditingChamado] = useState<Chamado | null>(null);
 
   function formatarValor(valor: unknown, moeda: boolean = true): string {
     const numero = Number(valor);
@@ -170,36 +172,37 @@ export default function AdminDashboard({ _user }: { _user: User }) {
     return new Intl.NumberFormat("pt-BR", options).format(numero);
   }
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoadingChamados(true);
-      
-      try {
-        // Buscar chamados
-        const chamadosResponse = await getAdminChamadosAction();
-        if (chamadosResponse.success && chamadosResponse.data) {
-          setChamados(chamadosResponse.data);
-        }
+  const fetchData = async () => {
+    setLoadingChamados(true);
 
-        // Buscar estatísticas
-        const statsResponse = await getSystemStatsAction();
-        if (statsResponse.success && statsResponse.data) {
-          setStats({
-            totalChamados: statsResponse.data.totalChamados,
-            chamadosPendentes: statsResponse.data.chamadosPendentes,
-            totalCondominios: statsResponse.data.totalCondominios,
-            mediaTempoResolucao: statsResponse.data.mediaTempoResolucao
-          });
-        }
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
+    try {
+      // Buscar chamados
+      const chamadosResponse = await getAdminChamadosAction();
+      if (chamadosResponse.success && chamadosResponse.data) {
+        setChamados(chamadosResponse.data);
       }
-      
-      setLoadingChamados(false);
+
+      // Buscar estatísticas
+      const statsResponse = await getSystemStatsAction();
+      if (statsResponse.success && statsResponse.data) {
+        setStats({
+          totalChamados: statsResponse.data.totalChamados,
+          chamadosPendentes: statsResponse.data.chamadosPendentes,
+          totalCondominios: statsResponse.data.totalCondominios,
+          mediaTempoResolucao: statsResponse.data.mediaTempoResolucao
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
     }
 
+    setLoadingChamados(false);
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
+
 
   
 
@@ -292,17 +295,16 @@ export default function AdminDashboard({ _user }: { _user: User }) {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
               <div>
                 <h2 className="font-afacad text-3xl font-bold text-black mb-1">
-                  Gerenciar Chamados
+                  Lista de chamados
                 </h2>
                 <p className="font-afacad text-base text-black">
-                  Administre todos os chamados do sistema com acesso completo
+                  Acompanhe as últimas atualizações na plataforma
                 </p>
               </div>
               <Button
                 className="bg-[#1F45FF] hover:bg-[#1F45FF]/90 text-white font-afacad font-bold text-base px-8 py-3 h-12 rounded-xl shadow-lg"
-                onClick={() => router.push('/admin/chamados')}
               >
-                Ver todos os chamados
+                Exportar dados
               </Button>
             </div>
 
@@ -327,11 +329,11 @@ export default function AdminDashboard({ _user }: { _user: User }) {
 
                     {/* Table Body */}
                     <div className="divide-y divide-[#EFF0FF]">
-                      {chamados.slice(0, 10).map((chamado) => (
+                      {chamados.map((chamado) => (
                         <div
                           key={chamado.id}
                           className="px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[800px]"
-                          onClick={() => router.push('/admin/chamados')}
+                          onClick={() => setSelectedChamado(chamado)}
                         >
                           <div className="grid grid-cols-8 gap-4 items-center">
                             <div className="font-afacad text-sm font-bold text-black">
@@ -373,7 +375,7 @@ export default function AdminDashboard({ _user }: { _user: User }) {
                             </div>
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-blue-600 font-medium">
-                                EDITAR
+                                GERENCIAR
                               </span>
                               <div className="w-6 h-6 rounded-full bg-[#F5F7FF] flex items-center justify-center ml-2">
                                 <ChevronRightIcon />
@@ -404,6 +406,25 @@ export default function AdminDashboard({ _user }: { _user: User }) {
             ) : null}
           </div>
         </div>
+      )}
+
+      {selectedChamado && (
+        <ModalVisualizarChamado
+          chamado={selectedChamado}
+          onClose={() => setSelectedChamado(null)}
+          onUpdate={() => {
+            setEditingChamado(selectedChamado);
+            setSelectedChamado(null);
+          }}
+        />
+      )}
+
+      {editingChamado && (
+        <ModalAtualizarChamado
+          chamado={editingChamado}
+          onClose={() => setEditingChamado(null)}
+          onUpdated={fetchData}
+        />
       )}
 
       {/* WhatsApp Float Button */}
