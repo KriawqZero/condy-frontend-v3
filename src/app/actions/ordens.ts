@@ -15,7 +15,10 @@ export async function apiPrestadorListOrdens(page: number = 1, limit: number = 1
       headers: { Authorization: `Bearer ${session.token}` },
       params: { page, limit },
     });
-    return { success: true, data: res.data };
+    const raw = res.data;
+    // Backend retorna { items, meta } direto
+    const data = raw?.data ? raw.data : raw;
+    return { success: true, data };
   } catch (e: any) {
     return { success: false, error: e.response?.data?.message || e.message };
   }

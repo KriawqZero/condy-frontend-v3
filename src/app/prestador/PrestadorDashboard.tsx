@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { apiGetPrestadorDashboard } from "@/app/actions/prestador";
 import { apiPrestadorListOrdens } from "@/app/actions/ordens";
-import { apiPrestadorListPropostas } from "@/app/actions/propostas";
+import { apiPrestadorListPropostas, apiPrestadorAceitarProposta, apiPrestadorRecusarProposta, apiPrestadorContraproposta } from "@/app/actions/propostas";
 
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { EmptyStateIllustration } from "@/components/icons/EmptyStateIllustration";
@@ -36,6 +36,13 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
   const [ordens, setOrdens] = useState<any[]>([]);
   const [propostas, setPropostas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [propostaSelecionada, setPropostaSelecionada] = useState<any|null>(null);
+  const [mostrarContra, setMostrarContra] = useState(false);
+  const [contraMin, setContraMin] = useState("");
+  const [contraMax, setContraMax] = useState("");
+  const [contraPrazo, setContraPrazo] = useState("");
+  const [contraJust, setContraJust] = useState("");
+  const [salvando, setSalvando] = useState(false);
   const router = useRouter();
 
   function formatarValor(valor: unknown, moeda: boolean = true): string {
@@ -115,34 +122,44 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
     }
   }
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        const dash = await apiGetPrestadorDashboard();
-        if (dash.success && dash.data) {
-          setStats({
-            receitaMensal: dash.data.receitaMensal || 0,
-            chamadosNoMes: dash.data.chamadosNoMes || 0,
-            custoMensal: dash.data.custoMensal || 0,
-            receitaTotal:
-              dash.data.receitaTotal ?? dash.data.lucroMensal ?? 0,
-          });
-        }
-        const ord = await apiPrestadorListOrdens();
-        if (ord.success) {
-          setOrdens(ord.data.items || []);
-        }
-        const prop = await apiPrestadorListPropostas();
-        if (prop.success) {
-          setPropostas(prop.data || []);
-        }
-      } catch (err) {
-        console.error(err);
+  function formatarEndereco(imovel?: any) {
+    if (!imovel) return "N/A";
+    const parts = [imovel.endereco, imovel.numero, imovel.bairro, imovel.cidade, imovel.uf].filter(Boolean);
+    return parts.join(", ");
+  }
+
+  async function carregarPainel() {
+    setLoading(true);
+    try {
+      const dash = await apiGetPrestadorDashboard();
+      if (dash.success && dash.data) {
+        setStats({
+          receitaMensal: dash.data.receitaMensal || 0,
+          chamadosNoMes: dash.data.chamadosNoMes || 0,
+          custoMensal: dash.data.custoMensal || 0,
+          receitaTotal: dash.data.receitaTotal ?? dash.data.lucroMensal ?? 0,
+        });
       }
-      setLoading(false);
+      await carregarOrdens();
+      await carregarPropostas();
+    } catch (err) {
+      console.error(err);
     }
-    fetchData();
+    setLoading(false);
+  }
+
+  async function carregarOrdens() {
+    const ord = await apiPrestadorListOrdens();
+    if (ord.success) setOrdens(ord.data.items || []);
+  }
+
+  async function carregarPropostas() {
+    const prop = await apiPrestadorListPropostas();
+    if (prop.success) setPropostas(prop.data || []);
+  }
+
+  useEffect(() => {
+    carregarPainel();
   }, []);
 
   return (
@@ -269,7 +286,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
                               {ordem.chamado?.numeroChamado}
                             </div>
                             <div className="font-afacad text-sm font-bold text-black">
-                              {ordem.chamado?.imovel?.nome || ordem.chamado?.imovel?.endereco || "N/A"}
+                              {formatarEndereco(ordem.chamado?.imovel)}
                             </div>
                             <div className="font-afacad text-sm font-bold text-black">
                               {formatarValor(ordem.chamado?.valorEstimado)}
@@ -318,7 +335,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
               </div>
             </div>
 
-            {propostas.length > 0 ? (
+            {propostas.filter(p => !['PROPOSTA_ACEITA','CONTRAPROPOSTA_APROVADA'].includes(p.status)).length > 0 ? (
               <div className="bg-white rounded-2xl shadow-sm w-full">
                 <div className="overflow-x-auto w-full">
                   <div className="min-w-[700px]">
@@ -331,18 +348,18 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
                       </div>
                     </div>
                     <div className="divide-y divide-[#EFF0FF]">
-                      {propostas.slice(0, 5).map((p) => (
+                      {propostas.filter(p => !['PROPOSTA_ACEITA','CONTRAPROPOSTA_APROVADA'].includes(p.status)).slice(0, 5).map((p) => (
                         <div
                           key={p.id}
                           className="px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[700px]"
-                          onClick={() => router.push("/prestador/propostas")}
+                          onClick={(e) => { e.stopPropagation(); setPropostaSelecionada(p); setMostrarContra(false); setContraMin(""); setContraMax(""); setContraPrazo(""); setContraJust(""); }}
                         >
                           <div className="grid grid-cols-4 gap-4 items-center">
                             <div className="font-afacad text-sm font-bold text-black">
                               {p.chamado?.numeroChamado}
                             </div>
                             <div className="font-afacad text-sm font-bold text-black">
-                              {p.chamado?.imovel?.nome || p.chamado?.imovel?.endereco || "N/A"}
+                              {formatarEndereco(p.chamado?.imovel)}
                             </div>
                             <div>{getPropostaStatusBadge(p.status)}</div>
                             <div className="flex items-center justify-between">
@@ -383,6 +400,78 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
           <WhatsappIcon />
         </button>
       </div>
+
+      {/* Modal Detalhes Proposta */}
+      {propostaSelecionada && !mostrarContra && (
+        <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center" onClick={()=>setPropostaSelecionada(null)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl" onClick={(e)=>e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="font-afacad text-2xl font-bold">Detalhes da proposta</div>
+              <button className="text-gray-500 hover:text-gray-700" onClick={()=>setPropostaSelecionada(null)}>Fechar</button>
+            </div>
+            <div className="space-y-3 text-sm">
+              <div>
+                <div className="font-bold">Chamado</div>
+                <div>#{propostaSelecionada.chamado?.numeroChamado}</div>
+              </div>
+              <div>
+                <div className="font-bold">Endereço de atendimento</div>
+                <div>{formatarEndereco(propostaSelecionada.chamado?.imovel)}</div>
+              </div>
+              <div>
+                <div className="font-bold">Faixa sugerida pelo admin</div>
+                <div>
+                  {propostaSelecionada.precoSugeridoMin || '-'} ~ {propostaSelecionada.precoSugeridoMax || '-'} | Prazo: {propostaSelecionada.prazoSugerido || '-'}
+                </div>
+              </div>
+              {propostaSelecionada.contrapropostaPrecoMin || propostaSelecionada.contrapropostaPrecoMax ? (
+                <div>
+                  <div className="font-bold">Sua contraproposta</div>
+                  <div>
+                    {propostaSelecionada.contrapropostaPrecoMin || '-'} ~ {propostaSelecionada.contrapropostaPrecoMax || '-'} | Prazo: {propostaSelecionada.contrapropostaPrazo || '-'}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <Button className="bg-red-600 text-white" onClick={async ()=>{ const j = prompt('Motivo da recusa (opcional)') || ''; setSalvando(true); try { await apiPrestadorRecusarProposta(propostaSelecionada.id, j); await carregarPropostas(); } finally { setSalvando(false); setPropostaSelecionada(null); } }}>Recusar</Button>
+              <Button className="bg-yellow-600 text-white" onClick={()=> setMostrarContra(true)}>Fazer contraproposta</Button>
+              <Button className="bg-green-600 text-white" disabled={salvando} onClick={async ()=>{ setSalvando(true); try { await apiPrestadorAceitarProposta(propostaSelecionada.id); await carregarPropostas(); await carregarOrdens(); } finally { setSalvando(false); setPropostaSelecionada(null); } }}>Aceitar proposta</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Contraproposta */}
+      {propostaSelecionada && mostrarContra && (
+        <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center" onClick={()=>setMostrarContra(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg" onClick={(e)=>e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="font-afacad text-xl font-bold">Fazer contraproposta</div>
+              <button className="text-gray-500 hover:text-gray-700" onClick={()=>setMostrarContra(false)}>Fechar</button>
+            </div>
+            <div className="space-y-3">
+              <div className="text-sm text-[#1F45FF]">Faixa sugerida: {propostaSelecionada.precoSugeridoMin || '-'} ~ {propostaSelecionada.precoSugeridoMax || '-'}</div>
+              <div>
+                <label className="block text-sm font-afacad font-bold text-black mb-1">Meu valor proposto</label>
+                <input className="w-full border rounded-lg px-3 py-2" value={contraMax} onChange={(e)=>setContraMax(e.target.value)} placeholder="Ex.: 3200,00" />
+              </div>
+              <div>
+                <label className="block text-sm font-afacad font-bold text-black mb-1">Prazo (dias)</label>
+                <input className="w-full border rounded-lg px-3 py-2" value={contraPrazo} onChange={(e)=>setContraPrazo(e.target.value)} placeholder="Ex.: 3" />
+              </div>
+              <div>
+                <label className="block text-sm font-afacad font-bold text-black mb-1">Observações (opcional)</label>
+                <textarea className="w-full border rounded-lg px-3 py-2" rows={3} value={contraJust} onChange={(e)=>setContraJust(e.target.value)} />
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button className="bg-gray-200 text-black" onClick={()=>setMostrarContra(false)}>Voltar</Button>
+              <Button className="bg-[#1F45FF] text-white" disabled={salvando} onClick={async ()=>{ setSalvando(true); try { await apiPrestadorContraproposta(propostaSelecionada.id, { precoMax: contraMax || undefined, prazo: contraPrazo ? Number(contraPrazo) : undefined, justificativa: contraJust || '' }); await carregarPropostas(); } finally { setSalvando(false); setMostrarContra(false); setPropostaSelecionada(null); } }}>Enviar contraproposta</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
