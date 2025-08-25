@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { User } from "@/types";
 import { useEffect, useState } from "react";
 import { apiGetPrestadorDashboard } from "../actions/prestador";
+import Link from "next/link";
 
 export default function PrestadorDashboard({ user }: { user: User }) {
   const [loading, setLoading] = useState(true);
@@ -58,12 +59,18 @@ export default function PrestadorDashboard({ user }: { user: User }) {
         </div>
 
         <div className="flex gap-4">
-          <Button asChild className="bg-[#1F45FF] text-white">
-            <a href="/prestador/propostas">Propostas de Serviço</a>
-          </Button>
-          <Button asChild className="bg-[#1F45FF] text-white">
-            <a href="/prestador/ordens">Ordens de Serviço</a>
-          </Button>
+          <Link
+            href="/prestador/propostas"
+            className={`${buttonVariants({ variant: "default", size: "default" })} bg-[#1F45FF] text-white`}
+          >
+            Propostas de Serviço
+          </Link>
+          <Link
+            href="/prestador/ordens"
+            className={`${buttonVariants({ variant: "default", size: "default" })} bg-[#1F45FF] text-white`}
+          >
+            Ordens de Serviço
+          </Link>
         </div>
       </div>
     </div>
