@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { apiGetPrestadorDashboard } from "@/app/actions/prestador";
-import { apiPrestadorListOrdens } from "@/app/actions/ordens";
+import {
+  apiPrestadorListOrdens,
+  apiPrestadorAlterarStatus,
+  apiPrestadorCriarOrdemAvulsa,
+} from "@/app/actions/ordens";
 import { apiPrestadorListPropostas, apiPrestadorAceitarProposta, apiPrestadorRecusarProposta, apiPrestadorContraproposta } from "@/app/actions/propostas";
 
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
@@ -16,6 +19,7 @@ import { WhatsappIcon } from "@/components/icons/WhatsappIcon";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import Input from "@/components/ui/Input";
 
 import { User } from "@/types";
 
@@ -38,12 +42,18 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
   const [loading, setLoading] = useState(true);
   const [propostaSelecionada, setPropostaSelecionada] = useState<any|null>(null);
   const [mostrarContra, setMostrarContra] = useState(false);
-  const [contraMin, setContraMin] = useState("");
   const [contraMax, setContraMax] = useState("");
   const [contraPrazo, setContraPrazo] = useState("");
   const [contraJust, setContraJust] = useState("");
   const [salvando, setSalvando] = useState(false);
-  const router = useRouter();
+  const [novaOsOpen, setNovaOsOpen] = useState(false);
+  const [novaDescricao, setNovaDescricao] = useState("");
+  const [novaValor, setNovaValor] = useState("");
+  const [novaPrazo, setNovaPrazo] = useState("");
+  const [salvandoNova, setSalvandoNova] = useState(false);
+  const [statusModal, setStatusModal] = useState<any|null>(null);
+  const [novoStatus, setNovoStatus] = useState("EM_ANDAMENTO");
+  const [salvandoStatus, setSalvandoStatus] = useState(false);
 
   function formatarValor(valor: unknown, moeda: boolean = true): string {
     const numero = Number(valor);
@@ -158,6 +168,38 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
     if (prop.success) setPropostas(prop.data || []);
   }
 
+  async function criarNovaOs() {
+    setSalvandoNova(true);
+    const r = await apiPrestadorCriarOrdemAvulsa({
+      descricao: novaDescricao,
+      valorAcordado: novaValor ? Number(novaValor) : undefined,
+      prazoAcordado: novaPrazo ? Number(novaPrazo) : undefined,
+    });
+    setSalvandoNova(false);
+    if (r.success) {
+      setNovaOsOpen(false);
+      setNovaDescricao("");
+      setNovaValor("");
+      setNovaPrazo("");
+      await carregarOrdens();
+    } else {
+      alert(r.error);
+    }
+  }
+
+  async function atualizarStatus() {
+    if (!statusModal) return;
+    setSalvandoStatus(true);
+    const r = await apiPrestadorAlterarStatus(statusModal.id, novoStatus as any);
+    setSalvandoStatus(false);
+    if (r.success) {
+      setStatusModal(null);
+      await carregarOrdens();
+    } else {
+      alert(r.error);
+    }
+  }
+
   useEffect(() => {
     carregarPainel();
   }, []);
@@ -248,9 +290,9 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
               <div className="flex gap-2">
                 <Button
                   className="bg-[#1F45FF] hover:bg-[#1F45FF]/90 text-white font-afacad font-bold text-base px-6 py-3 h-12 rounded-xl shadow-lg"
-                  onClick={() => router.push("/prestador/ordens")}
+                  onClick={() => setNovaOsOpen(true)}
                 >
-                  Criar nova OS
+                  Nova OS (avulsa)
                 </Button>
                 <Button
                   variant="outline"
@@ -275,11 +317,10 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
                       </div>
                     </div>
                     <div className="divide-y divide-[#EFF0FF]">
-                      {ordens.slice(0, 5).map((ordem) => (
+                      {ordens.map((ordem) => (
                         <div
                           key={ordem.id}
-                          className="px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[800px]"
-                          onClick={() => router.push("/prestador/ordens")}
+                          className="px-6 py-4 hover:bg-gray-50 min-w-[800px]"
                         >
                           <div className="grid grid-cols-5 gap-4 items-center">
                             <div className="font-afacad text-sm font-bold text-black">
@@ -292,13 +333,16 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
                               {formatarValor(ordem.chamado?.valorEstimado)}
                             </div>
                             <div>{getOrdemStatusBadge(ordem.status)}</div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-blue-600 font-medium">
-                                VER
-                              </span>
-                              <div className="w-6 h-6 rounded-full bg-[#F5F7FF] flex items-center justify-center ml-2">
-                                <ChevronRightIcon />
-                              </div>
+                            <div className="flex items-center justify-center">
+                              <Button
+                                className="bg-[#1F45FF] text-white"
+                                onClick={() => {
+                                  setStatusModal(ordem);
+                                  setNovoStatus(ordem.status);
+                                }}
+                              >
+                                Alterar
+                              </Button>
                             </div>
                           </div>
                         </div>
@@ -352,7 +396,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
                         <div
                           key={p.id}
                           className="px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[700px]"
-                          onClick={(e) => { e.stopPropagation(); setPropostaSelecionada(p); setMostrarContra(false); setContraMin(""); setContraMax(""); setContraPrazo(""); setContraJust(""); }}
+                          onClick={(e) => { e.stopPropagation(); setPropostaSelecionada(p); setMostrarContra(false); setContraMax(""); setContraPrazo(""); setContraJust(""); }}
                         >
                           <div className="grid grid-cols-4 gap-4 items-center">
                             <div className="font-afacad text-sm font-bold text-black">
@@ -396,10 +440,77 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
 
       {/* WhatsApp Float Button */}
       <div className="fixed bottom-8 right-8 z-50">
-        <button className="w-16 h-16 bg-[#10A07B] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
-          <WhatsappIcon />
-        </button>
+      <button className="w-16 h-16 bg-[#10A07B] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+        <WhatsappIcon />
+      </button>
       </div>
+
+      {/* Modal Nova OS */}
+      {novaOsOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Nova OS avulsa</h2>
+            <div className="space-y-4">
+              <Input label="Descrição" value={novaDescricao} onChange={(e)=>setNovaDescricao(e.target.value)} required />
+              <Input label="Valor acordado" type="number" value={novaValor} onChange={(e)=>setNovaValor(e.target.value)} />
+              <Input label="Prazo (dias)" type="number" value={novaPrazo} onChange={(e)=>setNovaPrazo(e.target.value)} />
+            </div>
+            <div className="flex flex-col-reverse sm:flex-row gap-2 justify-end mt-6">
+              <Button
+                variant="secondary"
+                onClick={()=>{ setNovaOsOpen(false); setNovaDescricao(''); setNovaValor(''); setNovaPrazo(''); }}
+                className="sm:min-w-[120px]"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={criarNovaOs}
+                disabled={salvandoNova}
+                className="bg-[#1F45FF] text-white sm:min-w-[120px]"
+              >
+                {salvandoNova ? "Salvando..." : "Criar"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Atualizar Status */}
+      {statusModal && (
+        <div className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Atualizar status</h2>
+            <div className="space-y-4">
+              <label className="block text-sm font-bold text-black">Status</label>
+              <select
+                value={novoStatus}
+                onChange={(e)=>setNovoStatus(e.target.value)}
+                className="w-full border-2 border-[#EFF0FF] rounded-xl px-4 py-3 font-afacad"
+              >
+                <option value="EM_ANDAMENTO">Em andamento</option>
+                <option value="CONCLUIDO">Concluído</option>
+                <option value="CANCELADO">Cancelado</option>
+              </select>
+            </div>
+            <div className="flex flex-col-reverse sm:flex-row gap-2 justify-end mt-6">
+              <Button
+                variant="secondary"
+                onClick={()=>setStatusModal(null)}
+                className="sm:min-w-[120px]"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={atualizarStatus}
+                disabled={salvandoStatus}
+                className="bg-[#1F45FF] text-white sm:min-w-[120px]"
+              >
+                {salvandoStatus ? "Salvando..." : "Atualizar"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Detalhes Proposta */}
       {propostaSelecionada && !mostrarContra && (
@@ -419,7 +530,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
                 <div>{formatarEndereco(propostaSelecionada.chamado?.imovel)}</div>
               </div>
               <div>
-                <div className="font-bold">Faixa sugerida pelo admin</div>
+                <div className="font-bold">Faixa sugerida pela Condy</div>
                 <div>
                   {propostaSelecionada.precoSugeridoMin || '-'} ~ {propostaSelecionada.precoSugeridoMax || '-'} | Prazo: {propostaSelecionada.prazoSugerido || '-'}
                 </div>
@@ -436,7 +547,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
             <div className="mt-6 flex justify-end gap-2">
               <Button className="bg-red-600 text-white" onClick={async ()=>{ const j = prompt('Motivo da recusa (opcional)') || ''; setSalvando(true); try { await apiPrestadorRecusarProposta(propostaSelecionada.id, j); await carregarPropostas(); } finally { setSalvando(false); setPropostaSelecionada(null); } }}>Recusar</Button>
               <Button className="bg-yellow-600 text-white" onClick={()=> setMostrarContra(true)}>Fazer contraproposta</Button>
-              <Button className="bg-green-600 text-white" disabled={salvando} onClick={async ()=>{ setSalvando(true); try { await apiPrestadorAceitarProposta(propostaSelecionada.id); await carregarPropostas(); await carregarOrdens(); } finally { setSalvando(false); setPropostaSelecionada(null); } }}>Aceitar proposta</Button>
+              <Button className="bg-green-600 text-white" disabled={salvando} onClick={async ()=>{ const valor = window.prompt('Valor acordado (obrigatório)'); if (!valor) { return; } setSalvando(true); try { await apiPrestadorAceitarProposta(propostaSelecionada.id, valor); await carregarPropostas(); await carregarOrdens(); } finally { setSalvando(false); setPropostaSelecionada(null); } }}>Aceitar proposta</Button>
             </div>
           </div>
         </div>
@@ -455,6 +566,12 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
               <div>
                 <label className="block text-sm font-afacad font-bold text-black mb-1">Meu valor proposto</label>
                 <input className="w-full border rounded-lg px-3 py-2" value={contraMax} onChange={(e)=>setContraMax(e.target.value)} placeholder="Ex.: 3200,00" />
+                {contraMax && propostaSelecionada.precoSugeridoMin && Number(contraMax) < Number(propostaSelecionada.precoSugeridoMin) * 0.5 && (
+                  <div className="text-xs text-red-600 mt-1">Valor abaixo de 50% do mínimo permitido.</div>
+                )}
+                {contraMax && propostaSelecionada.precoSugeridoMax && Number(contraMax) > Number(propostaSelecionada.precoSugeridoMax) && (
+                  <div className="text-xs text-red-600 mt-1">Valor acima do máximo permitido.</div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-afacad font-bold text-black mb-1">Prazo (dias)</label>
@@ -467,7 +584,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
             </div>
             <div className="mt-4 flex justify-end gap-2">
               <Button className="bg-gray-200 text-black" onClick={()=>setMostrarContra(false)}>Voltar</Button>
-              <Button className="bg-[#1F45FF] text-white" disabled={salvando} onClick={async ()=>{ setSalvando(true); try { await apiPrestadorContraproposta(propostaSelecionada.id, { precoMax: contraMax || undefined, prazo: contraPrazo ? Number(contraPrazo) : undefined, justificativa: contraJust || '' }); await carregarPropostas(); } finally { setSalvando(false); setMostrarContra(false); setPropostaSelecionada(null); } }}>Enviar contraproposta</Button>
+              <Button className="bg-[#1F45FF] text-white" disabled={salvando || (contraMax && propostaSelecionada.precoSugeridoMin && Number(contraMax) < Number(propostaSelecionada.precoSugeridoMin) * 0.5) || (contraMax && propostaSelecionada.precoSugeridoMax && Number(contraMax) > Number(propostaSelecionada.precoSugeridoMax))} onClick={async ()=>{ setSalvando(true); try { await apiPrestadorContraproposta(propostaSelecionada.id, { precoMax: contraMax || undefined, prazo: contraPrazo ? Number(contraPrazo) : undefined, justificativa: contraJust || '' }); await carregarPropostas(); } finally { setSalvando(false); setMostrarContra(false); setPropostaSelecionada(null); } }}>Enviar contraproposta</Button>
             </div>
           </div>
         </div>

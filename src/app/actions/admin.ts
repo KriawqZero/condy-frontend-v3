@@ -88,11 +88,11 @@ export async function adminListPropostasPorChamadoAction(chamadoId: number) {
 }
 
 // Admin: decidir contraproposta
-export async function adminDecidirContrapropostaAction(propostaId: number, acao: 'aprovar'|'recusar') {
+export async function adminDecidirContrapropostaAction(propostaId: number, acao: 'aprovar'|'recusar', body?: { valorAcordado?: string }) {
   const session = await getSession();
   const base = process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
   const url = acao === 'aprovar' ? `${base}/admin/propostas/${propostaId}/aprovar-contraproposta` : `${base}/admin/propostas/${propostaId}/recusar-contraproposta`;
-  const res = await axios.post(url, {}, { headers: { Authorization: `Bearer ${session.token}` } });
+  const res = await axios.post(url, body || {}, { headers: { Authorization: `Bearer ${session.token}` } });
   const raw = res.data;
   return { success: true, data: raw?.data ?? raw } as any;
 }

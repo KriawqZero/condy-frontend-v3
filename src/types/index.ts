@@ -137,6 +137,8 @@ export interface Chamado {
   prestadorAssignadoId?: string;
   anexos?: Anexo[];
 
+  prestadorAssignado?: User;
+
   createdAt: Date;
   updatedAt: Date;
 }

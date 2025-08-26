@@ -157,6 +157,7 @@ export default function AdminDashboard({ _user }: { _user: User }) {
   const [prazo, setPrazo] = useState<string>("");
   const [enviando, setEnviando] = useState(false);
   const [propostasChamado, setPropostasChamado] = useState<any[]>([]);
+  const [valorAcordadoAdmin, setValorAcordadoAdmin] = useState<string>("");
 
   function formatarValor(valor: unknown, moeda: boolean = true): string {
     const numero = Number(valor);
@@ -463,10 +464,16 @@ export default function AdminDashboard({ _user }: { _user: User }) {
               <div>
                 <label className="block text-sm font-afacad font-bold text-black mb-2">Preço sugerido (mínimo)</label>
                 <input className="w-full border rounded-lg px-3 py-2" value={precoMin} onChange={(e)=>setPrecoMin(e.target.value)} placeholder="Opcional" />
+                {precoMin && precoMax && Number(precoMin) > Number(precoMax) && (
+                  <div className="text-xs text-red-600 mt-1">Mínimo não pode ser maior que máximo.</div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-afacad font-bold text-black mb-2">Preço sugerido (máximo)</label>
                 <input className="w-full border rounded-lg px-3 py-2" value={precoMax} onChange={(e)=>setPrecoMax(e.target.value)} placeholder="Opcional" />
+                {precoMin && precoMax && Number(precoMin) > Number(precoMax) && (
+                  <div className="text-xs text-red-600 mt-1">Máximo deve ser maior ou igual ao mínimo.</div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-afacad font-bold text-black mb-2">Prazo (dias)</label>
@@ -505,7 +512,8 @@ export default function AdminDashboard({ _user }: { _user: User }) {
                       </div>
                       {p.status === 'CONTRAPROPOSTA_ENVIADA' && (
                         <div className="flex gap-2">
-                          <Button className="bg-green-600 text-white" onClick={async ()=>{ await adminDecidirContrapropostaAction(p.id, 'aprovar'); const prop = await adminListPropostasPorChamadoAction(Number(abrirProposta.id)); setPropostasChamado(prop.data || []); fetchData(); }}>Aprovar</Button>
+                          <input className="border rounded px-2 py-1 text-sm" placeholder="Valor acordado (obrigatório)" value={valorAcordadoAdmin} onChange={(e)=>setValorAcordadoAdmin(e.target.value)} />
+                          <Button className="bg-green-600 text-white" onClick={async ()=>{ if (!valorAcordadoAdmin) { alert('Informe o valor acordado'); return; } await adminDecidirContrapropostaAction(p.id, 'aprovar', /* @ts-ignore */ { valorAcordado: valorAcordadoAdmin }); setValorAcordadoAdmin(""); const prop = await adminListPropostasPorChamadoAction(Number(abrirProposta.id)); setPropostasChamado(prop.data || []); fetchData(); }}>Aprovar</Button>
                           <Button className="bg-red-600 text-white" onClick={async ()=>{ await adminDecidirContrapropostaAction(p.id, 'recusar'); const prop = await adminListPropostasPorChamadoAction(Number(abrirProposta.id)); setPropostasChamado(prop.data || []); }}>Recusar</Button>
                         </div>
                       )}
