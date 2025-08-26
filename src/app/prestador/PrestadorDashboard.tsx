@@ -530,7 +530,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
                 <div>{formatarEndereco(propostaSelecionada.chamado?.imovel)}</div>
               </div>
               <div>
-                <div className="font-bold">Faixa sugerida pelo admin</div>
+                <div className="font-bold">Faixa sugerida pela Condy</div>
                 <div>
                   {propostaSelecionada.precoSugeridoMin || '-'} ~ {propostaSelecionada.precoSugeridoMax || '-'} | Prazo: {propostaSelecionada.prazoSugerido || '-'}
                 </div>
@@ -547,7 +547,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
             <div className="mt-6 flex justify-end gap-2">
               <Button className="bg-red-600 text-white" onClick={async ()=>{ const j = prompt('Motivo da recusa (opcional)') || ''; setSalvando(true); try { await apiPrestadorRecusarProposta(propostaSelecionada.id, j); await carregarPropostas(); } finally { setSalvando(false); setPropostaSelecionada(null); } }}>Recusar</Button>
               <Button className="bg-yellow-600 text-white" onClick={()=> setMostrarContra(true)}>Fazer contraproposta</Button>
-              <Button className="bg-green-600 text-white" disabled={salvando} onClick={async ()=>{ setSalvando(true); try { await apiPrestadorAceitarProposta(propostaSelecionada.id); await carregarPropostas(); await carregarOrdens(); } finally { setSalvando(false); setPropostaSelecionada(null); } }}>Aceitar proposta</Button>
+              <Button className="bg-green-600 text-white" disabled={salvando} onClick={async ()=>{ const valor = window.prompt('Valor acordado (obrigatório)'); if (!valor) { return; } setSalvando(true); try { await apiPrestadorAceitarProposta(propostaSelecionada.id, valor); await carregarPropostas(); await carregarOrdens(); } finally { setSalvando(false); setPropostaSelecionada(null); } }}>Aceitar proposta</Button>
             </div>
           </div>
         </div>
@@ -566,6 +566,12 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
               <div>
                 <label className="block text-sm font-afacad font-bold text-black mb-1">Meu valor proposto</label>
                 <input className="w-full border rounded-lg px-3 py-2" value={contraMax} onChange={(e)=>setContraMax(e.target.value)} placeholder="Ex.: 3200,00" />
+                {contraMax && propostaSelecionada.precoSugeridoMin && Number(contraMax) < Number(propostaSelecionada.precoSugeridoMin) * 0.5 && (
+                  <div className="text-xs text-red-600 mt-1">Valor abaixo de 50% do mínimo permitido.</div>
+                )}
+                {contraMax && propostaSelecionada.precoSugeridoMax && Number(contraMax) > Number(propostaSelecionada.precoSugeridoMax) && (
+                  <div className="text-xs text-red-600 mt-1">Valor acima do máximo permitido.</div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-afacad font-bold text-black mb-1">Prazo (dias)</label>
@@ -578,7 +584,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
             </div>
             <div className="mt-4 flex justify-end gap-2">
               <Button className="bg-gray-200 text-black" onClick={()=>setMostrarContra(false)}>Voltar</Button>
-              <Button className="bg-[#1F45FF] text-white" disabled={salvando} onClick={async ()=>{ setSalvando(true); try { await apiPrestadorContraproposta(propostaSelecionada.id, { precoMax: contraMax || undefined, prazo: contraPrazo ? Number(contraPrazo) : undefined, justificativa: contraJust || '' }); await carregarPropostas(); } finally { setSalvando(false); setMostrarContra(false); setPropostaSelecionada(null); } }}>Enviar contraproposta</Button>
+              <Button className="bg-[#1F45FF] text-white" disabled={salvando || (contraMax && propostaSelecionada.precoSugeridoMin && Number(contraMax) < Number(propostaSelecionada.precoSugeridoMin) * 0.5) || (contraMax && propostaSelecionada.precoSugeridoMax && Number(contraMax) > Number(propostaSelecionada.precoSugeridoMax))} onClick={async ()=>{ setSalvando(true); try { await apiPrestadorContraproposta(propostaSelecionada.id, { precoMax: contraMax || undefined, prazo: contraPrazo ? Number(contraPrazo) : undefined, justificativa: contraJust || '' }); await carregarPropostas(); } finally { setSalvando(false); setMostrarContra(false); setPropostaSelecionada(null); } }}>Enviar contraproposta</Button>
             </div>
           </div>
         </div>

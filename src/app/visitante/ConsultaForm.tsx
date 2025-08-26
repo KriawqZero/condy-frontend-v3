@@ -160,18 +160,19 @@ export default function ConsultaForm() {
           {/* Desktop table */}
           <div className="bg-white rounded-2xl overflow-hidden shadow-sm hidden md:block">
             <div className="bg-white/30 px-6 py-4 border-b border-[#EFF0FF]">
-              <div className="grid grid-cols-6 gap-4 text-sm font-afacad font-bold text-black">
+              <div className="grid grid-cols-7 gap-4 text-sm font-afacad font-bold text-black">
                 <div>Tipo do chamado</div>
                 <div>Descrição</div>
                 <div>Valor estimado</div>
                 <div>Chamado</div>
                 <div>Status do chamado</div>
                 <div>Data de abertura</div>
+                <div>Prestador</div>
               </div>
             </div>
             <div className="divide-y divide-[#EFF0FF]">
               <div className="px-6 py-4">
-                <div className="grid grid-cols-6 gap-4 items-center">
+                <div className="grid grid-cols-7 gap-4 items-center">
                   <div className="font-afacad text-sm font-bold text-black">
                     {chamado.escopo ?? '-'}
                   </div>
@@ -193,6 +194,11 @@ export default function ConsultaForm() {
                   </div>
                   <div className="font-afacad text-sm font-bold text-black">
                     {createdAt ?? '-'}
+                  </div>
+                  <div className="font-afacad text-sm font-bold text-black">
+                    {chamado.prestadorPublico
+                      ? (chamado.prestadorPublico.nomeFantasia || chamado.prestadorPublico.name)
+                      : 'Aguardando alocação'}
                   </div>
                 </div>
               </div>
@@ -238,6 +244,14 @@ export default function ConsultaForm() {
                 <span className="font-afacad text-sm font-bold text-black">Data de abertura</span>
                 <span className="font-afacad text-sm font-bold text-black text-right">
                   {createdAt ?? '-'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-afacad text-sm font-bold text-black">Prestador</span>
+                <span className="font-afacad text-sm font-bold text-black text-right">
+                  {chamado.prestadorPublico
+                    ? (chamado.prestadorPublico.nomeFantasia || chamado.prestadorPublico.name)
+                    : 'Aguardando alocação'}
                 </span>
               </div>
             </div>
