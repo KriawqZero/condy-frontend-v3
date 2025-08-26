@@ -325,8 +325,8 @@ export function ModalVisualizarChamado({
                        <label className="block text-sm font-medium text-gray-600 mb-1">
                          Prestador vinculado:
                        </label>
-                       <p className={`font-medium ${chamado.prestadorId ? 'text-black' : 'text-gray-400'}`}>
-                         {chamado.prestadorId || "Nenhum prestador alocado"}
+                       <p className={`font-medium ${chamado.prestadorAssignado ? 'text-black' : 'text-gray-400'}`}>
+                         {chamado.prestadorAssignado?.name || "Nenhum prestador alocado"}
                        </p>
                      </div>
                      
@@ -505,7 +505,7 @@ export function ModalVisualizarChamado({
                    Informações do prestador
                  </h3>
                  
-                 {chamado.prestadorId ? (
+                 {chamado.prestadorAssignadoId || chamado.prestadorAssignado?.name ? (
                    <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
                      <div className="flex items-center gap-3 mb-4">
                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -513,7 +513,7 @@ export function ModalVisualizarChamado({
                        </div>
                        <div>
                          <h4 className="font-afacad text-lg font-bold text-black">
-                           {chamado.prestadorId}
+                           {chamado.prestadorAssignado?.name}
                          </h4>
                          <p className="text-sm text-blue-600 font-medium">
                            Prestador alocado
@@ -526,7 +526,7 @@ export function ModalVisualizarChamado({
                          <label className="block text-sm font-medium text-gray-600 mb-1">
                            Status:
                          </label>
-                         <p className="text-black font-medium">
+                         <p className="text-gray-900 font-medium">
                            Ativo no chamado
                          </p>
                        </div>
@@ -535,8 +535,8 @@ export function ModalVisualizarChamado({
                          <label className="block text-sm font-medium text-gray-600 mb-1">
                            Contato:
                          </label>
-                         <p className="text-gray-400">
-                           ...
+                         <p className="text-gray-900">
+                           {chamado.prestadorAssignado?.whatsapp}
                          </p>
                        </div>
                      </div>

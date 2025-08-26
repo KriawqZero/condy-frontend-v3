@@ -22,10 +22,10 @@ export async function apiPrestadorListPropostas(): Promise<ApiResponse<any[]>> {
   }
 }
 
-export async function apiPrestadorAceitarProposta(id: number): Promise<ApiResponse<any>> {
+export async function apiPrestadorAceitarProposta(id: number, valorAcordado?: string): Promise<ApiResponse<any>> {
   const session = await getSession();
   try {
-    const res = await axios.post(`${baseUrl()}/prestador/propostas/${id}/aceitar`, {}, {
+    const res = await axios.post(`${baseUrl()}/prestador/propostas/${id}/aceitar`, { valorAcordado }, {
       headers: { Authorization: `Bearer ${session.token}` },
     });
     const raw = res.data;
