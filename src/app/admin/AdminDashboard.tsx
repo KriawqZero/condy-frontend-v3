@@ -364,12 +364,12 @@ export default function AdminDashboard({ _user }: { _user: User }) {
                             <div
                               className={
                                 `font-afacad font-bold text-sm ` +
-                                (chamado.prestadorId
+                                (chamado.prestadorAssignadoId
                                   ? `text-black`
                                   : `text-black/50`)
                               }
                             >
-                              {chamado.prestadorId || "Não alocado"}
+                              {chamado.prestadorAssignadoId ? (chamado.prestadorAssignado?.name || "Nome não disponível") : "Não alocado"}
                             </div>
                             <div
                               className={
@@ -476,7 +476,7 @@ export default function AdminDashboard({ _user }: { _user: User }) {
 
             <div className="mt-4 flex justify-end gap-2">
               <Button className="bg-gray-200 text-black" onClick={()=>setAbrirProposta(null)}>Cancelar</Button>
-              <Button className="bg-[#1F45FF] text-white" disabled={enviando || prestadoresSelecionados.length===0} onClick={async ()=>{
+              <Button className="bg-[#1F45FF] text-white" disabled={enviando || prestadoresSelecionados.length===0 || (!!precoMin && !!precoMax && Number(precoMin) > Number(precoMax))} onClick={async ()=>{
                 try {
                   setEnviando(true);
                   await adminEnviarPropostasAction({ chamadoId: Number(abrirProposta.id), prestadores: prestadoresSelecionados, precoMin: precoMin || undefined, precoMax: precoMax || undefined, prazo: prazo ? Number(prazo) : undefined });
