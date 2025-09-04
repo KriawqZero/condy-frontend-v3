@@ -39,8 +39,8 @@ export default function CondyLayout({
       {/* Header */}
       <CondyHeader user={user} title={title} visitante={visitante} />
 
-      <main className="relative">
-        <div>{children}</div>
+      <main className="relative flex-grow">
+        <div className="container mx-auto px-4 py-6 mt-0">{children}</div>
       </main>
 
       {/* Footer */}
