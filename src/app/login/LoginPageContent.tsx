@@ -104,7 +104,6 @@ export default function LoginPageContent() {
           />
           
           <div className="flex items-center justify-center text-xs">
-            <span>Incubado por</span>
             <img 
               src="/svg/incubadora_logo.svg" 
               alt="Incubadora" 
@@ -113,7 +112,6 @@ export default function LoginPageContent() {
           </div>
           
           <div className="flex items-center justify-center text-xs">
-            <span>Acelerado por</span>
             <img 
               src="/logo_aceleradora.png" 
               alt="Aceleradora" 

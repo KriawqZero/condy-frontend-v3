@@ -23,7 +23,7 @@ export function LogoutModal({ open, onClose }: LogoutModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] bg-black/30 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl p-6 text-center max-w-sm w-full shadow-xl">
         <div className="flex justify-center mb-4">
           <LogoutIcon
@@ -51,14 +51,16 @@ export function LogoutModal({ open, onClose }: LogoutModalProps) {
         ) : (
           <button
             onClick={handleLogout}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mb-3"
+            className="w-[296px] h-[48px] mx-auto bg-[#1F45FF] hover:bg-[#1F45FF] text-white font-semibold py-2 px-4 rounded-lg mb-3 gap-[32px] opacity-100 flex items-center justify-center"
+            style={{ transform: 'rotate(0deg)' }}
           >
             Sim, quero sair
           </button>
         )}
         <button
-          className="w-full text-indigo-600 hover:underline font-medium"
+          className="w-[296px] h-[48px] mx-auto text-[#1F45FF] bg-[#F5F7FF] hover:underline font-medium gap-[32px] opacity-100 flex items-center justify-center"
           onClick={onClose}
+          style={{ transform: 'rotate(0deg)' }}
         >
           Voltar para o início
         </button>
