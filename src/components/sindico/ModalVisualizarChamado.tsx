@@ -214,36 +214,81 @@ export function ModalVisualizarChamado({
         <div className="overflow-y-auto flex-grow">
           <div className="p-4 sm:p-6">
             {editando && (
-              <div className="mb-6 p-4 border rounded-lg bg-gray-50">
-                <div className="grid grid-cols-1 gap-4">
+              <div className="mb-6 sm:mb-8 p-4 sm:p-8 bg-white shadow-lg rounded-2xl">
+                <h3 className="font-afacad text-lg sm:text-xl font-medium text-gray-800 mb-4 sm:mb-6">Editar chamado</h3>
+                <div className="grid grid-cols-1 gap-4 sm:gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Descrição do ocorrido</label>
-                    <textarea className="w-full border rounded-lg px-3 py-2" rows={3} value={descricao} onChange={(e)=>setDescricao(e.target.value)} />
+                    <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Descrição do ocorrido</label>
+                    <textarea 
+                      className="w-full border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
+                      rows={3} 
+                      value={descricao} 
+                      onChange={(e)=>setDescricao(e.target.value)} 
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Informações adicionais</label>
-                    <textarea className="w-full border rounded-lg px-3 py-2" rows={2} value={infoAdicionais} onChange={(e)=>setInfoAdicionais(e.target.value)} />
+                    <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Informações adicionais</label>
+                    <textarea 
+                      className="w-full border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
+                      rows={2} 
+                      value={infoAdicionais} 
+                      onChange={(e)=>setInfoAdicionais(e.target.value)} 
+                    />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">Prioridade</label>
-                      <select className="w-full border rounded-lg px-3 py-2" value={prioridade} onChange={(e)=>setPrioridade(e.target.value as any)}>
-                        <option value="BAIXA">Baixa</option>
-                        <option value="MEDIA">Média</option>
-                        <option value="ALTA">Alta</option>
-                      </select>
+                      <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Prioridade</label>
+                      <div className="relative">
+                        <select 
+                          className="w-full appearance-none border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 pr-10 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
+                          value={prioridade} 
+                          onChange={(e)=>setPrioridade(e.target.value as any)}
+                        >
+                          <option value="BAIXA">Baixa</option>
+                          <option value="MEDIA">Média</option>
+                          <option value="ALTA">Alta</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">Escopo</label>
-                      <select className="w-full border rounded-lg px-3 py-2" value={escopo} onChange={(e)=>setEscopo(e.target.value as any)}>
-                        <option value="ORCAMENTO">Solicitar Orçamento</option>
-                        <option value="SERVICO_IMEDIATO">Serviço Imediato</option>
-                      </select>
+                      <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Escopo</label>
+                      <div className="relative">
+                        <select 
+                          className="w-full appearance-none border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 pr-10 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
+                          value={escopo} 
+                          onChange={(e)=>setEscopo(e.target.value as any)}
+                        >
+                          <option value="ORCAMENTO">Solicitar Orçamento</option>
+                          <option value="SERVICO_IMEDIATO">Serviço Imediato</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 justify-end">
-                    <button className="px-4 py-2 rounded-lg bg-gray-200" onClick={()=>setEditando(false)} disabled={salvando}>Cancelar</button>
-                    <button className="px-4 py-2 rounded-lg bg-[#1F45FF] text-white" onClick={salvarAlteracoes} disabled={salvando}>{salvando? 'Salvando...' : 'Salvar alterações'}</button>
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
+                    <button 
+                      className="w-full sm:flex-1 bg-white border border-gray-200 text-gray-700 font-medium py-2 sm:py-3 px-4 sm:px-6 rounded-xl hover:bg-gray-50 transition-all order-2 sm:order-1" 
+                      onClick={()=>setEditando(false)} 
+                      disabled={salvando}
+                    >
+                      Cancelar
+                    </button>
+                    <button 
+                      className="w-full sm:flex-1 bg-[#1F45FF] text-white font-medium py-2 sm:py-3 px-4 sm:px-6 rounded-xl hover:bg-blue-600 transition-all disabled:opacity-50 shadow-sm hover:shadow order-1 sm:order-2 mb-2 sm:mb-0" 
+                      onClick={salvarAlteracoes} 
+                      disabled={salvando}
+                    >
+                      {salvando ? 'Salvando...' : 'Salvar alterações'}
+                    </button>
                   </div>
                 </div>
               </div>

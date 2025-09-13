@@ -264,6 +264,12 @@ export function ModalNovoChamado({
                     value={imovelSelecionado}
                     onChange={setImovelSelecionado}
                     placeholder="Selecione um imóvel"
+                    customIcon={
+                      <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 14.0823C13.7231 14.0823 15.12 12.6855 15.12 10.9623C15.12 9.23922 13.7231 7.84234 12 7.84234C10.2769 7.84234 8.88 9.23922 8.88 10.9623C8.88 12.6855 10.2769 14.0823 12 14.0823Z" stroke="black" strokeWidth="1.5"/>
+                        <path d="M3.61995 9.14234C5.58995 0.482344 18.42 0.492344 20.38 9.15234C21.53 14.2323 18.37 18.5323 15.6 21.1923C13.59 23.1323 10.41 23.1323 8.38995 21.1923C5.62995 18.5323 2.46995 14.2223 3.61995 9.14234Z" stroke="black" strokeWidth="1.5"/>
+                      </svg>
+                    }
                   />
                   <div
                     className={`mt-2 w-full flex flex-col items-center justify-center gap-1 px-2 sm:px-3 text-xs sm:text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed ${
@@ -292,6 +298,12 @@ export function ModalNovoChamado({
                   value={localInstalacao}
                   onChange={setLocalInstalacao}
                   placeholder="Selecione o local"
+                  customIcon={
+                    <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 14.0823C13.7231 14.0823 15.12 12.6855 15.12 10.9623C15.12 9.23922 13.7231 7.84234 12 7.84234C10.2769 7.84234 8.88 9.23922 8.88 10.9623C8.88 12.6855 10.2769 14.0823 12 14.0823Z" stroke="black" strokeWidth="1.5"/>
+                      <path d="M3.61995 9.14234C5.58995 0.482344 18.42 0.492344 20.38 9.15234C21.53 14.2323 18.37 18.5323 15.6 21.1923C13.59 23.1323 10.41 23.1323 8.38995 21.1923C5.62995 18.5323 2.46995 14.2223 3.61995 9.14234Z" stroke="black" strokeWidth="1.5"/>
+                    </svg>
+                  }
                 />
               </div>
 
@@ -335,13 +347,24 @@ export function ModalNovoChamado({
                 <label className="block text-xs sm:text-sm font-afacad text-[#1F45FF] mb-1">
                   Informe detalhes sobre o problema *
                 </label>
-                <textarea
-                  placeholder="Descreva o ocorrido"
-                  className="w-full border-2 border-[#1F45FF] rounded-xl px-3 sm:px-4 py-2 sm:py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm"
-                  rows={3}
-                  value={descricaoOcorrido}
-                  onChange={(e) => setDescricaoOcorrido(e.target.value)}
-                />
+                <div className="relative">
+                  <div className="absolute left-3 sm:left-4 top-2 sm:top-3 z-10">
+                    <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 2.65234V5.65234" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M16 2.65234V5.65234" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M21 9.15234V17.6523C21 20.6523 19.5 22.6523 16 22.6523H8C4.5 22.6523 3 20.6523 3 17.6523V9.15234C3 6.15234 4.5 4.15234 8 4.15234H16C19.5 4.15234 21 6.15234 21 9.15234Z" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M8 11.6523H16" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M8 16.6523H12" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <textarea
+                    placeholder="Descreva o ocorrido"
+                    className="w-full border-2 border-[#1F45FF] rounded-xl pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm"
+                    rows={3}
+                    value={descricaoOcorrido}
+                    onChange={(e) => setDescricaoOcorrido(e.target.value)}
+                  />
+                </div>
               </div>
 
               <FileUpload anexos={anexos} onFilesUploaded={setAnexos} />
@@ -380,21 +403,19 @@ export function ModalNovoChamado({
         </div>
 
         {/* Navegação */}
-        <div className="flex justify-between">
-          {etapa > 1 ? (
+        <div className="flex justify-end gap-4">
+          {etapa > 1 && (
             <button
-              className="bg-[#F4F5FF] text-[#1F45FF] font-bold text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow hover:bg-blue-50 transition-colors"
+              className="bg-[#F4F5FF] text-[#1F45FF] font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow hover:bg-blue-50 transition-colors"
               onClick={handleVoltar}
               disabled={loading}
             >
               Voltar etapa
             </button>
-          ) : (
-            <div />
           )}
 
           <button
-            className="bg-[#1F45FF] text-white font-bold text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow hover:bg-blue-600 transition-colors disabled:opacity-50"
+            className="bg-[#1F45FF] text-white font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow hover:bg-blue-600 transition-colors disabled:opacity-50"
             onClick={handleAvancar}
             disabled={loading}
           >
