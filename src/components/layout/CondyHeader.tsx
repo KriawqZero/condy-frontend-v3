@@ -35,7 +35,7 @@ export default function CondyHeader({ user, title, visitante = false }: CondyHea
 
         {/* Logout Button */}
         {!visitante && (
-          <div className="relative z-[9999]">
+          <div className="relative z-[40]">
             <LogoutButton className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-amber-200 transition duration-500 cursor-pointer" />
           </div>
         )}

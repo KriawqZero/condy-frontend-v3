@@ -2,7 +2,8 @@
 
 import { Chamado } from "@/types";
 import { updateChamado } from "@/lib/api";
-import { X, User, FileText, Download, ZoomIn } from "lucide-react";
+import { User, FileText, Download, ZoomIn } from "lucide-react";
+import { CloseIcon } from "../icons/CloseIcon";
 import { Badge } from "@/components/ui/Badge";
 import { useState, useEffect } from "react";
 
@@ -16,25 +17,25 @@ function getStatusBadge(status: Chamado["status"]) {
   switch (status) {
     case "NOVO":
       return (
-        <Badge className="bg-blue-50 text-blue-600 border-blue-200 px-4 py-2 text-sm font-medium rounded-full">
+        <Badge className="bg-blue-50 text-blue-600 border-blue-200">
           Novo chamado
         </Badge>
       );
     case "A_CAMINHO":
       return (
-        <Badge className="bg-yellow-50 text-yellow-600 border-yellow-200 px-4 py-2 text-sm font-medium rounded-full">
+        <Badge className="bg-yellow-50 text-yellow-600 border-yellow-200">
           A caminho
         </Badge>
       );
     case "EM_ATENDIMENTO":
       return (
-        <Badge className="bg-orange-50 text-orange-600 border-orange-200 px-4 py-2 text-sm font-medium rounded-full">
+        <Badge className="bg-orange-50 text-orange-600 border-orange-200">
           Em atendimento
         </Badge>
       );
     case "CONCLUIDO":
       return (
-        <Badge className="bg-green-50 text-green-600 border-green-200 px-4 py-2 text-sm font-medium rounded-full">
+        <Badge className="bg-green-50 text-green-600 border-green-200">
           Concluído
         </Badge>
       );
@@ -81,6 +82,16 @@ export function ModalVisualizarChamado({
   onClose,
   onUpdated,
 }: ModalVisualizarChamadoProps) {
+  // Efeito para bloquear o scroll da página quando o modal estiver aberto
+  useEffect(() => {
+    // Adiciona a classe que bloqueia o scroll
+    document.body.classList.add('overflow-hidden');
+    
+    // Função de limpeza que remove a classe quando o componente for desmontado
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, []);
   const [abaAtiva, setAbaAtiva] = useState("geral");
   const [imagemAmpliada, setImagemAmpliada] = useState<string | null>(null);
   const [editando, setEditando] = useState(false);
@@ -143,105 +154,68 @@ export function ModalVisualizarChamado({
 
 
 
-  // Adiciona classe ao body quando o modal está aberto para impedir rolagem
-  useEffect(() => {
-    // Salva a posição atual de rolagem
-    const scrollY = window.scrollY;
-    
-    // Adiciona classes para impedir rolagem e aplicar blur
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-    document.body.classList.add('modal-open');
-    
-    // Adiciona estilo global para o blur
-    const style = document.createElement('style');
-    style.id = 'modal-blur-style';
-    style.innerHTML = `
-      .modal-open main, 
-      .modal-open .container, 
-      .modal-open .min-h-screen > div:not(.fixed) {
-        filter: blur(5px);
-        transition: filter 0.3s ease;
-      }
-      .modal-open {
-        overflow: hidden;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      // Remove classes e restaura rolagem quando o modal é fechado
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.classList.remove('modal-open');
-      window.scrollTo(0, scrollY);
-      
-      // Remove o estilo de blur
-      const blurStyle = document.getElementById('modal-blur-style');
-      if (blurStyle) {
-        blurStyle.remove();
-      }
-    };
-  }, []);
-
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-1 sm:p-2 md:p-4">
-      <div className="bg-white w-full max-w-4xl rounded-2xl sm:rounded-3xl shadow-2xl relative max-h-[95vh] sm:max-h-[90vh] overflow-hidden modal-content">
+      <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl relative max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
         
         {/* Header */}
-        <div className="bg-white px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 border-b border-gray-200">
+        <div className="bg-white px-4 sm:px-6 py-4 sm:py-6">
           <div className="flex items-start justify-between">
-            <div className="pr-2 sm:pr-3">
-              <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold font-afacad text-black mb-0.5 sm:mb-1 truncate">
+            <div>
+              <h2 className="text-2xl font-bold font-afacad text-black mb-1">
                 {tipoDescricao}
               </h2>
-              <p className="text-gray-600 font-afacad text-xs sm:text-sm md:text-base truncate">
+              <p className="text-gray-600 font-afacad">
                 Chamado #{chamado.numeroChamado} — {chamado.imovel?.nome || "Imóvel"}
               </p>
             </div>
             <button
-              className="text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 rounded-full p-1.5 sm:p-2 flex-shrink-0"
+              className="w-8 h-8 flex items-center justify-center bg-white rounded-full text-blue-600 border border-blue-600 hover:bg-gray-50 transition-colors"
               onClick={onClose}
             >
-              <X size={18} className="xs:hidden" />
-              <X size={20} className="hidden xs:block sm:hidden" />
-              <X size={24} className="hidden sm:block" />
+              <CloseIcon size={24} />
             </button>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="bg-white border-b border-gray-200 overflow-x-auto">
-          <div className="flex px-2 xs:px-3 sm:px-4 md:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4 min-w-max">
-            {abas.map((aba, index) => (
-              <button
-                key={aba.id}
-                className={`px-2.5 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-1.5 xs:py-2 sm:py-2.5 md:py-3 font-afacad font-semibold text-[10px] xs:text-xs sm:text-sm transition-all whitespace-nowrap ${
-                  abaAtiva === aba.id
-                    ? "bg-[#1F45FF] text-white shadow-md"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                } ${
-                  index === 0 ? "rounded-l-full" : ""
-                } ${
-                  index === abas.length - 1 ? "rounded-r-full" : ""
-                }`}
-                onClick={() => setAbaAtiva(aba.id)}
-              >
-                {aba.label}
-              </button>
-            ))}
+        <div>
+          <div className="bg-white">
+            <h3 className="font-afacad text-lg font-bold text-black mb-2 px-6">
+              Detalhes do chamado
+            </h3>          
+          </div>
+          <div className="flex flex-row justify-start w-full px-6 py-3" style={{
+            height: 'auto',
+            minHeight: '75px',
+            opacity: 1,
+            position: 'relative',
+          }}>
+            <div className="inline-flex space-x-1 xs:space-x-2">
+              {abas.map((aba) => (
+                <button
+                  key={aba.id}
+                  className={`px-2 xs:px-3 sm:px-6 py-1 xs:py-2 font-afacad font-semibold text-[10px] xs:text-xs sm:text-sm rounded-full transition-all min-w-[50px] xs:min-w-[70px] sm:min-w-[100px] text-center ${
+                    abaAtiva === aba.id
+                      ? "bg-[#1F45FF] text-white shadow-md"
+                      : "bg-white text-gray-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setAbaAtiva(aba.id)}
+                >
+                  {aba.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(95vh-160px)] sm:max-h-[calc(90vh-180px)] md:max-h-[calc(90vh-200px)]">
-          <div className="p-3 sm:p-4 md:p-6">
+        <div className="overflow-y-auto flex-grow">
+          <div className="p-4 sm:p-6">
             {editando && (
-              <div className="mb-4 sm:mb-6 p-3 sm:p-4 border rounded-lg bg-gray-50">
-                <div className="grid grid-cols-1 gap-3 sm:gap-4">
+              <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Descrição do ocorrido</label>
                     <textarea className="w-full border rounded-lg px-3 py-2" rows={3} value={descricao} onChange={(e)=>setDescricao(e.target.value)} />
@@ -277,83 +251,87 @@ export function ModalVisualizarChamado({
             
             {/* ABA GERAL */}
             {abaAtiva === "geral" && (
-              <div>
-                <h3 className="font-afacad text-lg sm:text-xl font-bold text-black mb-4 sm:mb-6">
+              <div className="pb-4">
+                <h3 className="font-afacad text-lg font-bold text-black mb-4 sm:mb-6">
                   Dados gerais do chamado
                 </h3>
                 
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-                    <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
-                        Tipo de chamado
-                      </label>
-                      <p className="text-black font-medium text-base sm:text-lg">
-                        {tipoDescricao}
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
-                        Imóvel e local do ativo
-                      </label>
-                      <p className="text-black font-medium text-base sm:text-lg">
-                        {chamado.imovel?.nome || "Imóvel"} - {chamado.imovel?.endereco || "..."}
-                        {chamado.imovel?.numero && `, ${chamado.imovel.numero}`}
-                      </p>
-                    </div>
-                     
-                    <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
-                        Ativo cadastrado
-                      </label>
-                      <p className="text-black font-medium text-base sm:text-lg">
-                        Elevador social - Marca Atlas, modelo G540
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
-                        Prioridade
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${
-                          chamado.prioridade === "ALTA" ? "bg-red-500" :
-                          chamado.prioridade === "MEDIA" ? "bg-yellow-500" : "bg-green-500"
-                        }`} />
-                        <span className="text-black font-medium text-base sm:text-lg">
-                          {chamado.prioridade === "ALTA" ? "Urgência" :
-                           chamado.prioridade === "MEDIA" ? "Média" : "Baixa"}
-                        </span>
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row">
+                    <div className="w-full sm:w-1/2 space-y-4 sm:space-y-6 sm:pr-6 mb-4 sm:mb-0">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Tipo de chamado
+                        </label>
+                        <p className="text-black font-medium">
+                          {tipoDescricao}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Imóvel e local do ativo
+                        </label>
+                        <p className="text-black font-medium">
+                          {chamado.imovel?.endereco || "..."}
+                          {chamado.imovel?.numero && `, ${chamado.imovel.numero}`}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Ativo cadastrado
+                        </label>
+                        <p className="text-black font-medium">
+                          Elevador social - Marca Atlas
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Status do chamado:
+                        </label>
+                        <div>
+                          {getStatusBadge(chamado.status)}
+                        </div>
                       </div>
                     </div>
                     
-                    <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
-                        Data de abertura
-                      </label>
-                      <p className="text-black font-medium text-base sm:text-lg">
-                        {formatarData(chamado.createdAt)}
-                      </p>
-                    </div>
+                    <div className="w-full sm:w-px h-px sm:h-auto bg-gray-200 my-3 sm:my-0 sm:mx-2"></div>
                     
-                    <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
-                        Número do chamado
-                      </label>
-                      <p className="text-black font-medium text-base sm:text-lg">
-                        #{chamado.numeroChamado}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
-                        Status do chamado
-                      </label>
+                    <div className="w-full sm:w-1/2 space-y-4 sm:space-y-6 sm:pl-6">
                       <div>
-                        {getStatusBadge(chamado.status)}
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Prioridade
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${
+                            chamado.prioridade === "ALTA" ? "bg-red-500" :
+                            chamado.prioridade === "MEDIA" ? "bg-yellow-500" : "bg-green-500"
+                          }`} />
+                          <span className="text-black font-medium">
+                            {chamado.prioridade === "ALTA" ? "Urgência" :
+                             chamado.prioridade === "MEDIA" ? "Média" : "Baixa"}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Data de abertura
+                        </label>
+                        <p className="text-black font-medium">
+                          {formatarData(chamado.createdAt)}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Número do chamado
+                        </label>
+                        <p className="text-black font-medium">
+                          #{chamado.numeroChamado}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -364,47 +342,53 @@ export function ModalVisualizarChamado({
             {/* ABA SERVIÇO */}
             {abaAtiva === "servico" && (
               <div>
-                <h3 className="font-afacad text-lg font-bold text-black mb-4 sm:mb-6">
+                <h3 className="font-afacad text-lg font-bold text-black mb-6">
                   Informações sobre o serviço
                 </h3>
                 
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                                         <div>
-                       <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
-                         Prestador vinculado:
-                       </label>
-                       <p className={`font-medium ${chamado.prestadorAssignado ? 'text-black' : 'text-gray-400'}`}>
-                         {chamado.prestadorAssignado?.name || "Nenhum prestador alocado"}
-                       </p>
-                     </div>
-                     
-                     <div>
-                       <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
-                         Valor do serviço:
-                       </label>
-                       <p className="text-black font-medium">
-                         {formatarValor(chamado.valorEstimado)}
-                       </p>
-                     </div>
-                     
-                     <div>
-                       <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
-                         Forma de pagamento:
-                       </label>
-                       <p className="text-gray-400">
-                         ...
-                       </p>
-                     </div>
-                     
-                     <div>
-                       <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
-                         Garantia adquirida:
-                       </label>
-                       <p className="text-gray-400">
-                         ...
-                       </p>
-                     </div>
+                <div className="space-y-4">
+                  <div className="flex">
+                    <div className="w-1/2 space-y-6 pr-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Prestador vinculado
+                        </label>
+                        <p className={`font-medium ${chamado.prestadorAssignado ? 'text-black' : 'text-gray-400'}`}>
+                          {chamado.prestadorAssignado?.name || "Nenhum prestador alocado"}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Forma de pagamento
+                        </label>
+                        <p className="text-gray-400">
+                          ...
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="w-px bg-gray-200 mx-2"></div>
+                    
+                    <div className="w-1/2 space-y-6 pl-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Valor do serviço
+                        </label>
+                        <p className="text-black font-medium">
+                          {formatarValor(chamado.valorEstimado)}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                          Garantia adquirida
+                        </label>
+                        <p className="text-gray-400">
+                          ...
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
                   
@@ -415,22 +399,22 @@ export function ModalVisualizarChamado({
             {/* ABA ANEXOS */}
             {abaAtiva === "anexos" && (
               <div>
-                <h3 className="font-afacad text-lg font-bold text-black mb-4 sm:mb-6">
+                <h3 className="font-afacad text-lg font-bold text-black mb-6">
                   Descrição e imagens
                 </h3>
                 
-                <div className="space-y-4 sm:space-y-6">
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                    <label className="block text-sm font-medium text-gray-600 mb-2">
                       Descrição textual do ocorrido:
                     </label>
-                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                    <div className="bg-gray-50 rounded-lg p-4">
                       <p className="text-black leading-relaxed">
                         {chamado.descricaoOcorrido}
                       </p>
                       {chamado.informacoesAdicionais && (
                         <div className="mt-4 pt-4 border-t border-gray-200">
-                          <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Informações adicionais:</p>
+                          <p className="text-sm font-medium text-gray-600 mb-1">Informações adicionais:</p>
                           <p className="text-black">
                             {chamado.informacoesAdicionais}
                           </p>
@@ -440,7 +424,7 @@ export function ModalVisualizarChamado({
                   </div>
 
                                      <div>
-                     <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2">
+                     <label className="block text-sm font-medium text-gray-600 mb-2">
                        Anexos ({chamado.anexos?.length || 0}):
                      </label>
                      
@@ -449,8 +433,8 @@ export function ModalVisualizarChamado({
                          {/* Grid de Imagens */}
                          {chamado.anexos.filter(anexo => isImageFile(anexo.url)).length > 0 && (
                            <div>
-                             <h4 className="font-afacad font-semibold text-black mb-2 sm:mb-3 text-sm sm:text-base">Imagens</h4>
-                             <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                             <h4 className="font-afacad font-semibold text-black mb-3">Imagens</h4>
+                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                {chamado.anexos
                                  .filter(anexo => isImageFile(anexo.url))
                                  .map((anexo) => (
@@ -501,7 +485,7 @@ export function ModalVisualizarChamado({
                          {/* Lista de Outros Arquivos */}
                          {chamado.anexos.filter(anexo => !isImageFile(anexo.url)).length > 0 && (
                            <div>
-                             <h4 className="font-afacad font-semibold text-black mb-2 sm:mb-3 text-sm sm:text-base">Outros arquivos</h4>
+                             <h4 className="font-afacad font-semibold text-black mb-3">Outros arquivos</h4>
                              <div className="space-y-2">
                                {chamado.anexos
                                  .filter(anexo => !isImageFile(anexo.url))
@@ -535,7 +519,7 @@ export function ModalVisualizarChamado({
                          )}
                        </div>
                      ) : (
-                       <div className="bg-gray-50 rounded-lg p-6 sm:p-8 text-center">
+                       <div className="bg-gray-50 rounded-lg p-8 text-center">
                          <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
                          <p className="text-gray-400">
                            Nenhum anexo disponível
@@ -550,53 +534,51 @@ export function ModalVisualizarChamado({
                          {/* ABA PRESTADOR */}
              {abaAtiva === "prestador" && (
                <div>
-                 <h3 className="font-afacad text-lg font-bold text-black mb-4 sm:mb-6">
-                   Informações do prestador
+                 <h3 className="font-afacad text-lg font-bold text-black mb-6">
+                   Contato e suporte do prestador de serviço
                  </h3>
                  
                  {chamado.prestadorAssignadoId || chamado.prestadorAssignado?.name ? (
-                   <div className="bg-blue-50 rounded-xl p-4 sm:p-6 border border-blue-200">
-                     <div className="flex items-center gap-3 mb-4">
-                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                         <User className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-                       </div>
+                   <div className="bg-white rounded-xl p-6 border border-gray-200">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                        <div>
-                         <h4 className="font-afacad text-base sm:text-lg font-bold text-black">
-                           {chamado.prestadorAssignado?.name}
-                         </h4>
-                         <p className="text-xs sm:text-sm text-blue-600 font-medium">
-                           Prestador alocado
-                         </p>
-                       </div>
-                     </div>
-                     
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       <div>
-                         <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
-                           Status:
-                         </label>
-                         <p className="text-gray-900 font-medium">
-                           Ativo no chamado
-                         </p>
+                         <h5 className="text-gray-500 text-sm mb-1">Nome do técnico</h5>
+                         <p className="text-black font-medium">{chamado.prestadorAssignado?.name || "Rafael Santana"}</p>
                        </div>
                        
                        <div>
-                         <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
-                           Contato:
-                         </label>
-                         <p className="text-gray-900">
-                           {chamado.prestadorAssignado?.whatsapp}
-                         </p>
+                         <h5 className="text-gray-500 text-sm mb-1">Especialidade</h5>
+                         <p className="text-black font-medium">Manutenção de elevadores</p>
+                       </div>
+                       
+                       <div>
+                         <h5 className="text-gray-500 text-sm mb-1">Empresa</h5>
+                         <p className="text-black font-medium">Elevatech Serviços</p>
+                       </div>
+                       
+                       <div>
+                         <h5 className="text-gray-500 text-sm mb-1">Contato (WhatsApp)</h5>
+                         <p className="text-black font-medium">{chamado.prestadorAssignado?.whatsapp || "(11) 99876-1122"}</p>
+                       </div>
+                       
+                       <div>
+                         <h5 className="text-gray-500 text-sm mb-1">Status da visita</h5>
+                         <p className="text-black font-medium">Agendamento marcado</p>
+                       </div>
+                       
+                       <div>
+                         <h5 className="text-gray-500 text-sm mb-1">Data agendada</h5>
+                         <p className="text-black font-medium">08/05/2025 às 09h00</p>
                        </div>
                      </div>
                    </div>
                  ) : (
-                   <div className="bg-gray-50 rounded-xl p-6 sm:p-8 text-center">
+                   <div className="bg-gray-50 rounded-xl p-8 text-center">
                      <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                     <h4 className="font-afacad text-base sm:text-lg font-bold text-gray-700 mb-2">
+                     <h4 className="font-afacad text-lg font-bold text-gray-700 mb-2">
                        Nenhum prestador alocado
                      </h4>
-                     <p className="text-gray-500">
+                     <p className="text-gray-500 mb-2">
                        Aguardando a administração alocar um prestador para este chamado.
                      </p>
                    </div>
@@ -608,24 +590,29 @@ export function ModalVisualizarChamado({
         </div>
 
         {/* Footer - Botões fixos */}
-        <div className="bg-white px-4 sm:px-6 py-4 sm:py-6">
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-between">
-            <div className="grid grid-cols-2 sm:flex sm:flex-row gap-3 sm:gap-4 w-full">
+        <div className="bg-gray-50 px-4 sm:px-6 py-4 sticky bottom-0 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:justify-end items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full sm:w-auto">
               <button
-                className="px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-gray-100 text-gray-700 rounded-full font-afacad font-semibold hover:bg-gray-200 transition-colors text-xs sm:text-sm md:text-base flex items-center justify-center"
+                className="text-[#1F45FF] px-4 sm:px-6 py-3 bg-gray-100 rounded-lg font-afacad font-semibold hover:bg-gray-200 transition-colors border border-gray-200 w-full"
                 onClick={() => setMostrarQRCode(true)}
               >
-                <span className="whitespace-nowrap">Gerar QR Code</span>
+                Gerar QR Code
               </button>
-              <button className="px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-blue-50 text-blue-600 rounded-full font-afacad font-semibold hover:bg-blue-100 transition-colors text-xs sm:text-sm md:text-base flex items-center justify-center">
-                <span className="whitespace-nowrap">Baixar Recibo / NF</span>
+              <button className="px-4 sm:px-6 py-3 bg-gray-100 text-[#1F45FF] rounded-lg font-afacad font-semibold hover:bg-gray-200 transition-colors border border-gray-200 w-full">
+                Carregar Recibo / NF
               </button>
+            </div>
+            <div className="w-full sm:w-auto">
               {!editando ? (
-                <button className="col-span-2 px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-[#1F45FF] text-white rounded-full font-afacad font-semibold hover:bg-[#1F45FF]/90 transition-colors shadow-md text-xs sm:text-sm md:text-base flex items-center justify-center" onClick={() => setEditando(true)}>
-                  <span className="whitespace-nowrap">Atualizar status</span>
+                <button 
+                  className="px-4 sm:px-6 py-3 bg-[#1F45FF] text-white rounded-lg font-afacad font-semibold hover:bg-[#1F45FF]/90 transition-colors shadow-md w-full"
+                  onClick={() => setEditando(true)}
+                >
+                  Atualizar chamado
                 </button>
               ) : (
-                <button className="col-span-2 px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-green-600 text-white rounded-full font-afacad font-semibold hover:bg-green-700 transition-colors shadow-md text-xs sm:text-sm md:text-base flex items-center justify-center" onClick={salvarAlteracoes} disabled={salvando}>
+                <button className="px-4 sm:px-6 py-3 bg-green-600 text-white rounded-lg font-afacad font-semibold hover:bg-green-700 transition-colors shadow-md w-full" onClick={salvarAlteracoes} disabled={salvando}>
                   {salvando ? 'Salvando...' : 'Salvar alterações'}
                 </button>
               )}
@@ -633,26 +620,26 @@ export function ModalVisualizarChamado({
           </div>
         </div>
 
-      </div>
+              </div>
       </div>
 
       {/* Lightbox para ampliar imagens */}
       {imagemAmpliada && (
         <div
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100]"
           onClick={() => setImagemAmpliada(null)}
         >
-          <div className="relative max-w-full max-h-full p-2 sm:p-4">
+          <div className="relative max-w-screen-lg max-h-screen-lg p-4">
             <button
               onClick={() => setImagemAmpliada(null)}
-              className="absolute -top-4 -right-4 text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-full"
+              className="absolute -top-10 right-0 w-8 h-8 flex items-center justify-center rounded-full bg-white text-blue-600 border border-blue-600 transition-colors"
             >
-              <X className="w-5 h-5 sm:w-6 sm:h-6" />
+              <CloseIcon size={24} />
             </button>
             <img
               src={imagemAmpliada}
               alt="Imagem ampliada"
-              className="max-w-full max-h-[80vh] object-contain rounded-lg"
+              className="max-w-full max-h-full object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
@@ -661,18 +648,15 @@ export function ModalVisualizarChamado({
 
       {/* Modal QR Code */}
       {mostrarQRCode && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4" onClick={() => setMostrarQRCode(false)}>
-          <div className="bg-white p-4 sm:p-6 md:p-8 rounded-3xl relative max-w-[90%] max-h-[90%]" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100]" onClick={() => setMostrarQRCode(false)}>
+          <div className="bg-white p-6 rounded-lg relative" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setMostrarQRCode(false)}
-              className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 text-blue-600 hover:text-blue-800 bg-blue-50 p-1.5 sm:p-2 rounded-full"
+              className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-white text-blue-600 border border-blue-600 hover:bg-gray-50 transition-colors"
             >
-              <X className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+              <CloseIcon size={24} />
             </button>
-            <div className="text-center">
-              <img src={qrCodeUrl} alt="QR Code do chamado" className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 mx-auto" />
-              <p className="mt-3 text-sm sm:text-base text-gray-700 font-medium">Escaneie para acessar o chamado</p>
-            </div>
+            <img src={qrCodeUrl} alt="QR Code do chamado" className="w-96 h-96" />
           </div>
         </div>
       )}

@@ -126,4 +126,12 @@
   body {
     @apply text-gray-900 bg-gray-50;
   }
+  
+  /* Classe para bloquear o scroll do body quando modais estiverem abertos */
+  body.modal-open {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
 }
