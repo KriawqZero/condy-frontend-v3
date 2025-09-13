@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import { CloseIcon } from "../icons/CloseIcon";
 import { Button } from "@/components/ui/Button";
 import { Chamado } from "@/types";
 import { updateChamado } from "@/lib/api";
@@ -51,9 +52,9 @@ export function ModalAtualizarChamado({ chamado, onClose, onUpdated }: ModalAtua
             </h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center"
+              className="w-8 h-8 flex items-center justify-center bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors"
             >
-              <X className="w-6 h-6" />
+              <CloseIcon size={24} />
             </button>
           </div>
 

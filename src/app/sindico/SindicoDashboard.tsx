@@ -31,8 +31,8 @@ function getStatusBadge(status: Chamado["status"]) {
       );
     case "EM_ATENDIMENTO":
       return (
-        <Badge className="bg-orange-50 text-orange-600 border-orange-200">
-          Em atendimento
+        <Badge className="bg-[#FFD9A014] text-orange-600 border-orange-200">
+          Em atendimento 
         </Badge>
       );
     case "CONCLUIDO":
@@ -142,12 +142,24 @@ export default function SindicoDashboard({ user }: { user: User }) {
         </div>
       ) : (
         <div className="container relative -mt-20 z-10">
+          <div className="relative">
+            <img 
+              src="/3d_illustration.png" 
+              alt="Ilustração 3D de prédio" 
+              className="w-[330px] h-[303px] opacity-100 absolute hidden md:block lg:block" 
+              style={{ 
+                right: '0', 
+                top: '-280px', 
+                transform: 'rotate(0deg)' 
+              }} 
+            />
+          </div>
           {/* Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="flex flex-wrap justify-start mb-8 sm:mb-10 md:mb-12 px-2 sm:pl-3">
             {/* Total Invested */}
-            <Card className="bg-white rounded-[20px] p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow">
-              <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
+            <Card className="bg-white rounded-[20px] p-4 sm:p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow w-[280px] sm:w-[300px] md:w-[320px] h-[90px] sm:h-[96px] opacity-100 mr-3 mb-3" style={{ transform: 'rotate(0deg)', borderRadius: '20px' }}>
+              <div className="flex items-center gap-2 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
                   <StatisticsIcon />
                 </div>
                 <div>
@@ -163,9 +175,9 @@ export default function SindicoDashboard({ user }: { user: User }) {
             </Card>
 
             {/* Active Tickets */}
-            <Card className="bg-white rounded-[20px] p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
+            <Card className="bg-white rounded-[20px] p-4 sm:p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow w-[280px] sm:w-[300px] md:w-[320px] h-[90px] sm:h-[96px] opacity-100 mr-3 mb-3" style={{ transform: 'rotate(0deg)', borderRadius: '20px' }}>
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
                   <NoteIcon />
                 </div>
                 <div>
@@ -180,17 +192,18 @@ export default function SindicoDashboard({ user }: { user: User }) {
             </Card>
 
             {/* Completed Tickets */}
-            <Card className="bg-white rounded-[20px] p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow">
-              <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
+            <Card className="bg-white rounded-[20px] p-4 sm:p-6 shadow-xl border-0 hover:shadow-2xl transition-shadow w-[280px] sm:w-[300px] md:w-[320px] h-[90px] sm:h-[96px] opacity-100 mr-3 mb-3" style={{ transform: 'rotate(0deg)', borderRadius: '20px' }}>
+              <div className="flex items-center gap-2 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-[#F5F7FF] flex items-center justify-center">
                   <ClipboardTickIcon />
                 </div>
                 <div>
-                  <p className="font-afacad text-sm font-bold text-[#7F98BC] mb-1">
+                  <p className="font-afacad text-xs sm:text-sm font-bold text-[#7F98BC] mb-1">
                     Chamados concluídos
                   </p>
-                  <div className="font-afacad text-2xl font-bold text-black">
-                    {completedTicketsCount.toString()} finalizados
+                  <div className="font-afacad text-lg sm:text-xl md:text-2xl font-bold text-black">
+                    {completedTicketsCount.toString()}{" "}
+                    <span className="text-lg sm:text-xl md:text-2xl">finalizados</span>
                   </div>
                 </div>
               </div>
@@ -313,7 +326,7 @@ export default function SindicoDashboard({ user }: { user: User }) {
       )}
 
       {/* WhatsApp Float Button */}
-      <div className="fixed bottom-8 right-8 z-50">
+      <div className="fixed bottom-8 right-8 z-40">
         <button className="w-16 h-16 bg-[#10A07B] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
           <WhatsappIcon />
         </button>

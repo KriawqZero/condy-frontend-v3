@@ -12,14 +12,12 @@ export default function Footer() {
           />
 
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-white">Incubado por</span>
             <img 
               src="/svg/incubadora_logo.svg" 
               alt="Incubadora" 
               className="h-8" 
             />
 
-            <span className="text-sm text-white ml-4">Acelerado por</span>
             <img 
               src="/logo_aceleradora.png" 
               alt="Aceleradora" 
