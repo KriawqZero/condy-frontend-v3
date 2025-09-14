@@ -452,192 +452,103 @@ export default function AdminDashboard({ _user }: { _user: User }) {
 
             {chamadosFiltrados.length > 0 ? (
               /* Tickets Table */
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                {/* Mobile Cards View */}
-                <div className="block md:hidden">
-                  <div className="space-y-4 px-4 py-2">
-                    {chamadosFiltrados.map((chamado, index) => (
-                      <div 
-                        key={chamado.id} 
-                        className="bg-white rounded-lg p-4 border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors shadow-sm"
-                        onClick={() => setSelectedChamado(chamado)}
-                      >
-                        {/* Header com botão */}
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex-1">
-                            <div className="text-gray-500 text-sm font-medium mb-1">Tipo de chamado</div>
-                            <div className="text-gray-900 text-base font-semibold">
-                              {chamado.escopo === "ORCAMENTO" ? "Orçamento" : "Manutenção preventiva"}
-                            </div>
-                          </div>
-                          <div className="ml-4 flex-shrink-0">
-                            {chamado.status === 'NOVO' && (
-                              <button 
-                                className="bg-[#1F45FF] hover:bg-[#1a3de6] text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setAbrirProposta(chamado);
-                                }}
-                              >
-                                Fazer <br/>proposta
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Ativo cadastrado */}
-                        <div className="mb-4">
-                          <div className="text-gray-500 text-sm font-medium mb-1">Ativo cadastrado</div>
-                          <div className="text-gray-900 text-base font-semibold">
-                            {chamado.imovel?.nome || "N/A"}
-                          </div>
-                        </div>
-                        
-                        {/* Grid de informações - Responsivo */}
-                        <div className="space-y-4 mb-4">
-                          {/* Primeira linha: Valor e Prestador */}
-                          <div className="grid grid-cols-2 gap-4">
-                            {/* Valor do serviço */}
-                            <div>
-                              <div className="text-gray-500 text-sm font-medium mb-1">Valor do serviço</div>
-                              <div className="text-gray-900 text-base font-semibold">
-                                {Number(chamado.valorEstimado || 0) > 0 ? formatarValor(chamado.valorEstimado) : "--"}
-                              </div>
-                            </div>
-                            
-                            {/* Prestador vinculado */}
-                            <div>
-                              <div className="text-gray-500 text-sm font-medium mb-1">Prestador vinculado</div>
-                              <div className="text-gray-900 text-base font-semibold truncate">
-                                {chamado.prestadorAssignadoId ? (chamado.prestadorAssignado?.name || "N/D") : "--"}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Segunda linha: Chamado */}
-                          <div>
-                            <div className="text-gray-500 text-sm font-medium mb-1">Chamado</div>
-                            <div className="text-gray-900 text-base font-semibold">
-                              #{chamado.numeroChamado}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Observações gerais */}
-                          <div className="mb-4">
-                            <div className="text-gray-500 text-sm font-medium mb-1">Observações gerais</div>
-                            <div className="text-gray-900 text-base font-medium leading-relaxed">
-                              {chamado.descricaoOcorrido || "Troca de cabo de tração agendada."}
-                            </div>
-                          </div>
-                         
-                         {/* Footer com botão e status */}
-                         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                           <div className="flex items-center space-x-2">
-                             {getStatusBadge(chamado.status)}
-                             <button className="text-blue-600 hover:text-blue-800 transition-colors duration-150 p-2">
-                               <ChevronRightIcon />
-                             </button>
-                           </div>
-                         </div>
+              <div className="bg-white rounded-2xl shadow-sm w-full">
+                <div className="overflow-x-auto w-full">
+                  <div className="min-w-[800px] relative">
+                    {/* Table Header */}
+                    <div className="bg-gray-50 px-3 sm:px-6 py-4 border-b border-[#EFF0FF]">
+                      <div className="grid grid-cols-8 gap-2 sm:gap-4 text-xs sm:text-sm font-afacad font-bold text-black">
+                        <div className="pl-0">Tipo de chamado</div>
+                        <div className="pl-4">Ativo cadastrado</div>
+                        <div className="pl-4">Valor do serviço</div>
+                        <div className="pl-4">Prestador vinculado</div>
+                        <div className="pl-4">Observações gerais</div>
+                        <div className="pl-4">Chamado</div>
+                        <div className="pl-4">Status do chamado</div>
+                        <div className="pl-4">Ações</div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Tablet and Desktop Table View */}
-                <div className="hidden md:block">
-                  <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                    <table className="w-full table-fixed min-w-[900px] md:min-w-[1200px] lg:min-w-[1400px] xl:min-w-[1200px]">
-                      {/* Table Header */}
-                      <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                          <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%] md:w-[12%] lg:w-[15%]">Tipo</th>
-                          <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[18%] md:w-[20%] lg:w-[25%]">Ativo</th>
-                          <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%] md:w-[12%] lg:w-[15%]">Valor</th>
-                          <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[18%] md:w-[12%] lg:w-[20%]">Prestador</th>
-                          <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%] md:w-[12%] lg:w-[18%]">Chamado</th>
-                          <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[14%] md:w-[10%] lg:w-[17%]">Status</th>
-                          <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[8%] md:w-[10%] lg:w-[9%]">Data</th>
-                          <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[6%] md:w-[10%] lg:w-[11%]">Ações</th>
-                          <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[0%] md:w-[5%] lg:w-[8%]"></th>
-                        </tr>
-                      </thead>
+                    </div>
+                    {/* Linhas verticais da tabela */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div className="absolute top-0 bottom-0 left-[12.5%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[25%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[37.5%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[50%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[62.5%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[75%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[87.5%] w-px bg-[#EFF0FF]"></div>
+                    </div>
 
-                      {/* Table Body */}
-                      <tbody className="bg-white divide-y divide-gray-100">
-                        {chamadosFiltrados.map((chamado, index) => (
-                          <tr
-                            key={chamado.id}
-                            className={`hover:bg-blue-50 cursor-pointer transition-colors duration-150 ${
-                              index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
-                            }`}
-                            onClick={() => setSelectedChamado(chamado)}
-                          >
-                            <td className="px-4 md:px-6 py-4 md:py-5 text-xs md:text-sm font-medium text-gray-900 truncate">
-                              <div className="truncate" title={chamado.escopo === "ORCAMENTO" ? "Solicitação de orçamento" : "Manutenção preventiva"}>
-                                {chamado.escopo === "ORCAMENTO" ? "Orçamento" : "Manutenção"}
-                              </div>
-                            </td>
-                            <td className="px-4 md:px-6 py-4 md:py-5 text-xs md:text-sm text-gray-700 truncate">
-                              <div className="truncate" title={chamado.imovel?.nome || "N/A"}>
-                                {chamado.imovel?.nome || "N/A"}
-                              </div>
-                            </td>
-                            <td className="px-4 md:px-6 py-4 md:py-5 text-xs md:text-sm font-semibold text-gray-900 truncate text-center">
-                              <div className="truncate" title={Number(chamado.valorEstimado || 0) > 0 ? formatarValor(chamado.valorEstimado) : "Sem valor"}>
-                                {Number(chamado.valorEstimado || 0) > 0 ? formatarValor(chamado.valorEstimado) : "--"}
-                              </div>
-                            </td>
-                            <td className="px-4 md:px-6 py-4 md:py-5 text-xs md:text-sm text-gray-700 truncate">
-                              <div className="truncate" title={chamado.prestadorAssignadoId ? (chamado.prestadorAssignado?.name || "Nome não disponível") : "Sem prestador"}>
-                                {chamado.prestadorAssignadoId ? (chamado.prestadorAssignado?.name || "N/D") : "--"}
-                              </div>
-                            </td>
-                            <td className="px-4 md:px-6 py-4 md:py-5 text-xs md:text-sm font-semibold text-blue-600 ">
-                              #{chamado.numeroChamado}
-                            </td>
-                            <td className="px-4 md:px-6 py-4 md:py-5 ">
+                    {/* Table Body */}
+                    <div className="divide-y divide-[#EFF0FF]">
+                      {chamadosFiltrados.map((chamado) => (
+                        <div
+                          key={chamado.id}
+                          className="px-3 sm:px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[800px]"
+                          onClick={() => setSelectedChamado(chamado)}
+                        >
+                          <div className="grid grid-cols-8 gap-2 sm:gap-4 items-center">
+                            <div className="font-afacad text-xs sm:text-sm font-bold text-black pl-0">
+                              {chamado.escopo === "ORCAMENTO"
+                                ? "Solicitação de orçamento"
+                                : "Serviço imediato"}
+                            </div>
+                            <div className="font-afacad text-xs sm:text-sm font-bold text-black pl-2 sm:pl-4">
+                              {chamado.imovel?.nome || "Sem ativo"}
+                            </div>
+                            <div
+                              className={
+                                `font-afacad font-bold text-xs sm:text-sm pl-2 sm:pl-4 ` +
+                                (Number(chamado.valorEstimado || 0) > 0
+                                  ? `text-black`
+                                  : `text-black/50`)
+                              }
+                            >
+                              {Number(chamado.valorEstimado || 0) > 0 ? formatarValor(chamado.valorEstimado) : "Sem valor"}
+                            </div>
+                            <div
+                              className={
+                                `font-afacad font-bold text-xs sm:text-sm pl-2 sm:pl-4 ` +
+                                (chamado.prestadorAssignadoId
+                                  ? `text-black`
+                                  : `text-black/50`)
+                              }
+                            >
+                              {chamado.prestadorAssignadoId ? (chamado.prestadorAssignado?.name || "N/D") : "Sem prestador"}
+                            </div>
+                            <div className="font-afacad text-xs sm:text-sm font-bold text-black pl-2 sm:pl-4">
+                              {chamado.descricaoOcorrido || "Sem descrição"}
+                            </div>
+                            <div className="font-afacad text-xs sm:text-sm font-bold text-black pl-2 sm:pl-4">
+                              {chamado.numeroChamado}
+                            </div>
+                            <div className="pl-2 sm:pl-4">
                               {getStatusBadge(chamado.status)}
-                            </td>
-                            <td className="px-4 md:px-6 py-4 md:py-5 text-xs md:text-sm text-gray-700 ">
-                              <span className="hidden lg:inline">
-                                {new Date(chamado.createdAt || Date.now()).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                              </span>
-                              <span className="lg:hidden">
-                                {new Date(chamado.createdAt || Date.now()).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }).replace('/2024', '')}
-                              </span>
-                            </td>
-                            <td className="px-4 md:px-6 py-4 md:py-5 text-xs md:text-sm ">
-                              <Button 
-                                className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 md:px-4 py-2 rounded transition-colors duration-150" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setAbrirProposta(chamado);
-                                  (async () => {
-                                    const list = await adminListPrestadoresAction();
-                                    setPrestadores(Array.isArray(list.data) ? list.data : []);
-                                    const prop = await adminListPropostasPorChamadoAction(Number(chamado.id));
-                                    setPropostasChamado(Array.isArray(prop.data) ? prop.data : []);
-                                  })();
-                                }}
-                              >
-                                <span>Proposta</span>
-                            
-                              </Button>
-                            </td>
-                            <td className="px-4 md:px-6 py-4 md:py-5 text-right text-sm font-medium">
-                              <button className="text-blue-600 hover:text-blue-800 transition-colors duration-150 p-1 rounded-full hover:bg-blue-100">
+                            </div>
+                            <div className="flex items-center justify-between pl-2 sm:pl-4">
+                              {chamado.status === 'NOVO' && (
+                                <button 
+                                  className="bg-[#1F45FF] hover:bg-[#1a3de6] text-white px-2 py-1 rounded-lg text-xs font-afacad font-bold transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setAbrirProposta(chamado);
+                                  }}
+                                >
+                                  Proposta
+                                </button>
+                              )}
+                              <div className="w-6 h-6 rounded-full bg-[#F5F7FF] flex items-center justify-center ml-2">
                                 <ChevronRightIcon />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
+
             ) : !loadingChamados && chamados.length > 0 && chamadosFiltrados.length === 0 ? (
               /* Empty Search State */
               <div className="flex flex-col items-center justify-center py-16">
@@ -680,7 +591,7 @@ export default function AdminDashboard({ _user }: { _user: User }) {
         <ModalVisualizarChamado
           chamado={selectedChamado}
           onClose={() => setSelectedChamado(null)}
-          onUpdated={fetchData}
+          onUpdate={fetchData}
         />
       )}
 

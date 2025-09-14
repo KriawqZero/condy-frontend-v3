@@ -4,16 +4,14 @@ import { Chamado } from "@/types";
 import { User, FileText, Download, ZoomIn, X } from "lucide-react";
 import { CloseIcon } from "../icons/CloseIcon";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { useState } from "react";
 import { useEffect } from "react";
 import { adminAssignPrestadorAction, adminListPrestadoresAction } from "@/app/actions/admin";
-import { updateChamado } from "@/lib/api";
 
 interface ModalVisualizarChamadoProps {
   chamado: Chamado;
   onClose: () => void;
-  onUpdated?: () => void;
+  onUpdate?: () => void;
 }
 
 function getStatusBadge(status: Chamado["status"]) {
@@ -83,56 +81,21 @@ function formatarData(data: Date | string): string {
 export function ModalVisualizarChamado({
   chamado,
   onClose,
-  onUpdated,
+  onUpdate,
 }: ModalVisualizarChamadoProps) {
   const [abaAtiva, setAbaAtiva] = useState("geral");
   const [imagemAmpliada, setImagemAmpliada] = useState<string | null>(null);
   const [abrirVinculo, setAbrirVinculo] = useState(false);
   const [prestadores, setPrestadores] = useState<any[]>([]);
   const [prestadorId, setPrestadorId] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-  const [editando, setEditando] = useState(false);
-  const [status, setStatus] = useState(chamado.status);
-  const [prioridade, setPrioridade] = useState(chamado.prioridade);
-  const [valorEstimado, setValorEstimado] = useState(chamado.valorEstimado?.toString() || "");
-  const [informacoesAdicionais, setInformacoesAdicionais] = useState(chamado.informacoesAdicionais || "");
 
   useEffect(() => {
-    if (abrirVinculo || editando) {
+    if (abrirVinculo) {
       adminListPrestadoresAction().then((r: any) => setPrestadores(r.data || []));
     }
-  }, [abrirVinculo, editando]);
+  }, [abrirVinculo]);
 
   const abas = [
-    { id: "geral", label: "Geral" },
-    { id: "servico", label: "Serviço" },
-    { id: "anexos", label: "Anexos" },
-    { id: "prestador", label: "Prestador" },
-  ];
-
-  const salvarAlteracoes = async () => {
-    setLoading(true);
-
-    try {
-      await updateChamado(chamado.id, {
-        status,
-        prioridade,
-        prestadorId: prestadorId || undefined,
-        valorEstimado: valorEstimado ? parseFloat(valorEstimado) : undefined,
-        informacoesAdicionais,
-      });
-
-      setEditando(false);
-      onUpdated?.();
-    } catch (error) {
-      console.error("Erro ao atualizar chamado:", error);
-      alert("Erro ao atualizar chamado. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const abas_old = [
     { id: "geral", label: "Geral" },
     { id: "servico", label: "Serviço" },
     { id: "anexos", label: "Anexos" },
@@ -229,116 +192,6 @@ export function ModalVisualizarChamado({
         {/* Content */}
         <div className="overflow-y-auto flex-grow">
           <div className="p-4 sm:p-6">
-            
-            {editando && (
-              <div className="mb-6 sm:mb-8 p-4 sm:p-8 bg-white shadow-lg rounded-2xl">
-                <h3 className="font-afacad text-lg sm:text-xl font-medium text-gray-800 mb-4 sm:mb-6">Editar chamado</h3>
-                <div className="grid grid-cols-1 gap-4 sm:gap-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Status</label>
-                      <div className="relative">
-                        <select 
-                          className="w-full appearance-none border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 pr-10 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
-                          value={status} 
-                          onChange={(e)=>setStatus(e.target.value as any)}
-                        >
-                          <option value="NOVO">Novo</option>
-                          <option value="A_CAMINHO">A caminho</option>
-                          <option value="EM_ATENDIMENTO">Em atendimento</option>
-                          <option value="CONCLUIDO">Concluído</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Prioridade</label>
-                      <div className="relative">
-                        <select 
-                          className="w-full appearance-none border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 pr-10 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
-                          value={prioridade} 
-                          onChange={(e)=>setPrioridade(e.target.value as any)}
-                        >
-                          <option value="BAIXA">Baixa</option>
-                          <option value="MEDIA">Média</option>
-                          <option value="ALTA">Alta</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Prestador</label>
-                      <div className="relative">
-                        <select 
-                          className="w-full appearance-none border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 pr-10 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
-                          value={prestadorId} 
-                          onChange={(e)=>setPrestadorId(e.target.value)}
-                        >
-                          <option value="">Selecionar prestador</option>
-                          {prestadores.map((prestador) => (
-                            <option key={prestador.id} value={prestador.id}>
-                              {prestador.name}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Valor Estimado</label>
-                      <input 
-                        type="number" 
-                        step="0.01" 
-                        placeholder="0,00" 
-                        className="w-full border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
-                        value={valorEstimado} 
-                        onChange={(e)=>setValorEstimado(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Informações Adicionais</label>
-                    <textarea 
-                      className="w-full border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
-                      rows={3} 
-                      placeholder="Informações adicionais sobre o chamado" 
-                      value={informacoesAdicionais} 
-                      onChange={(e)=>setInformacoesAdicionais(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
-                    <button 
-                      className="w-full sm:flex-1 bg-white border border-gray-200 text-gray-700 font-medium py-2 sm:py-3 px-4 sm:px-6 rounded-xl hover:bg-gray-50 transition-all order-2 sm:order-1" 
-                      onClick={()=>setEditando(false)} 
-                      disabled={loading}
-                    >
-                      Cancelar
-                    </button>
-                    <button 
-                      className="w-full sm:flex-1 bg-[#1F45FF] text-white font-medium py-2 sm:py-3 px-4 sm:px-6 rounded-xl hover:bg-blue-600 transition-all disabled:opacity-50 shadow-sm hover:shadow order-1 sm:order-2 mb-2 sm:mb-0" 
-                      onClick={salvarAlteracoes} 
-                      disabled={loading}
-                    >
-                      {loading ? 'Salvando...' : 'Salvar alterações'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
             
             {/* ABA GERAL */}
             {abaAtiva === "geral" && (
@@ -684,8 +537,6 @@ export function ModalVisualizarChamado({
                </div>
              )}
 
-
-
           </div>
         </div>
 
@@ -696,7 +547,7 @@ export function ModalVisualizarChamado({
               <button className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-afacad font-semibold hover:bg-gray-300 transition-colors">
                 Carregar Recibo / NF
               </button>
-              <button className="px-6 py-3 bg-[#1F45FF] text-white rounded-lg font-afacad font-semibold hover:bg-[#1F45FF]/90 transition-colors shadow-md" onClick={() => setEditando(true)}>
+              <button className="px-6 py-3 bg-[#1F45FF] text-white rounded-lg font-afacad font-semibold hover:bg-[#1F45FF]/90 transition-colors shadow-md" onClick={onUpdate}>
                 Atualizar chamado
               </button>
             </div>

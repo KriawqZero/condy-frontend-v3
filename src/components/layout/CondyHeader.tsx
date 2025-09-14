@@ -35,18 +35,17 @@ export default function CondyHeader({ user, title, visitante = false }: CondyHea
 
         {/* Logout Button */}
         {!visitante && (
-          <div className="relative z-[40]">
-            <LogoutButton className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-amber-200 transition duration-500 cursor-pointer" />
-          </div>
+          <LogoutButton className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-amber-200 transition duration-500 cursor-pointer" />
         )}
       </div>
 
       {/* Welcome Message - Ajustado para não conflitar com os cards */}
-      <div className="relative max-w-screen-2xl px-4 sm:px-6 lg:px-8 mx-auto mt-6">
-        <h1 className="font-afacad text-4xl lg:text-5xl font-bold leading-tight">
-          {isAdmin ? `Olá, Administrador!` : visitante ? `Olá, Visitante!` : `Olá, ${user?.name || "Síndico"}!`}
-        </h1>
-        <p className="font-afacad text-lg mt-1">{title}</p>
+      <div className="relative max-w-screen-2xl px-4 sm:px-6 lg:px-8 mx-auto mt-20">
+        <div className="flex flex-col justify-center w-full sm:w-auto" style={{ minHeight: '46px', opacity: 1 }}>
+          <h1 className="font-afacad text-4xl lg:text-5xl font-bold leading-tight sm:whitespace-nowrap break-words">
+            {isAdmin ? `Olá, Administrador!` : visitante ? `Olá, Visitante!` : `Olá, ${user?.name || "Síndico"}!`}
+          </h1>
+        </div>
       </div>
 
       {/* Ilustração de Prédio */}

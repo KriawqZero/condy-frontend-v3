@@ -234,18 +234,27 @@ export default function SindicoDashboard({ user }: { user: User }) {
               /* Tickets Table */
               <div className="bg-white rounded-2xl shadow-sm w-full">
                 <div className="overflow-x-auto w-full">
-                  <div className="min-w-[700px]">
+                  <div className="min-w-[700px] relative">
                     {/* Table Header */}
-                    <div className="bg-white/30 px-6 py-4 border-b border-[#EFF0FF]">
-                      <div className="grid grid-cols-7 gap-4 text-sm font-afacad font-bold text-black">
-                        <div>Tipo de chamado</div>
-                        <div>Ativo cadastrado</div>
-                        <div>Valor do serviço</div>
-                        <div>Prestador vinculado</div>
-                        <div>Observações gerais</div>
-                        <div>Chamado</div>
-                        <div>Status do chamado</div>
+                    <div className="bg-gray-50 px-3 sm:px-6 py-4 border-b border-[#EFF0FF]">
+                      <div className="grid grid-cols-7 gap-2 sm:gap-4 text-xs sm:text-sm font-afacad font-bold text-black">
+                        <div className="pl-0">Tipo de chamado</div>
+                        <div className="pl-4">Ativo cadastrado</div>
+                        <div className="pl-4">Valor do serviço</div>
+                        <div className="pl-4">Prestador vinculado</div>
+                        <div className="pl-4">Observações gerais</div>
+                        <div className="pl-4">Chamado</div>
+                        <div className="pl-4">Status do chamado</div>
                       </div>
+                    </div>
+                    {/* Linhas verticais da tabela */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div className="absolute top-0 bottom-0 left-[14.3%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[28.6%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[42.9%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[57.2%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[71.5%] w-px bg-[#EFF0FF]"></div>
+                      <div className="absolute top-0 bottom-0 left-[85.8%] w-px bg-[#EFF0FF]"></div>
                     </div>
 
                     {/* Table Body */}
@@ -253,21 +262,21 @@ export default function SindicoDashboard({ user }: { user: User }) {
                       {chamados.map((chamado) => (
                         <div
                           key={chamado.id}
-                          className="px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[700px]"
+                          className="px-3 sm:px-6 py-4 hover:bg-gray-50 group cursor-pointer min-w-[700px]"
                           onClick={() => abrirModalVisualizacao(chamado)}
                         >
-                          <div className="grid grid-cols-7 gap-4 items-center">
-                            <div className="font-afacad text-sm font-bold text-black">
+                          <div className="grid grid-cols-7 gap-2 sm:gap-4 items-center">
+                            <div className="font-afacad text-xs sm:text-sm font-bold text-black pl-0">
                               {chamado.escopo === "ORCAMENTO"
                                 ? "Solicitação de orçamento"
                                 : "Serviço imediato"}
                             </div>
-                            <div className="font-afacad text-sm font-bold text-black">
+                            <div className="font-afacad text-xs sm:text-sm font-bold text-black pl-2 sm:pl-4">
                               {chamado.imovel?.endereco || "Sem endereço"}
                             </div>
                             <div
                               className={
-                                `font-afacad font-bold text-sm ` +
+                                `font-afacad font-bold text-xs sm:text-sm pl-2 sm:pl-4 ` +
                                 (Number(chamado.valorEstimado || 0) > 0
                                   ? `text-black`
                                   : `text-black/50`)
@@ -277,7 +286,7 @@ export default function SindicoDashboard({ user }: { user: User }) {
                             </div>
                             <div
                               className={
-                                `font-afacad font-bold text-sm ` +
+                                `font-afacad font-bold text-xs sm:text-sm pl-2 sm:pl-4 ` +
                                 (chamado.prestadorId
                                   ? `text-black`
                                   : `text-black/50`)
@@ -285,13 +294,13 @@ export default function SindicoDashboard({ user }: { user: User }) {
                             >
                               {chamado.prestadorId || "Sem prestador"}
                             </div>
-                            <div className="font-afacad text-sm font-bold text-black">
+                            <div className="font-afacad text-xs sm:text-sm font-bold text-black pl-2 sm:pl-4">
                               {chamado.descricaoOcorrido}
                             </div>
-                            <div className="font-afacad text-sm font-bold text-black">
+                            <div className="font-afacad text-xs sm:text-sm font-bold text-black pl-2 sm:pl-4">
                               {chamado.numeroChamado}
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between pl-2 sm:pl-4">
                               {getStatusBadge(chamado.status)}
                               <div className="w-6 h-6 rounded-full bg-[#F5F7FF] flex items-center justify-center ml-2">
                                 <ChevronRightIcon />
