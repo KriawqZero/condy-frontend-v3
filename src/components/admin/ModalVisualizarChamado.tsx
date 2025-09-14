@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { useState } from "react";
 import { useEffect } from "react";
 import { adminAssignPrestadorAction, adminListPrestadoresAction } from "@/app/actions/admin";
+import { updateChamado } from "@/lib/api";
 
 interface ModalVisualizarChamadoProps {
   chamado: Chamado;
@@ -88,12 +89,68 @@ export function ModalVisualizarChamado({
   const [abrirVinculo, setAbrirVinculo] = useState(false);
   const [prestadores, setPrestadores] = useState<any[]>([]);
   const [prestadorId, setPrestadorId] = useState<string>("");
+  const [vinculandoPrestador, setVinculandoPrestador] = useState(false);
+  const [editando, setEditando] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+  const [status, setStatus] = useState(chamado.status);
+  const [prioridade, setPrioridade] = useState(chamado.prioridade);
+  const [valorEstimado, setValorEstimado] = useState(chamado.valorEstimado?.toString() || "");
+  const [prestadorIdEdit, setPrestadorIdEdit] = useState(chamado.prestadorId || "");
 
   useEffect(() => {
     if (abrirVinculo) {
       adminListPrestadoresAction().then((r: any) => setPrestadores(r.data || []));
     }
   }, [abrirVinculo]);
+
+  const handleVincularPrestador = async () => {
+    if (!prestadorId) {
+      alert("Selecione um prestador");
+      return;
+    }
+    
+    setVinculandoPrestador(true);
+    try {
+      const result = await adminAssignPrestadorAction(chamado.id, prestadorId);
+      if (result.success) {
+        alert("Prestador vinculado com sucesso!");
+        setAbrirVinculo(false);
+        onUpdate?.();
+      } else {
+         alert("Erro ao vincular prestador");
+      }
+    } catch (error) {
+      console.error("Erro ao vincular prestador:", error);
+      alert("Erro ao vincular prestador");
+    } finally {
+      setVinculandoPrestador(false);
+    }
+  };
+
+  const salvarAlteracoes = async () => {
+    setSalvando(true);
+    try {
+      const updateData: any = {
+        status,
+        prioridade,
+        prestadorId: prestadorIdEdit || undefined,
+      };
+      
+      if (valorEstimado) {
+        updateData.valorEstimado = parseFloat(valorEstimado);
+      }
+      
+      await updateChamado(chamado.id, updateData);
+      setEditando(false);
+      onUpdate?.();
+      alert("Chamado atualizado com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao atualizar chamado:", error);
+      alert("Erro ao atualizar chamado: " + (error.response?.data?.message || error.message));
+    } finally {
+      setSalvando(false);
+    }
+  };
 
   const abas = [
     { id: "geral", label: "Geral" },
@@ -192,6 +249,91 @@ export function ModalVisualizarChamado({
         {/* Content */}
         <div className="overflow-y-auto flex-grow">
           <div className="p-4 sm:p-6">
+            {editando && (
+              <div className="mb-6 sm:mb-8 p-4 sm:p-8 bg-white shadow-lg rounded-2xl">
+                <h3 className="font-afacad text-lg sm:text-xl font-medium text-gray-800 mb-4 sm:mb-6">Editar chamado</h3>
+                <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                      <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Status</label>
+                      <div className="relative">
+                        <select 
+                          className="w-full appearance-none border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 pr-10 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
+                          value={status} 
+                          onChange={(e)=>setStatus(e.target.value as any)}
+                        >
+                          <option value="NOVO">Novo</option>
+                          <option value="A_CAMINHO">A Caminho</option>
+                          <option value="EM_ATENDIMENTO">Em Atendimento</option>
+                          <option value="CONCLUIDO">Concluído</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Prioridade</label>
+                      <div className="relative">
+                        <select 
+                          className="w-full appearance-none border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 pr-10 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
+                          value={prioridade} 
+                          onChange={(e)=>setPrioridade(e.target.value as any)}
+                        >
+                          <option value="BAIXA">Baixa</option>
+                          <option value="MEDIA">Média</option>
+                          <option value="ALTA">Alta</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Prestador (CNPJ)</label>
+                    <input 
+                      type="text"
+                      className="w-full border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
+                      placeholder="Digite o CNPJ do prestador"
+                      value={prestadorIdEdit} 
+                      onChange={(e)=>setPrestadorIdEdit(e.target.value)} 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-afacad text-gray-600 mb-1 sm:mb-2">Valor Estimado</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      className="w-full border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-3 focus:outline-none focus:ring-1 focus:ring-[#1F45FF] focus:border-[#1F45FF] transition-all bg-gray-50" 
+                      placeholder="0.00"
+                      value={valorEstimado} 
+                      onChange={(e)=>setValorEstimado(e.target.value)} 
+                    />
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
+                    <button 
+                      className="w-full sm:flex-1 bg-white border border-gray-200 text-gray-700 font-medium py-2 sm:py-3 px-4 sm:px-6 rounded-xl hover:bg-gray-50 transition-all order-2 sm:order-1" 
+                      onClick={()=>setEditando(false)} 
+                      disabled={salvando}
+                    >
+                      Cancelar
+                    </button>
+                    <button 
+                      className="w-full sm:flex-1 bg-[#1F45FF] text-white font-medium py-2 sm:py-3 px-4 sm:px-6 rounded-xl hover:bg-blue-600 transition-all disabled:opacity-50 shadow-sm hover:shadow order-1 sm:order-2 mb-2 sm:mb-0" 
+                      onClick={salvarAlteracoes} 
+                      disabled={salvando}
+                    >
+                      {salvando ? 'Salvando...' : 'Salvar alterações'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* ABA GERAL */}
             {abaAtiva === "geral" && (
@@ -547,9 +689,15 @@ export function ModalVisualizarChamado({
               <button className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-afacad font-semibold hover:bg-gray-300 transition-colors">
                 Carregar Recibo / NF
               </button>
-              <button className="px-6 py-3 bg-[#1F45FF] text-white rounded-lg font-afacad font-semibold hover:bg-[#1F45FF]/90 transition-colors shadow-md" onClick={onUpdate}>
-                Atualizar chamado
-              </button>
+              {!editando ? (
+                <button className="px-6 py-3 bg-[#1F45FF] text-white rounded-lg font-afacad font-semibold hover:bg-[#1F45FF]/90 transition-colors shadow-md" onClick={() => setEditando(true)}>
+                  Atualizar chamado
+                </button>
+              ) : (
+                <button className="px-6 py-3 bg-green-600 text-white rounded-lg font-afacad font-semibold hover:bg-green-700 transition-colors shadow-md" onClick={salvarAlteracoes} disabled={salvando}>
+                  {salvando ? 'Salvando...' : 'Salvar alterações'}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -579,6 +727,65 @@ export function ModalVisualizarChamado({
           </div>
         </div>
       )}
+
+      {/* Modal de Vinculação de Prestador */}
+      {abrirVinculo && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-afacad text-xl font-bold text-black">
+                  Vincular Prestador
+                </h3>
+                <button
+                  onClick={() => setAbrirVinculo(false)}
+                  className="w-8 h-8 flex items-center justify-center bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors"
+                >
+                  <CloseIcon size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block font-afacad text-sm font-bold text-black mb-2">
+                    Selecione o prestador:
+                  </label>
+                  <select
+                    value={prestadorId}
+                    onChange={(e) => setPrestadorId(e.target.value)}
+                    className="w-full border-2 border-[#EFF0FF] rounded-xl px-4 py-3 font-afacad"
+                  >
+                    <option value="">Selecione um prestador</option>
+                    {prestadores.map((prestador) => (
+                      <option key={prestador.id} value={prestador.id}>
+                        {prestador.name || prestador.email} - {prestador.cnpj || prestador.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    onClick={() => setAbrirVinculo(false)}
+                    className="px-4 py-2 border-2 border-[#EFF0FF] rounded-xl text-black hover:bg-gray-50 font-afacad font-bold"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleVincularPrestador}
+                    disabled={vinculandoPrestador || !prestadorId}
+                    className="px-4 py-2 bg-[#1F45FF] text-white rounded-xl hover:bg-[#1F45FF]/90 font-afacad font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {vinculandoPrestador ? "Vinculando..." : "Vincular"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+
 
     </>
   );
