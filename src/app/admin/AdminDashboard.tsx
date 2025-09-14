@@ -526,17 +526,21 @@ export default function AdminDashboard({ _user }: { _user: User }) {
                               {getStatusBadge(chamado.status)}
                             </div>
                             <div className="flex items-center justify-between pl-2 sm:pl-4">
-                              {chamado.status === 'NOVO' && (
-                                <button 
-                                  className="bg-[#1F45FF] hover:bg-[#1a3de6] text-white px-2 py-1 rounded-lg text-xs font-afacad font-bold transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setAbrirProposta(chamado);
-                                  }}
-                                >
-                                  Proposta
-                                </button>
-                              )}
+                              <div className="flex-1">
+                                {chamado.status === 'NOVO' ? (
+                                  <button 
+                                    className="bg-[#1F45FF] hover:bg-[#1a3de6] text-white px-2 py-1 rounded-lg text-xs font-afacad font-bold transition-colors"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAbrirProposta(chamado);
+                                    }}
+                                  >
+                                    Proposta
+                                  </button>
+                                ) : (
+                                  <div className="h-6"></div>
+                                )}
+                              </div>
                               <div className="w-6 h-6 rounded-full bg-[#F5F7FF] flex items-center justify-center ml-2">
                                 <ChevronRightIcon />
                               </div>
