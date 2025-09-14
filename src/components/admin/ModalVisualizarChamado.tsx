@@ -1,7 +1,8 @@
 "use client";
 
 import { Chamado } from "@/types";
-import { X, User, FileText, Download, ZoomIn } from "lucide-react";
+import { User, FileText, Download, ZoomIn, X } from "lucide-react";
+import { CloseIcon } from "../icons/CloseIcon";
 import { Badge } from "@/components/ui/Badge";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -138,10 +139,10 @@ export function ModalVisualizarChamado({
               </p>
             </div>
             <button
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="w-8 h-8 flex items-center justify-center bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors"
               onClick={onClose}
             >
-              <X size={24} />
+              <CloseIcon size={24} />
             </button>
           </div>
         </div>
@@ -532,9 +533,9 @@ export function ModalVisualizarChamado({
           <div className="relative max-w-screen-lg max-h-screen-lg p-4">
             <button
               onClick={() => setImagemAmpliada(null)}
-              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+              className="absolute -top-10 right-0 w-8 h-8 flex items-center justify-center bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors"
             >
-              <X className="w-8 h-8" />
+              <CloseIcon size={24} />
             </button>
             <img
               src={imagemAmpliada}
@@ -548,4 +549,4 @@ export function ModalVisualizarChamado({
 
     </>
   );
-} 
+}

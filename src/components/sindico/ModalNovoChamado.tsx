@@ -3,6 +3,7 @@ import { getImoveisAction } from "@/app/actions/imoveis";
 import { debugAnexosPendentes, getAnexosPendentes, limparAnexosPendentes, updateAnexoChamadoIdClient } from "@/lib/api";
 import { Anexo, Imovel, NovoChamadoData } from "@/types";
 import { Building, MapPin, Plus, X } from "lucide-react";
+import { CloseIcon } from "../icons/CloseIcon";
 import { useEffect, useState } from "react";
 import { CondySelect } from "../forms/CondySelect";
 import { FileUpload } from "../forms/FileUpload";
@@ -17,6 +18,10 @@ const handleCloseModal = (onClose: () => void) => {
   // Opcionalmente, limpar anexos pendentes se o usuário cancelar
   // Descomente a linha abaixo se quiser limpar anexos ao cancelar
   // limparAnexosPendentes();
+  
+  // Restaurar scroll da página quando o modal for fechado manualmente
+  document.body.classList.remove('modal-open');
+  
   onClose();
 };
 
@@ -36,11 +41,19 @@ export function ModalNovoChamado({
   const [escopo, setEscopo] = useState<string>("");
   const [anexos, setAnexos] = useState<Anexo[]>([]);
 
-  // Carregar imóveis na inicialização
+  // Carregar imóveis na inicialização e desabilitar scroll
   useEffect(() => {
     carregarImoveis();
     // Debug do estado atual dos anexos pendentes
     debugAnexosPendentes();
+    
+    // Desabilitar scroll da página quando o modal estiver aberto
+    document.body.classList.add('modal-open');
+    
+    // Restaurar scroll quando o modal for fechado
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
   }, []);
 
   const carregarImoveis = async () => {
@@ -57,6 +70,8 @@ export function ModalNovoChamado({
     { numero: "02", ativo: etapa >= 2 },
     { numero: "03", ativo: etapa >= 3 },
   ];
+
+  // Ajuste de espaçamento para alinhamento com o design do Figma
 
   const opcoesImovel = imoveis.map((imovel) => ({
     value: imovel.id.toString(),
@@ -175,6 +190,9 @@ export function ModalNovoChamado({
         console.log("ℹ️ Nenhum anexo pendente para associar");
       }
 
+      // Restaurar scroll da página quando o chamado for enviado com sucesso
+      document.body.classList.remove('modal-open');
+      
       onSuccess?.();
       onClose();
     } catch (error) {
@@ -187,37 +205,38 @@ export function ModalNovoChamado({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-2xl rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-white w-full max-w-2xl rounded-2xl p-4 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold font-afacad text-black">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold font-afacad text-black">
             Novo chamado
           </h2>
           <button
-            className="text-gray-400 hover:text-gray-600"
+            className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-white rounded-full text-blue-600 border border-blue-600 hover:bg-gray-50 transition-colors"
             onClick={() => handleCloseModal(onClose)}
           >
-            <X size={24} />
+            <CloseIcon size={20} className="sm:hidden" />
+            <CloseIcon size={24} className="hidden sm:block" />
           </button>
         </div>
 
         {/* Progresso */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-center mb-6 px-2 w-full space-x-2 sm:space-x-3 md:space-x-4">
           {Etapas.map((etapaItem, index) => (
             <div key={etapaItem.numero} className="flex items-center">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm sm:text-base md:text-lg font-bold transition-all ${
                   etapaItem.ativo
                     ? "bg-[#1F45FF] text-white"
-                    : "bg-[#E3E7F1] text-gray-400"
+                    : "bg-[#F5F7FF] text-gray-400"
                 }`}
               >
                 {etapaItem.numero}
               </div>
               {index < Etapas.length - 1 && (
                 <div
-                  className={`h-1 w-16 ml-2 transition-all ${
-                    etapa > index + 1 ? "bg-[#1F45FF]" : "bg-[#E3E7F1]"
+                  className={`h-1 sm:h-1.5 w-8 sm:w-10 md:w-12 ml-1 sm:ml-2 transition-all ${
+                    etapa > index + 1 ? "bg-[#1F45FF]" : "bg-[#F5F7FF]"
                   }`}
                 />
               )}
@@ -226,18 +245,18 @@ export function ModalNovoChamado({
         </div>
 
         {/* Conteúdo da etapa */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           {etapa === 1 && (
             <div>
-              <h3 className="text-lg font-bold font-afacad text-black mb-2">
+              <h3 className="text-base sm:text-lg font-bold font-afacad text-black mb-1 sm:mb-2">
                 1ª Etapa: Identificação do Condomínio
               </h3>
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
                 Selecione o local onde o problema foi identificado para podermos
                 associar corretamente o chamado
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <div>
                   <CondySelect
                     label="Selecione o condomínio ou empresa"
@@ -245,21 +264,28 @@ export function ModalNovoChamado({
                     value={imovelSelecionado}
                     onChange={setImovelSelecionado}
                     placeholder="Selecione um imóvel"
+                    customIcon={
+                      <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 14.0823C13.7231 14.0823 15.12 12.6855 15.12 10.9623C15.12 9.23922 13.7231 7.84234 12 7.84234C10.2769 7.84234 8.88 9.23922 8.88 10.9623C8.88 12.6855 10.2769 14.0823 12 14.0823Z" stroke="black" strokeWidth="1.5"/>
+                        <path d="M3.61995 9.14234C5.58995 0.482344 18.42 0.492344 20.38 9.15234C21.53 14.2323 18.37 18.5323 15.6 21.1923C13.59 23.1323 10.41 23.1323 8.38995 21.1923C5.62995 18.5323 2.46995 14.2223 3.61995 9.14234Z" stroke="black" strokeWidth="1.5"/>
+                      </svg>
+                    }
                   />
                   <div
-                    className={`mt-2 w-full flex flex-col items-center justify-center gap-1 px-3 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed ${
-                      imoveis.length === 0 ? "py-4" : "py-2"
+                    className={`mt-2 w-full flex flex-col items-center justify-center gap-1 px-2 sm:px-3 text-xs sm:text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed ${
+                      imoveis.length === 0 ? "py-3 sm:py-4" : "py-2"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <Plus size={16} className="text-gray-400" />
-                      <span className="font-medium">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <Plus size={14} className="text-gray-400 sm:hidden" />
+                      <Plus size={16} className="text-gray-400 hidden sm:block" />
+                      <span className="font-medium text-xs sm:text-sm">
                         {imoveis.length === 0
                           ? "Nenhum imóvel cadastrado"
                           : "Cadastrar novo imóvel"}
                       </span>
                     </div>
-                    <span className="text-xs text-gray-400 text-center">
+                    <span className="text-[10px] sm:text-xs text-gray-400 text-center">
                       Funcionalidade indisponível. Entre em contato com seu
                       atendente para cadastrar novos imóveis.
                     </span>
@@ -272,17 +298,24 @@ export function ModalNovoChamado({
                   value={localInstalacao}
                   onChange={setLocalInstalacao}
                   placeholder="Selecione o local"
+                  customIcon={
+                    <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 14.0823C13.7231 14.0823 15.12 12.6855 15.12 10.9623C15.12 9.23922 13.7231 7.84234 12 7.84234C10.2769 7.84234 8.88 9.23922 8.88 10.9623C8.88 12.6855 10.2769 14.0823 12 14.0823Z" stroke="black" strokeWidth="1.5"/>
+                      <path d="M3.61995 9.14234C5.58995 0.482344 18.42 0.492344 20.38 9.15234C21.53 14.2323 18.37 18.5323 15.6 21.1923C13.59 23.1323 10.41 23.1323 8.38995 21.1923C5.62995 18.5323 2.46995 14.2223 3.61995 9.14234Z" stroke="black" strokeWidth="1.5"/>
+                    </svg>
+                  }
                 />
               </div>
 
               {imovelSelecionadoData && (
-                <div className="mb-4">
-                  <label className="block text-sm font-afacad text-[#1F45FF] mb-1">
+                <div className="mb-3 sm:mb-4">
+                  <label className="block text-xs sm:text-sm font-afacad text-[#1F45FF] mb-1">
                     Endereço
                   </label>
-                  <div className="border-2 border-[#1F45FF] rounded-xl px-4 py-3 bg-gray-50 flex items-center gap-2">
-                    <MapPin size={16} className="text-[#1F45FF]" />
-                    <span className="text-sm">
+                  <div className="border-2 border-[#1F45FF] rounded-xl px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 flex items-center gap-1 sm:gap-2">
+                    <MapPin size={14} className="text-[#1F45FF] sm:hidden" />
+                    <MapPin size={16} className="text-[#1F45FF] hidden sm:block" />
+                    <span className="text-xs sm:text-sm">
                       {imovelSelecionadoData.nome}:{" "}
                       {imovelSelecionadoData.endereco},{" "}
                       {imovelSelecionadoData.numero} –{" "}
@@ -302,25 +335,36 @@ export function ModalNovoChamado({
 
           {etapa === 2 && (
             <div>
-              <h3 className="text-lg font-bold font-afacad text-black mb-2">
+              <h3 className="text-base sm:text-lg font-bold font-afacad text-black mb-1 sm:mb-2">
                 2ª Etapa: Descrevendo o problema
               </h3>
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
                 Infoque o nível de urgência e se deseja apenas um orçamento ou
                 execução imediata do serviço
               </p>
 
-              <div className="mb-6">
-                <label className="block text-sm font-afacad text-[#1F45FF] mb-1">
+              <div className="mb-4 sm:mb-6">
+                <label className="block text-xs sm:text-sm font-afacad text-[#1F45FF] mb-1">
                   Informe detalhes sobre o problema *
                 </label>
-                <textarea
-                  placeholder="Descreva o ocorrido"
-                  className="w-full border-2 border-[#1F45FF] rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100"
-                  rows={3}
-                  value={descricaoOcorrido}
-                  onChange={(e) => setDescricaoOcorrido(e.target.value)}
-                />
+                <div className="relative">
+                  <div className="absolute left-3 sm:left-4 top-2 sm:top-3 z-10">
+                    <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 2.65234V5.65234" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M16 2.65234V5.65234" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M21 9.15234V17.6523C21 20.6523 19.5 22.6523 16 22.6523H8C4.5 22.6523 3 20.6523 3 17.6523V9.15234C3 6.15234 4.5 4.15234 8 4.15234H16C19.5 4.15234 21 6.15234 21 9.15234Z" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M8 11.6523H16" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M8 16.6523H12" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <textarea
+                    placeholder="Descreva o ocorrido"
+                    className="w-full border-2 border-[#1F45FF] rounded-xl pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm"
+                    rows={3}
+                    value={descricaoOcorrido}
+                    onChange={(e) => setDescricaoOcorrido(e.target.value)}
+                  />
+                </div>
               </div>
 
               <FileUpload anexos={anexos} onFilesUploaded={setAnexos} />
@@ -329,15 +373,15 @@ export function ModalNovoChamado({
 
           {etapa === 3 && (
             <div>
-              <h3 className="text-lg font-bold font-afacad text-black mb-2">
+              <h3 className="text-base sm:text-lg font-bold font-afacad text-black mb-1 sm:mb-2">
                 3ª Etapa: Prioridade e escopo
               </h3>
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
                 Infoque o nível de urgência e se deseja apenas um orçamento ou
                 execução imediata do serviço
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <CondySelect
                   label="Prioridade"
                   options={opcoesPrioridade}
@@ -359,21 +403,19 @@ export function ModalNovoChamado({
         </div>
 
         {/* Navegação */}
-        <div className="flex justify-between">
-          {etapa > 1 ? (
+        <div className="flex justify-end gap-4">
+          {etapa > 1 && (
             <button
-              className="bg-[#F4F5FF] text-[#1F45FF] font-bold px-6 py-3 rounded-xl shadow hover:bg-blue-50 transition-colors"
+              className="bg-[#F4F5FF] text-[#1F45FF] font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow hover:bg-blue-50 transition-colors"
               onClick={handleVoltar}
               disabled={loading}
             >
               Voltar etapa
             </button>
-          ) : (
-            <div />
           )}
 
           <button
-            className="bg-[#1F45FF] text-white font-bold px-6 py-3 rounded-xl shadow hover:bg-blue-600 transition-colors disabled:opacity-50"
+            className="bg-[#1F45FF] text-white font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow hover:bg-blue-600 transition-colors disabled:opacity-50"
             onClick={handleAvancar}
             disabled={loading}
           >

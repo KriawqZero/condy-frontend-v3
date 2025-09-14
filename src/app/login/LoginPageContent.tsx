@@ -104,7 +104,6 @@ export default function LoginPageContent() {
           />
           
           <div className="flex items-center justify-center text-xs">
-            <span>Incubado por</span>
             <img 
               src="/svg/incubadora_logo.svg" 
               alt="Incubadora" 
@@ -113,7 +112,6 @@ export default function LoginPageContent() {
           </div>
           
           <div className="flex items-center justify-center text-xs">
-            <span>Acelerado por</span>
             <img 
               src="/logo_aceleradora.png" 
               alt="Aceleradora" 
@@ -123,7 +121,7 @@ export default function LoginPageContent() {
         </div>
         
         <div className="text-xs text-white/80 mt-3 md:mt-4">
-          Condy Tecnologia LTDA © 2025 <br />Todos os direitos reservados · CNPJ 60.185.344/0001-44
+          Condy Tecnologia LTDA © 2025 <br />Todos os direitos reservados <br/>CNPJ 60.185.344/0001-44
         </div>
       </footer>
     </div>

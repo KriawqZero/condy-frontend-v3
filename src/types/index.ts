@@ -228,10 +228,11 @@ export interface NovoImovelData {
 }
 
 export interface NovoChamadoData {
-  descricaoOcorrido?: string;
+  descricaoOcorrido: string;
   prioridade: "BAIXA" | "MEDIA" | "ALTA";
   imovelId: number;
   escopo: "SERVICO_IMEDIATO" | "ORCAMENTO";
+  informacoesAdicionais?: string;
 }
 
 // Component Props Types

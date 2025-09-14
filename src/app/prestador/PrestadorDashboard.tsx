@@ -439,7 +439,7 @@ export default function PrestadorDashboard({ _user }: { _user: User }) {
       )}
 
       {/* WhatsApp Float Button */}
-      <div className="fixed bottom-8 right-8 z-50">
+      <div className="fixed bottom-8 right-8 z-40">
       <button className="w-16 h-16 bg-[#10A07B] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
         <WhatsappIcon />
       </button>
