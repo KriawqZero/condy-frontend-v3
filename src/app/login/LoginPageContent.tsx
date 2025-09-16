@@ -88,40 +88,24 @@ export default function LoginPageContent() {
 
         <div className="hidden lg:flex lg:w-1/2 relative">
           <img
-            src="/imagem_fundo.png"
+            src="/img-login-page4.jpeg"
             alt="Ambiente moderno de condomínio"
             className="w-full h-full object-cover"
           />
         </div>
       </div>
 
-      <footer className="bg-blue-600 py-4 md:py-6 text-white text-center">
-        <div className="flex flex-col md:flex-row md:justify-center md:items-center md:space-x-8 items-center space-y-3 md:space-y-0">
+      <footer className="bg-blue-600 py-4 md:py-6 text-white">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center items-center space-y-3 md:space-y-0 px-4 md:px-8">
+          <div className="text-xs text-white/80 text-center md:text-left order-2 md:order-1">
+            Condy Tecnologia LTDA © 2025 <br />Todos os direitos reservados <br/>CNPJ 60.185.344/0001-44
+          </div>
+          
           <img 
             src="/horizontal_logo_white.svg" 
             alt="Condy" 
-            className="h-6" 
+            className="h-10 md:h-12 order-1 md:order-2" 
           />
-          
-          <div className="flex items-center justify-center text-xs">
-            <img 
-              src="/svg/incubadora_logo.svg" 
-              alt="Incubadora" 
-              className="h-5 mx-2" 
-            />
-          </div>
-          
-          <div className="flex items-center justify-center text-xs">
-            <img 
-              src="/logo_aceleradora.png" 
-              alt="Aceleradora" 
-              className="h-5 mx-2" 
-            />
-          </div>
-        </div>
-        
-        <div className="text-xs text-white/80 mt-3 md:mt-4">
-          Condy Tecnologia LTDA © 2025 <br />Todos os direitos reservados <br/>CNPJ 60.185.344/0001-44
         </div>
       </footer>
     </div>
