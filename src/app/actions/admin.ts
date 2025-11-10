@@ -1,8 +1,7 @@
 "use server";
 
 import { getChamados, getImoveis, updateChamado } from "@/lib/api";
-import axios from "axios";
-import { getSession } from "@/lib/session";
+import { apiClient } from "@/lib/api-client";
 import { ResponsePayload, Chamado, User } from "@/types";
 
 // Action para admin obter todos os chamados (sem restrições)
@@ -43,58 +42,72 @@ export async function updateChamadoAdminAction(
 
 // Admin: listar prestadores
 export async function adminListPrestadoresAction(query?: string) {
-  const session = await getSession();
-  const base = process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-  const res = await axios.get(`${base}/user/prestadores`, {
-    headers: { Authorization: `Bearer ${session.token}` },
-    params: { q: query },
-  });
-  const raw = res.data;
-  const data = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
-  return { success: true, data } as any;
+  try {
+    const data = await apiClient.get<User[]>("/user/prestadores", {
+      params: { q: query },
+    });
+    return { success: true, data };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Erro ao listar prestadores" };
+  }
 }
 
 // Admin: atribuir prestador ao chamado
 export async function adminAssignPrestadorAction(chamadoId: string, prestadorId: string) {
-  const session = await getSession();
-  const base = process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-  const res = await axios.patch(`${base}/chamado/${chamadoId}/assign-prestador/${prestadorId}`, {}, {
-    headers: { Authorization: `Bearer ${session.token}` },
-  });
-  return { success: true, data: res.data };
+  try {
+    const data = await apiClient.patch(
+      `/chamado/${chamadoId}/assign-prestador/${prestadorId}`,
+      {}
+    );
+    return { success: true, data };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Erro ao atribuir prestador" };
+  }
 }
 
 // Admin: enviar propostas a prestadores
-export async function adminEnviarPropostasAction(data: { chamadoId: number; prestadores: string[]; precoMin?: string; precoMax?: string; prazo?: number; mensagem?: string; }) {
-  const session = await getSession();
-  const base = process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-  const res = await axios.post(`${base}/admin/propostas/enviar`, data, {
-    headers: { Authorization: `Bearer ${session.token}` },
-  });
-  const raw = res.data;
-  return { success: true, data: raw?.data ?? raw } as any;
+export async function adminEnviarPropostasAction(data: {
+  chamadoId: number;
+  prestadores: string[];
+  precoMin?: string;
+  precoMax?: string;
+  prazo?: number;
+  mensagem?: string;
+}) {
+  try {
+    const result = await apiClient.post("/admin/propostas/enviar", data);
+    return { success: true, data: result };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Erro ao enviar propostas" };
+  }
 }
 
 // Admin: listar propostas por chamado
 export async function adminListPropostasPorChamadoAction(chamadoId: number) {
-  const session = await getSession();
-  const base = process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-  const res = await axios.get(`${base}/admin/propostas/por-chamado/${chamadoId}`, {
-    headers: { Authorization: `Bearer ${session.token}` },
-  });
-  const raw = res.data;
-  const data = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
-  return { success: true, data } as any;
+  try {
+    const data = await apiClient.get(`/admin/propostas/por-chamado/${chamadoId}`);
+    return { success: true, data: Array.isArray(data) ? data : [] };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Erro ao listar propostas" };
+  }
 }
 
 // Admin: decidir contraproposta
-export async function adminDecidirContrapropostaAction(propostaId: number, acao: 'aprovar'|'recusar', body?: { valorAcordado?: string }) {
-  const session = await getSession();
-  const base = process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-  const url = acao === 'aprovar' ? `${base}/admin/propostas/${propostaId}/aprovar-contraproposta` : `${base}/admin/propostas/${propostaId}/recusar-contraproposta`;
-  const res = await axios.post(url, body || {}, { headers: { Authorization: `Bearer ${session.token}` } });
-  const raw = res.data;
-  return { success: true, data: raw?.data ?? raw } as any;
+export async function adminDecidirContrapropostaAction(
+  propostaId: number,
+  acao: 'aprovar' | 'recusar',
+  body?: { valorAcordado?: string }
+) {
+  try {
+    const endpoint = acao === 'aprovar'
+      ? `/admin/propostas/${propostaId}/aprovar-contraproposta`
+      : `/admin/propostas/${propostaId}/recusar-contraproposta`;
+    
+    const data = await apiClient.post(endpoint, body || {});
+    return { success: true, data };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Erro ao decidir contraproposta" };
+  }
 }
 
 // Action para admin obter todos os usuários
@@ -290,7 +303,7 @@ export async function getSystemStatsAction(): Promise<ResponsePayload<{
       error: error.message || "Erro ao buscar estatísticas",
     };
   }
-}
+}e
 
 // Action para admin obter logs do sistema
 export async function getSystemLogsAction(): Promise<ResponsePayload<{
