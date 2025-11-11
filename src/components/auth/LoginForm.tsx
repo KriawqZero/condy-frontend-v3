@@ -45,11 +45,18 @@ export default function LoginForm() {
       const result = await loginAction(formDataToSend);
 
       if (result && !result.success) {
-        setLoginError({
-          errorTitle: "Dados incorretos",
-          errorMessage:
-            "Email ou senha incorretos. Verifique seus dados e tente novamente.",
-        });
+        console.log("result", result);
+        if(result.status === 403) {
+          setLoginError({
+            errorTitle: "Usuário inativo",
+            errorMessage: "Seu usuário está inativo. Por favor, contate o suporte.",
+          });
+        } else {
+          setLoginError({
+            errorTitle: "Dados incorretos",
+            errorMessage: "Email ou senha incorretos. Verifique seus dados e tente novamente.",
+          });
+        }
       }
     } catch {
       setLoginError({

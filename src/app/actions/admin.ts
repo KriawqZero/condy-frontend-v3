@@ -113,41 +113,11 @@ export async function adminDecidirContrapropostaAction(
 // Action para admin obter todos os usuários
 export async function getAdminUsersAction(): Promise<ResponsePayload<User[]>> {
   try {
-    // TODO: Implementar chamada API real - Futura implementação
-    // const response = await getUsers();
+    const response = await apiClient.get<Promise<User[]>>("/auth");
     
-    // Mock data por enquanto - será implementado futuramente
-    const mockUsers: User[] = [
-      {
-        id: '1',
-        name: 'João Silva',
-        email: 'joao@condominio.com',
-        cpfCnpj: '123.456.789-00',
-        whatsapp: '(11) 99999-9999',
-        userType: 'SINDICO_RESIDENTE',
-        dataNascimento: '1985-05-15'
-      },
-      {
-        id: '2',
-        name: 'Maria Santos',
-        email: 'maria@empresa.com',
-        cpfCnpj: '12.345.678/0001-90',
-        whatsapp: '(11) 88888-8888',
-        userType: 'EMPRESA'
-      },
-      {
-        id: '3',
-        name: 'Carlos Prestador',
-        email: 'carlos@prestador.com',
-        cpfCnpj: '987.654.321-00',
-        whatsapp: '(11) 77777-7777',
-        userType: 'PRESTADOR'
-      }
-    ];
-    
-    return { success: true, data: mockUsers };
+    return { success: true, data: response };
   } catch (error: any) {
-    return {
+    return {  
       success: false,
       error: error.message || "Erro ao buscar usuários",
     };
@@ -303,7 +273,7 @@ export async function getSystemStatsAction(): Promise<ResponsePayload<{
       error: error.message || "Erro ao buscar estatísticas",
     };
   }
-}e
+}
 
 // Action para admin obter logs do sistema
 export async function getSystemLogsAction(): Promise<ResponsePayload<{

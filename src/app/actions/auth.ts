@@ -38,7 +38,7 @@ export async function loginAction(formData: FormData) {
       await createSession(response.data.token, response.data.user);
 
       // Disponibilizar o token para o cliente (axios no browser)
-      const cookieStore = await import("next/headers").then(m => m.cookies());
+      const cookieStore = await import("next/headers").then((m) => m.cookies());
       cookieStore.set("auth_token", response.data.token, {
         httpOnly: false,
         sameSite: "lax",
@@ -72,6 +72,7 @@ export async function loginAction(formData: FormData) {
       // Handle API errors separately
       return {
         success: false,
+        status: apiError.status,
         error: apiError.message || "Credenciais inválidas",
       };
     }
@@ -143,7 +144,7 @@ export async function registerAction(formData: FormData) {
 // Server Action para logout
 export async function logoutAction() {
   await destroySession();
-  const cookieStore = await import("next/headers").then(m => m.cookies());
+  const cookieStore = await import("next/headers").then((m) => m.cookies());
   cookieStore.delete("auth_token");
   redirect("/login");
 }
