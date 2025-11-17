@@ -71,7 +71,10 @@ export class ApiClient {
         // Erro de resposta do servidor
         const errorMessage =
           error.response.data?.message || error.response.data?.error || error.message || 'Erro na requisição';
-        throw new Error(errorMessage);
+        throw Object.assign(new Error(errorMessage), {
+          status: error.response.status,
+          data: error.response.data,
+        });
       } else if (error.request) {
         // Erro de rede
         throw new Error('Erro de conexão com o servidor');

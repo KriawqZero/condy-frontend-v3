@@ -2,9 +2,12 @@
 
 import LoginForm from '@/components/auth/LoginForm';
 import Head from 'next/head';
-import { useState as _useState } from 'react';
 
-export default function LoginPageContent() {
+interface LoginPageContentProps {
+  logoutNotice?: string;
+}
+
+export default function LoginPageContent({ logoutNotice }: LoginPageContentProps) {
   const handleWhatsAppClick = () => {
     const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5511999999999';
     const message = encodeURIComponent(
@@ -40,6 +43,12 @@ export default function LoginPageContent() {
                   Gerencie chamados, acompanhe serviços e facilite a rotina do seu condomínio ou empresa.
                 </p>
               </div>
+
+              {logoutNotice && (
+                <div className='mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700'>
+                  {logoutNotice}
+                </div>
+              )}
 
               <LoginForm />
 

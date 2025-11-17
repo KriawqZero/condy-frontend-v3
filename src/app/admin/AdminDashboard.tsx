@@ -19,7 +19,7 @@ type DashboardStats = {
   mediaTempoResolucao: number;
 };
 
-export default function AdminDashboard({ _user }: { _user: User }) {
+export default function AdminDashboard({ user }: { user: User }) {
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [chamadosFiltrados, setChamadosFiltrados] = useState<Chamado[]>([]);
   const [termoBusca, setTermoBusca] = useState('');
@@ -146,7 +146,9 @@ export default function AdminDashboard({ _user }: { _user: User }) {
         <ModalCadastroImovel onClose={() => setShowCreateImovelModal(false)} onSuccess={fetchData} />
       )}
 
-      {showUsersModal && <ModalListaUsuarios onClose={() => setShowUsersModal(false)} onSuccess={fetchData} />}
+      {showUsersModal && (
+        <ModalListaUsuarios currentUser={user} onClose={() => setShowUsersModal(false)} onSuccess={fetchData} />
+      )}
 
       {selectedChamado && (
         <ModalVisualizarChamado

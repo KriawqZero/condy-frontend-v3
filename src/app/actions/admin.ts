@@ -2,7 +2,50 @@
 
 import { getChamados, getImoveis, updateChamado } from '@/lib/api';
 import { apiClient } from '@/lib/api-client';
+import { destroySession } from '@/lib/session';
 import { ResponsePayload, Chamado, User, UserStatus } from '@/types';
+import { redirect } from 'next/navigation';
+
+async function forceLogout(reason: string) {
+  await destroySession();
+  const cookieStore = await import('next/headers').then(m => m.cookies());
+  cookieStore.delete('auth_token');
+  const noticeParam = encodeURIComponent(reason);
+  redirect(`/login?logoutNotice=${noticeParam}`);
+}
+
+async function handleAuthError(error: any) {
+  const status = error?.status;
+  const rawMessage = typeof error?.message === 'string' ? error.message : '';
+  const message = rawMessage.toLowerCase();
+
+  const requiresLogout =
+    status === 401 ||
+    status === 403 ||
+    message.includes('email mismatch') ||
+    message.includes('invalid token') ||
+    message.includes('user type mismatch');
+
+  if (!requiresLogout) {
+    return;
+  }
+
+  let reason = 'Sua sessão foi encerrada. Faça login novamente.';
+
+  if (message.includes('email mismatch')) {
+    reason = 'Seu e-mail foi atualizado e a sessão anterior não é mais válida. Faça login novamente.';
+  } else if (message.includes('user type mismatch')) {
+    reason = 'Seu perfil de acesso foi alterado. Faça login novamente para continuar.';
+  } else if (message.includes('invalid token')) {
+    reason = 'Seu token de acesso expirou. Faça login novamente.';
+  } else if (status === 401) {
+    reason = 'Sua sessão expirou. Faça login novamente.';
+  } else if (status === 403) {
+    reason = 'Você não tem mais permissão para continuar logado. Faça login novamente.';
+  }
+
+  await forceLogout(reason);
+}
 
 // Action para admin obter todos os chamados (sem restrições)
 export async function getAdminChamadosAction(): Promise<ResponsePayload<Chamado[]>> {
@@ -11,6 +54,7 @@ export async function getAdminChamadosAction(): Promise<ResponsePayload<Chamado[
     const response = await getChamados();
     return { success: true, data: response.data.items };
   } catch (error: any) {
+    await handleAuthError(error);
     return {
       success: false,
       error: error.message || 'Erro ao buscar chamados',
@@ -33,6 +77,7 @@ export async function updateChamadoAdminAction(
     const response = await updateChamado(id, data);
     return { success: true, data: response.data } as any;
   } catch (error: any) {
+    await handleAuthError(error);
     return {
       success: false,
       error: error.message || 'Erro ao atualizar chamado',
@@ -48,6 +93,7 @@ export async function adminListPrestadoresAction(query?: string) {
     });
     return { success: true, data };
   } catch (error: any) {
+    await handleAuthError(error);
     return { success: false, error: error.message || 'Erro ao listar prestadores' };
   }
 }
@@ -58,6 +104,7 @@ export async function adminAssignPrestadorAction(chamadoId: string, prestadorId:
     const data = await apiClient.patch(`/chamado/${chamadoId}/assign-prestador/${prestadorId}`, {});
     return { success: true, data };
   } catch (error: any) {
+    await handleAuthError(error);
     return { success: false, error: error.message || 'Erro ao atribuir prestador' };
   }
 }
@@ -75,6 +122,7 @@ export async function adminEnviarPropostasAction(data: {
     const result = await apiClient.post('/admin/propostas/enviar', data);
     return { success: true, data: result };
   } catch (error: any) {
+    await handleAuthError(error);
     return { success: false, error: error.message || 'Erro ao enviar propostas' };
   }
 }
@@ -85,6 +133,7 @@ export async function adminListPropostasPorChamadoAction(chamadoId: number) {
     const data = await apiClient.get(`/admin/propostas/por-chamado/${chamadoId}`);
     return { success: true, data: Array.isArray(data) ? data : [] };
   } catch (error: any) {
+    await handleAuthError(error);
     return { success: false, error: error.message || 'Erro ao listar propostas' };
   }
 }
@@ -104,6 +153,7 @@ export async function adminDecidirContrapropostaAction(
     const data = await apiClient.post(endpoint, body || {});
     return { success: true, data };
   } catch (error: any) {
+    await handleAuthError(error);
     return { success: false, error: error.message || 'Erro ao decidir contraproposta' };
   }
 }
@@ -115,6 +165,7 @@ export async function getAdminUsersAction(): Promise<ResponsePayload<User[]>> {
 
     return { success: true, data: response };
   } catch (error: any) {
+    await handleAuthError(error);
     return {
       success: false,
       error: error.message || 'Erro ao buscar usuários',
@@ -137,9 +188,26 @@ export async function updateUserAdminAction(id: string, data: UpdateUserAdminPay
       message: 'Usuário atualizado com sucesso!',
     };
   } catch (error: any) {
+    await handleAuthError(error);
     return {
       success: false,
       error: error.message || 'Erro ao atualizar usuário',
+    };
+  }
+}
+
+export async function deleteUserAdminAction(id: string): Promise<ResponsePayload<null>> {
+  try {
+    await apiClient.delete(`/auth/${id}`);
+    return {
+      success: true,
+      message: 'Usuário excluído com sucesso!',
+    };
+  } catch (error: any) {
+    await handleAuthError(error);
+    return {
+      success: false,
+      error: error.message || 'Erro ao excluir usuário',
     };
   }
 }
@@ -167,6 +235,7 @@ export async function createUserAdminAction(data: {
       message: 'Usuário criado com sucesso!',
     };
   } catch (error: any) {
+    await handleAuthError(error);
     return {
       success: false,
       error: error.message || 'Erro ao criar usuário',
@@ -190,6 +259,7 @@ export async function alocarPrestadorAction(chamadoId: string, prestadorId: stri
       message: 'Prestador alocado com sucesso!',
     };
   } catch (error: any) {
+    await handleAuthError(error);
     return {
       success: false,
       error: error.message || 'Erro ao alocar prestador',
@@ -249,6 +319,7 @@ export async function getSystemStatsAction(): Promise<
     };
   } catch (error: any) {
     console.error('Erro ao buscar estatísticas do sistema:', error);
+    await handleAuthError(error);
     return {
       success: false,
       error: error.message || 'Erro ao buscar estatísticas',
@@ -287,6 +358,7 @@ export async function getSystemLogsAction(): Promise<
       ],
     };
   } catch (error: any) {
+    await handleAuthError(error);
     return {
       success: false,
       error: error.message || 'Erro ao buscar logs',

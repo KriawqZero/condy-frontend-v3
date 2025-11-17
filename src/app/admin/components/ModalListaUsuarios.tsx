@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, ChangeEvent } from 'react';
-import { getAdminUsersAction, updateUserAdminAction } from '@/app/actions/admin';
+import { deleteUserAdminAction, getAdminUsersAction, updateUserAdminAction } from '@/app/actions/admin';
 import { User, UserType, UserStatus } from '@/types';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -13,6 +13,7 @@ import {
   Search,
   ShieldBan,
   ShieldCheck,
+  Trash2,
   Users,
   X,
 } from 'lucide-react';
@@ -46,6 +47,7 @@ type AdminUserData = User & {
 interface ModalListaUsuariosProps {
   onClose: () => void;
   onSuccess: () => void;
+  currentUser: User;
 }
 
 const userTypeOptions: { value: UserType; label: string }[] = [
@@ -56,7 +58,7 @@ const userTypeOptions: { value: UserType; label: string }[] = [
   { value: 'ADMIN_PLATAFORMA', label: 'Admin da plataforma' },
 ];
 
-export function ModalListaUsuarios({ onClose, onSuccess }: ModalListaUsuariosProps) {
+export function ModalListaUsuarios({ onClose, onSuccess, currentUser }: ModalListaUsuariosProps) {
   const [usuarios, setUsuarios] = useState<AdminUserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +74,7 @@ export function ModalListaUsuarios({ onClose, onSuccess }: ModalListaUsuariosPro
   });
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
   const [mudandoStatus, setMudandoStatus] = useState<string | null>(null);
+  const [excluindoUsuario, setExcluindoUsuario] = useState<string | null>(null);
 
   const carregarUsuarios = async () => {
     setLoading(true);
@@ -197,6 +200,40 @@ export function ModalListaUsuarios({ onClose, onSuccess }: ModalListaUsuariosPro
       setError(err.message || 'Erro inesperado ao atualizar status.');
     } finally {
       setMudandoStatus(null);
+    }
+  };
+
+  const excluirUsuario = async (usuario: AdminUserData) => {
+    if (!usuario) return;
+
+    if (usuario.id === currentUser.id) {
+      setError('Você não pode excluir o seu próprio usuário.');
+      return;
+    }
+
+    const confirmar = window.confirm(`Tem certeza que deseja excluir o usuário "${usuario.name}"? Essa ação é irreversível.`);
+    if (!confirmar) {
+      return;
+    }
+
+    setExcluindoUsuario(usuario.id);
+    setError(null);
+
+    try {
+      const response = await deleteUserAdminAction(usuario.id);
+      if (response.success) {
+        setUsuarios(prev => prev.filter(item => item.id !== usuario.id));
+        if (usuarioEditando?.id === usuario.id) {
+          cancelarEdicao();
+        }
+        onSuccess();
+      } else {
+        setError(response.error || 'Não foi possível excluir o usuário.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Erro inesperado ao excluir usuário.');
+    } finally {
+      setExcluindoUsuario(null);
     }
   };
 
@@ -331,6 +368,21 @@ export function ModalListaUsuarios({ onClose, onSuccess }: ModalListaUsuariosPro
                               className='rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors'
                             >
                               Editar
+                            </button>
+                            <button
+                              type='button'
+                              onClick={() => excluirUsuario(usuario)}
+                              className='flex items-center gap-1 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed'
+                              disabled={excluindoUsuario === usuario.id || usuario.id === currentUser.id}
+                            >
+                              {excluindoUsuario === usuario.id ? (
+                                <Loader2 className='h-4 w-4 animate-spin' />
+                              ) : (
+                                <>
+                                  <Trash2 className='h-4 w-4' />
+                                  Excluir
+                                </>
+                              )}
                             </button>
                           </div>
                         </td>
