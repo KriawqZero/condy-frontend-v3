@@ -16,12 +16,7 @@ export type ResponsePayload<T> = {
   message?: string | undefined;
 };
 
-export type UserType =
-  | "SINDICO_RESIDENTE"
-  | "SINDICO_PROFISSIONAL"
-  | "EMPRESA"
-  | "PRESTADOR"
-  | "ADMIN_PLATAFORMA";
+export type UserType = 'SINDICO_RESIDENTE' | 'SINDICO_PROFISSIONAL' | 'EMPRESA' | 'PRESTADOR' | 'ADMIN_PLATAFORMA';
 
 // Auth Types
 export interface LoginRequest {
@@ -123,9 +118,9 @@ export interface Chamado {
   descricaoOcorrido: string;
   informacoesAdicionais?: string;
 
-  prioridade: "BAIXA" | "MEDIA" | "ALTA";
-  escopo: "ORCAMENTO" | "SERVICO_IMEDIATO";
-  status: "NOVO" | "A_CAMINHO" | "EM_ATENDIMENTO" | "CONCLUIDO";
+  prioridade: 'BAIXA' | 'MEDIA' | 'ALTA';
+  escopo: 'ORCAMENTO' | 'SERVICO_IMEDIATO';
+  status: 'NOVO' | 'A_CAMINHO' | 'EM_ATENDIMENTO' | 'CONCLUIDO';
   valorEstimado?: number;
 
   imovelId: number;
@@ -151,9 +146,9 @@ export interface AtivoManual {
   local_instalacao: string;
 }
 
-export type Prioridade = "NORMAL" | "URGENCIA" | "EMERGENCIA";
-export type Escopo = "ORCAMENTO" | "SERVICO_IMEDIATO";
-export type StatusChamado = "ABERTO" | "EM_ANDAMENTO" | "CONCLUIDO";
+export type Prioridade = 'NORMAL' | 'URGENCIA' | 'EMERGENCIA';
+export type Escopo = 'ORCAMENTO' | 'SERVICO_IMEDIATO';
+export type StatusChamado = 'ABERTO' | 'EM_ANDAMENTO' | 'CONCLUIDO';
 
 export interface PrestadorChamado {
   cnpj: string;
@@ -229,21 +224,21 @@ export interface NovoImovelData {
 
 export interface NovoChamadoData {
   descricaoOcorrido: string;
-  prioridade: "BAIXA" | "MEDIA" | "ALTA";
+  prioridade: 'BAIXA' | 'MEDIA' | 'ALTA';
   imovelId: number;
-  escopo: "SERVICO_IMEDIATO" | "ORCAMENTO";
+  escopo: 'SERVICO_IMEDIATO' | 'ORCAMENTO';
   informacoesAdicionais?: string;
 }
 
 // Component Props Types
 export interface ButtonProps {
   children: React.ReactNode;
-  variant?: "primary" | "secondary" | "danger";
-  size?: "sm" | "md" | "lg";
+  variant?: 'primary' | 'secondary' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   loading?: boolean;
   onClick?: () => void;
-  type?: "button" | "submit" | "reset";
+  type?: 'button' | 'submit' | 'reset';
   className?: string;
 }
 

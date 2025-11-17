@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { loginAction } from "@/app/actions/auth";
-import { useState } from "react";
+import { loginAction } from '@/app/actions/auth';
+import { useState } from 'react';
 
 type LoginErrorType = {
   errorTitle: string;
@@ -10,8 +10,8 @@ type LoginErrorType = {
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
-    email: "",
-    senha: "",
+    email: '',
+    senha: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -39,30 +39,29 @@ export default function LoginForm() {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("email", formData.email);
-      formDataToSend.append("password", formData.senha);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.senha);
 
       const result = await loginAction(formDataToSend);
 
       if (result && !result.success) {
-        console.log("result", result);
-        if(result.status === 403) {
+        console.log('result', result);
+        if (result.status === 403) {
           setLoginError({
-            errorTitle: "Usuário inativo",
-            errorMessage: "Seu usuário está inativo. Por favor, contate o suporte.",
+            errorTitle: 'Usuário inativo',
+            errorMessage: 'Seu usuário está inativo. Por favor, contate o suporte.',
           });
         } else {
           setLoginError({
-            errorTitle: "Dados incorretos",
-            errorMessage: "Email ou senha incorretos. Verifique seus dados e tente novamente.",
+            errorTitle: 'Dados incorretos',
+            errorMessage: 'Email ou senha incorretos. Verifique seus dados e tente novamente.',
           });
         }
       }
     } catch {
       setLoginError({
-        errorTitle: "Erro de conexão",
-        errorMessage:
-          "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.",
+        errorTitle: 'Erro de conexão',
+        errorMessage: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
       });
     } finally {
       setLoading(false);
@@ -185,85 +184,64 @@ export default function LoginForm() {
         }
       `}</style>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className='space-y-5'>
         {/* Email de cadastro */}
-        <div className="form-group">
-          <div className="input-container">
-            <div className="input-icon">
-              <img src="/svg/email_icon.svg" alt="Email" className="w-5 h-5" />
+        <div className='form-group'>
+          <div className='input-container'>
+            <div className='input-icon'>
+              <img src='/svg/email_icon.svg' alt='Email' className='w-5 h-5' />
             </div>
             <input
-              id="email-input"
+              id='email-input'
               value={formData.email}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, email: e.target.value }))
-              }
-              type="email"
-              className={`form-input ${
-                formData.email && !isValidEmail() ? "error" : ""
-              }`}
-              placeholder=" "
+              onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              type='email'
+              className={`form-input ${formData.email && !isValidEmail() ? 'error' : ''}`}
+              placeholder=' '
               required
             />
             <label
-              htmlFor="email-input"
-              className={`floating-label ${
-                (formData.email && !isValidEmail()) || loginError
-                  ? "text-red-500"
-                  : ""
-              }`}
+              htmlFor='email-input'
+              className={`floating-label ${(formData.email && !isValidEmail()) || loginError ? 'text-red-500' : ''}`}
             >
-              {loginError ? loginError.errorMessage : "Email de cadastro"}
+              {loginError ? loginError.errorMessage : 'Email de cadastro'}
             </label>
             {formData.email && isValidEmail() && (
-              <div className="check-icon">
-                <img
-                  src="/svg/checkmark_success.svg"
-                  alt="Sucesso"
-                  className="w-5 h-5"
-                />
+              <div className='check-icon'>
+                <img src='/svg/checkmark_success.svg' alt='Sucesso' className='w-5 h-5' />
               </div>
             )}
             {formData.email && !isValidEmail() && (
-              <div className="check-icon">
-                <img
-                  src="/svg/checkmark_error.svg"
-                  alt="Erro"
-                  className="w-5 h-5"
-                />
+              <div className='check-icon'>
+                <img src='/svg/checkmark_error.svg' alt='Erro' className='w-5 h-5' />
               </div>
             )}
           </div>
         </div>
 
         {/* Senha de acesso */}
-        <div className="form-group">
-          <div className="input-container">
-            <div className="input-icon">
-              <img src="/svg/lock_icon.svg" alt="Senha" className="w-5 h-5" />
+        <div className='form-group'>
+          <div className='input-container'>
+            <div className='input-icon'>
+              <img src='/svg/lock_icon.svg' alt='Senha' className='w-5 h-5' />
             </div>
             <input
-              id="senha-input"
+              id='senha-input'
               value={formData.senha}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, senha: e.target.value }))
-              }
-              type={mostrarSenha ? "text" : "password"}
-              className="form-input"
-              placeholder=" "
+              onChange={e => setFormData(prev => ({ ...prev, senha: e.target.value }))}
+              type={mostrarSenha ? 'text' : 'password'}
+              className='form-input'
+              placeholder=' '
               required
             />
-            <label htmlFor="senha-input" className="floating-label">
+            <label htmlFor='senha-input' className='floating-label'>
               Senha de acesso
             </label>
-            <div
-              className="check-icon cursor-pointer"
-              onClick={alternarVisibilidadeSenha}
-            >
+            <div className='check-icon cursor-pointer' onClick={alternarVisibilidadeSenha}>
               <img
-                src={mostrarSenha ? "/svg/eye_off.svg" : "/svg/eye.svg"}
-                alt="Mostrar/Ocultar senha"
-                className="w-5 h-5"
+                src={mostrarSenha ? '/svg/eye_off.svg' : '/svg/eye.svg'}
+                alt='Mostrar/Ocultar senha'
+                className='w-5 h-5'
               />
             </div>
           </div>
@@ -271,20 +249,12 @@ export default function LoginForm() {
 
         {/* Loading ou Botão de login */}
         {loading ? (
-          <span className="flex items-center justify-center">
-            <img
-              src="/loading.gif"
-              alt="Carregando"
-              className="w-10 h-10 mr-2"
-            />
+          <span className='flex items-center justify-center'>
+            <img src='/loading.gif' alt='Carregando' className='w-10 h-10 mr-2' />
           </span>
         ) : (
           <span>
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={loading || !isValidEmail() || !formData.senha}
-            >
+            <button type='submit' className='btn-primary' disabled={loading || !isValidEmail() || !formData.senha}>
               Acessar minha conta
             </button>
           </span>

@@ -1,11 +1,11 @@
-"use server";
+'use server';
 
-import { ApiResponse } from "@/types";
-import { getSession } from "@/lib/session";
-import axios from "axios";
+import { ApiResponse } from '@/types';
+import { getSession } from '@/lib/session';
+import axios from 'axios';
 
 function baseUrl() {
-  return process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+  return process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 }
 
 export async function apiPrestadorListOrdens(page: number = 1, limit: number = 10): Promise<ApiResponse<any>> {
@@ -36,19 +36,31 @@ export async function apiPrestadorGetOrdem(id: number): Promise<ApiResponse<any>
   }
 }
 
-export async function apiPrestadorAlterarStatus(id: number, status: "EM_ANDAMENTO"|"CONCLUIDO"|"CANCELADO"): Promise<ApiResponse<any>> {
+export async function apiPrestadorAlterarStatus(
+  id: number,
+  status: 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO',
+): Promise<ApiResponse<any>> {
   const session = await getSession();
   try {
-    const res = await axios.post(`${baseUrl()}/prestador/ordens/${id}/status`, { status }, {
-      headers: { Authorization: `Bearer ${session.token}` },
-    });
+    const res = await axios.post(
+      `${baseUrl()}/prestador/ordens/${id}/status`,
+      { status },
+      {
+        headers: { Authorization: `Bearer ${session.token}` },
+      },
+    );
     return { success: true, data: res.data };
   } catch (e: any) {
     return { success: false, error: e.response?.data?.message || e.message };
   }
 }
 
-export async function apiPrestadorCriarOrdemAvulsa(data: { descricao: string; valorAcordado?: number; prazoAcordado?: number; referenciaExterna?: string }): Promise<ApiResponse<any>> {
+export async function apiPrestadorCriarOrdemAvulsa(data: {
+  descricao: string;
+  valorAcordado?: number;
+  prazoAcordado?: number;
+  referenciaExterna?: string;
+}): Promise<ApiResponse<any>> {
   const session = await getSession();
   try {
     const res = await axios.post(`${baseUrl()}/prestador/ordens`, data, {
@@ -59,5 +71,3 @@ export async function apiPrestadorCriarOrdemAvulsa(data: { descricao: string; va
     return { success: false, error: e.response?.data?.message || e.message };
   }
 }
-
-

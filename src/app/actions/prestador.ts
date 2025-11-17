@@ -1,11 +1,11 @@
-"use server";
+'use server';
 
-import { ApiResponse } from "@/types";
-import { getSession } from "@/lib/session";
-import axios from "axios";
+import { ApiResponse } from '@/types';
+import { getSession } from '@/lib/session';
+import axios from 'axios';
 
 function getBaseUrl() {
-  return process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+  return process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 }
 
 export async function apiGetPrestadorDashboard(): Promise<ApiResponse<any>> {
@@ -19,5 +19,3 @@ export async function apiGetPrestadorDashboard(): Promise<ApiResponse<any>> {
     return { success: false, error: e.response?.data?.message || e.message };
   }
 }
-
-

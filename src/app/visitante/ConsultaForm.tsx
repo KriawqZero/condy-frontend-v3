@@ -101,66 +101,59 @@ export default function ConsultaForm() {
   }, [chamado?.createdAt]);
 
   return (
-    <div className="space-y-10">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-        <form onSubmit={handleSubmit} className="flex w-full max-w-xl gap-4">
-          <div className="relative flex-grow">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+    <div className='space-y-10'>
+      <div className='flex flex-col lg:flex-row items-center justify-between gap-8'>
+        <form onSubmit={handleSubmit} className='flex w-full max-w-xl gap-4'>
+          <div className='relative flex-grow'>
+            <Search className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400' />
             <input
-              type="text"
+              type='text'
               value={numeroChamado}
-              onChange={(e) => setNumeroChamado(e.target.value)}
-              placeholder="Buscar por código do chamado"
-              className="w-full rounded-full border border-white bg-white/80 px-12 py-4 text-black placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={e => setNumeroChamado(e.target.value)}
+              placeholder='Buscar por código do chamado'
+              className='w-full rounded-full border border-white bg-white/80 px-12 py-4 text-black placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
             />
           </div>
           <Button
-            type="submit"
-            className="rounded-full bg-[#1F45FF] px-8 py-4 text-white hover:bg-[#1F45FF]/90"
+            type='submit'
+            className='rounded-full bg-[#1F45FF] px-8 py-4 text-white hover:bg-[#1F45FF]/90'
             disabled={loading || !numeroChamado.trim()}
           >
             {loading ? 'Buscando...' : 'Buscar'}
           </Button>
         </form>
-
       </div>
 
       {!hasSearched && !chamado && !error && (
-        <div className="flex flex-col items-center text-center gap-4 py-20">
+        <div className='flex flex-col items-center text-center gap-4 py-20'>
           <EmptyStateIllustration />
-          <h2 className="font-afacad text-2xl font-bold text-black">
+          <h2 className='font-afacad text-2xl font-bold text-black'>
             Busque por um chamado para visualizar os detalhes
           </h2>
         </div>
       )}
 
       {error && (
-        <div className="flex flex-col items-center text-center gap-4 py-20">
+        <div className='flex flex-col items-center text-center gap-4 py-20'>
           <EmptyStateIllustration />
-          <h2 className="font-afacad text-2xl font-bold text-black">
-            Nenhum chamado encontrado com esse código
-          </h2>
-          <p className="font-afacad text-base text-black">
+          <h2 className='font-afacad text-2xl font-bold text-black'>Nenhum chamado encontrado com esse código</h2>
+          <p className='font-afacad text-base text-black'>
             Verifique se digitou corretamente. Caso tenha dúvidas, fale com a Condy pelo WhatsApp.
           </p>
         </div>
       )}
 
       {chamado && (
-        <div className="space-y-6">
+        <div className='space-y-6'>
           <div>
-            <h2 className="font-afacad text-3xl font-bold text-black">
-              Chamado encontrado
-            </h2>
-            <p className="font-afacad text-base text-black">
-              Detalhes do chamado associado ao código
-            </p>
+            <h2 className='font-afacad text-3xl font-bold text-black'>Chamado encontrado</h2>
+            <p className='font-afacad text-base text-black'>Detalhes do chamado associado ao código</p>
           </div>
 
           {/* Desktop table */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm hidden md:block">
-            <div className="bg-white/30 px-6 py-4 border-b border-[#EFF0FF]">
-              <div className="grid grid-cols-7 gap-4 text-sm font-afacad font-bold text-black">
+          <div className='bg-white rounded-2xl overflow-hidden shadow-sm hidden md:block'>
+            <div className='bg-white/30 px-6 py-4 border-b border-[#EFF0FF]'>
+              <div className='grid grid-cols-7 gap-4 text-sm font-afacad font-bold text-black'>
                 <div>Tipo do chamado</div>
                 <div>Descrição</div>
                 <div>Valor estimado</div>
@@ -170,34 +163,28 @@ export default function ConsultaForm() {
                 <div>Prestador</div>
               </div>
             </div>
-            <div className="divide-y divide-[#EFF0FF]">
-              <div className="px-6 py-4">
-                <div className="grid grid-cols-7 gap-4 items-center">
-                  <div className="font-afacad text-sm font-bold text-black">
-                    {chamado.escopo ?? '-'}
-                  </div>
-                  <div className="font-afacad text-sm font-bold text-black">
-                    {chamado.descricaoOcorrido ?? '-'}
-                  </div>
-                  <div className="font-afacad text-sm font-bold text-black">
+            <div className='divide-y divide-[#EFF0FF]'>
+              <div className='px-6 py-4'>
+                <div className='grid grid-cols-7 gap-4 items-center'>
+                  <div className='font-afacad text-sm font-bold text-black'>{chamado.escopo ?? '-'}</div>
+                  <div className='font-afacad text-sm font-bold text-black'>{chamado.descricaoOcorrido ?? '-'}</div>
+                  <div className='font-afacad text-sm font-bold text-black'>
                     {typeof chamado.valorEstimado === 'number'
                       ? `R$ ${Number(chamado.valorEstimado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
                       : 'Sem valor'}
                   </div>
-                  <div className="font-afacad text-sm font-bold text-black">
-                    {chamado.numeroChamado}
-                  </div>
-                  <div className="font-afacad text-sm font-bold text-black">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full border ${getStatusColor(chamado.status)}`}>
+                  <div className='font-afacad text-sm font-bold text-black'>{chamado.numeroChamado}</div>
+                  <div className='font-afacad text-sm font-bold text-black'>
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full border ${getStatusColor(chamado.status)}`}
+                    >
                       {getStatusText(chamado.status)}
                     </span>
                   </div>
-                  <div className="font-afacad text-sm font-bold text-black">
-                    {createdAt ?? '-'}
-                  </div>
-                  <div className="font-afacad text-sm font-bold text-black">
+                  <div className='font-afacad text-sm font-bold text-black'>{createdAt ?? '-'}</div>
+                  <div className='font-afacad text-sm font-bold text-black'>
                     {chamado.prestadorPublico
-                      ? (chamado.prestadorPublico.nomeFantasia || chamado.prestadorPublico.name)
+                      ? chamado.prestadorPublico.nomeFantasia || chamado.prestadorPublico.name
                       : 'Aguardando alocação'}
                   </div>
                 </div>
@@ -206,51 +193,47 @@ export default function ConsultaForm() {
           </div>
 
           {/* Mobile card */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm md:hidden">
-            <div className="px-6 py-4 space-y-3">
-              <div className="flex justify-between">
-                <span className="font-afacad text-sm font-bold text-black">Tipo do chamado</span>
-                <span className="font-afacad text-sm font-bold text-black text-right">
-                  {chamado.escopo ?? '-'}
-                </span>
+          <div className='bg-white rounded-2xl overflow-hidden shadow-sm md:hidden'>
+            <div className='px-6 py-4 space-y-3'>
+              <div className='flex justify-between'>
+                <span className='font-afacad text-sm font-bold text-black'>Tipo do chamado</span>
+                <span className='font-afacad text-sm font-bold text-black text-right'>{chamado.escopo ?? '-'}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-afacad text-sm font-bold text-black">Descrição</span>
-                <span className="font-afacad text-sm font-bold text-black text-right">
+              <div className='flex justify-between'>
+                <span className='font-afacad text-sm font-bold text-black'>Descrição</span>
+                <span className='font-afacad text-sm font-bold text-black text-right'>
                   {chamado.descricaoOcorrido ?? '-'}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-afacad text-sm font-bold text-black">Valor estimado</span>
-                <span className="font-afacad text-sm font-bold text-black text-right">
+              <div className='flex justify-between'>
+                <span className='font-afacad text-sm font-bold text-black'>Valor estimado</span>
+                <span className='font-afacad text-sm font-bold text-black text-right'>
                   {typeof chamado.valorEstimado === 'number'
                     ? `R$ ${Number(chamado.valorEstimado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
                     : 'Sem valor'}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-afacad text-sm font-bold text-black">Chamado</span>
-                <span className="font-afacad text-sm font-bold text-black text-right">
-                  {chamado.numeroChamado}
-                </span>
+              <div className='flex justify-between'>
+                <span className='font-afacad text-sm font-bold text-black'>Chamado</span>
+                <span className='font-afacad text-sm font-bold text-black text-right'>{chamado.numeroChamado}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="font-afacad text-sm font-bold text-black">Status do chamado</span>
-                <span className={`font-afacad text-sm font-bold text-black inline-flex items-center px-3 py-1 rounded-full border ${getStatusColor(chamado.status)}`}>
+              <div className='flex justify-between items-center'>
+                <span className='font-afacad text-sm font-bold text-black'>Status do chamado</span>
+                <span
+                  className={`font-afacad text-sm font-bold text-black inline-flex items-center px-3 py-1 rounded-full border ${getStatusColor(chamado.status)}`}
+                >
                   {getStatusText(chamado.status)}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-afacad text-sm font-bold text-black">Data de abertura</span>
-                <span className="font-afacad text-sm font-bold text-black text-right">
-                  {createdAt ?? '-'}
-                </span>
+              <div className='flex justify-between'>
+                <span className='font-afacad text-sm font-bold text-black'>Data de abertura</span>
+                <span className='font-afacad text-sm font-bold text-black text-right'>{createdAt ?? '-'}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-afacad text-sm font-bold text-black">Prestador</span>
-                <span className="font-afacad text-sm font-bold text-black text-right">
+              <div className='flex justify-between'>
+                <span className='font-afacad text-sm font-bold text-black'>Prestador</span>
+                <span className='font-afacad text-sm font-bold text-black text-right'>
                   {chamado.prestadorPublico
-                    ? (chamado.prestadorPublico.nomeFantasia || chamado.prestadorPublico.name)
+                    ? chamado.prestadorPublico.nomeFantasia || chamado.prestadorPublico.name
                     : 'Aguardando alocação'}
                 </span>
               </div>

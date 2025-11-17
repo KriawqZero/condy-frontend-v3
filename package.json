@@ -10,7 +10,8 @@
     "resetdb": "npx prisma migrate reset --force && npx prisma migrate dev && npx prisma migrate deploy && yarn seed",
     "deploy:local": "next build && pm2 startOrRestart ecosystem.config.js --env local",
     "deploy:dev": "pm2 startOrRestart ecosystem.config.js --only frontend-v3-dev",
-    "deploy:prod": "next build && pm2 startOrRestart ecosystem.config.js --env prod"
+    "deploy:prod": "next build && pm2 startOrRestart ecosystem.config.js --env prod",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
@@ -40,6 +41,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

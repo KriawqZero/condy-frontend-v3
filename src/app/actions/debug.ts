@@ -1,10 +1,7 @@
-"use server";
+'use server';
 
-export function handleConsoleLog(
-  message: string,
-  type: "log" | "error" | "warn" | "info" = "log"
-) {
-  if (typeof window !== "undefined") {
+export function handleConsoleLog(message: string, type: 'log' | 'error' | 'warn' | 'info' = 'log') {
+  if (typeof window !== 'undefined') {
     // Client-side logging
     console[type](message);
   } else {

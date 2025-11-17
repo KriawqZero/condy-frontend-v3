@@ -5,7 +5,7 @@ import AdminDashboard from './AdminDashboard';
 
 export default async function AdminPage() {
   const session = await getSession();
-  
+
   if (!session.isLoggedIn || !session.user) {
     redirect('/login');
   }
@@ -16,12 +16,7 @@ export default async function AdminPage() {
   }
 
   return (
-    <CondyLayout 
-      user={session.user} 
-      title="Painel Administrativo"
-      maxWidth="full"
-      showFooter={false}
-    >
+    <CondyLayout user={session.user} title='Painel Administrativo' maxWidth='full' showFooter={false}>
       <AdminDashboard user={session.user} />
     </CondyLayout>
   );

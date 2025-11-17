@@ -1,5 +1,5 @@
-import { getSession } from "./session";
-import axios, { AxiosRequestConfig, Method } from "axios";
+import { getSession } from './session';
+import axios, { AxiosRequestConfig, Method } from 'axios';
 
 // Types
 interface ApiClientConfig {
@@ -19,12 +19,12 @@ export class ApiClient {
   private defaultHeaders: Record<string, string>;
 
   constructor(config?: ApiClientConfig) {
-    const isServer = typeof window === "undefined";
-    this.baseURL = config?.baseURL || (
-      isServer
-        ? (process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api")
-        : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api")
-    );
+    const isServer = typeof window === 'undefined';
+    this.baseURL =
+      config?.baseURL ||
+      (isServer
+        ? process.env.PRIVATE_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'
+        : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api');
     this.timeout = config?.timeout || 30000;
     this.defaultHeaders = config?.headers || {};
   }
@@ -32,16 +32,11 @@ export class ApiClient {
   /**
    * Método genérico para fazer requisições
    */
-  private async request<T>(
-    method: Method,
-    endpoint: string,
-    data?: any,
-    options?: RequestOptions
-  ): Promise<T> {
+  private async request<T>(method: Method, endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
     try {
       // Obter token de autenticação
       const session = await getSession();
-      
+
       const config: AxiosRequestConfig = {
         method,
         url: `${this.baseURL}${endpoint}`,
@@ -60,24 +55,22 @@ export class ApiClient {
       }
 
       const response = await axios(config);
-      
+
       // Extrai dados da resposta
       const responseData = response.data;
-      
+
       // Se a resposta tem o formato padrão com data wrapper
       if (responseData?.data !== undefined) {
         return responseData.data;
       }
-      
+
       return responseData;
     } catch (error: any) {
       // Tratamento de erro padronizado
       if (error.response) {
         // Erro de resposta do servidor
-        const errorMessage = error.response.data?.message || 
-                           error.response.data?.error || 
-                           error.message || 
-                           'Erro na requisição';
+        const errorMessage =
+          error.response.data?.message || error.response.data?.error || error.message || 'Erro na requisição';
         throw new Error(errorMessage);
       } else if (error.request) {
         // Erro de rede
@@ -115,4 +108,3 @@ export class ApiClient {
 
 // Instância padrão do cliente API
 export const apiClient = new ApiClient();
-

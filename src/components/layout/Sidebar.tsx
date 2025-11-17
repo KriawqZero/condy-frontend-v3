@@ -69,31 +69,28 @@ export default function Sidebar({ user }: SidebarProps) {
   }
 
   return (
-    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
-      <div className="flex flex-col h-full">
+    <div className='fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg'>
+      <div className='flex flex-col h-full'>
         {/* Header da sidebar */}
-        <div className="flex items-center justify-center h-16 bg-blue-600">
-          <h1 className="text-white text-xl font-bold">CONDY</h1>
+        <div className='flex items-center justify-center h-16 bg-blue-600'>
+          <h1 className='text-white text-xl font-bold'>CONDY</h1>
         </div>
 
         {/* Navegação */}
-        <nav className="flex-1 px-4 py-6 space-y-2">
-          {navItems.map((item) => {
+        <nav className='flex-1 px-4 py-6 space-y-2'>
+          {navItems.map(item => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-            
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={clsx(
-                  'flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors',
-                  {
-                    'bg-blue-100 text-blue-700': isActive,
-                    'text-gray-700 hover:bg-gray-100 hover:text-gray-900': !isActive,
-                  }
-                )}
+                className={clsx('flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors', {
+                  'bg-blue-100 text-blue-700': isActive,
+                  'text-gray-700 hover:bg-gray-100 hover:text-gray-900': !isActive,
+                })}
               >
-                <span className="mr-3 text-lg">{item.icon}</span>
+                <span className='mr-3 text-lg'>{item.icon}</span>
                 {item.name}
               </Link>
             );
@@ -101,15 +98,13 @@ export default function Sidebar({ user }: SidebarProps) {
         </nav>
 
         {/* Footer da sidebar */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="text-xs text-gray-500">
-            <p className="font-medium">{user.name}</p>
-            <p className="capitalize">
-              {user.user_type.toLowerCase().replace('_', ' ')}
-            </p>
+        <div className='p-4 border-t border-gray-200'>
+          <div className='text-xs text-gray-500'>
+            <p className='font-medium'>{user.name}</p>
+            <p className='capitalize'>{user.user_type.toLowerCase().replace('_', ' ')}</p>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

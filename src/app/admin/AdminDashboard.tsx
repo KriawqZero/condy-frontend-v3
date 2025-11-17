@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { getAdminChamadosAction, getSystemStatsAction } from "@/app/actions/admin";
-import { ModalVisualizarChamado } from "@/components/admin/ModalVisualizarChamado";
-import { WhatsappIcon } from "@/components/icons/WhatsappIcon";
-import { ModalCadastroImovel } from "@/components/sindico/ModalCadastroImovel";
-import { Chamado, User } from "@/types";
-import { OverviewCards } from "./components/OverviewCards";
-import { ChamadosSection } from "./components/ChamadosSection";
-import { ModalCadastroUsuario } from "./components/ModalCadastroUsuario";
-import { ModalListaUsuarios } from "./components/ModalListaUsuarios";
-import { ModalEnviarProposta } from "./components/ModalEnviarProposta";
+import { useEffect, useState } from 'react';
+import { getAdminChamadosAction, getSystemStatsAction } from '@/app/actions/admin';
+import { ModalVisualizarChamado } from '@/components/admin/ModalVisualizarChamado';
+import { WhatsappIcon } from '@/components/icons/WhatsappIcon';
+import { ModalCadastroImovel } from '@/components/sindico/ModalCadastroImovel';
+import { Chamado, User } from '@/types';
+import { OverviewCards } from './components/OverviewCards';
+import { ChamadosSection } from './components/ChamadosSection';
+import { ModalCadastroUsuario } from './components/ModalCadastroUsuario';
+import { ModalListaUsuarios } from './components/ModalListaUsuarios';
+import { ModalEnviarProposta } from './components/ModalEnviarProposta';
 
 type DashboardStats = {
   totalChamados: number;
@@ -22,7 +22,7 @@ type DashboardStats = {
 export default function AdminDashboard({ _user }: { _user: User }) {
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [chamadosFiltrados, setChamadosFiltrados] = useState<Chamado[]>([]);
-  const [termoBusca, setTermoBusca] = useState("");
+  const [termoBusca, setTermoBusca] = useState('');
   const [loadingChamados, setLoadingChamados] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalChamados: 0,
@@ -43,12 +43,12 @@ export default function AdminDashboard({ _user }: { _user: User }) {
     }
 
     const termoLower = termo.toLowerCase();
-    const filtrados = chamados.filter((chamado) => {
-      const numeroChamado = chamado.numeroChamado?.toString().toLowerCase() || "";
-      const condominio = chamado.imovel?.nome?.toLowerCase() || "";
-      const tipo = (chamado.escopo === "ORCAMENTO" ? "Orçamento" : "Imediato").toLowerCase();
-      const status = chamado.status?.toLowerCase() || "";
-      const prestador = chamado.prestadorAssignado?.name?.toLowerCase() || "";
+    const filtrados = chamados.filter(chamado => {
+      const numeroChamado = chamado.numeroChamado?.toString().toLowerCase() || '';
+      const condominio = chamado.imovel?.nome?.toLowerCase() || '';
+      const tipo = (chamado.escopo === 'ORCAMENTO' ? 'Orçamento' : 'Imediato').toLowerCase();
+      const status = chamado.status?.toLowerCase() || '';
+      const prestador = chamado.prestadorAssignado?.name?.toLowerCase() || '';
 
       return (
         numeroChamado.includes(termoLower) ||
@@ -85,7 +85,7 @@ export default function AdminDashboard({ _user }: { _user: User }) {
         });
       }
     } catch (error) {
-      console.error("Erro ao buscar dados:", error);
+      console.error('Erro ao buscar dados:', error);
     }
     setLoadingChamados(false);
   };
@@ -98,36 +98,36 @@ export default function AdminDashboard({ _user }: { _user: User }) {
     const handleVisualizarChamado = (event: CustomEvent) => {
       const chamadoId = event.detail?.chamadoId;
       if (chamadoId) {
-        const chamado = chamados.find((c) => Number(c.id) === Number(chamadoId));
+        const chamado = chamados.find(c => Number(c.id) === Number(chamadoId));
         if (chamado) {
           setSelectedChamado(chamado);
         }
       }
     };
 
-    window.addEventListener("visualizarChamado", handleVisualizarChamado as EventListener);
+    window.addEventListener('visualizarChamado', handleVisualizarChamado as EventListener);
     return () => {
-      window.removeEventListener("visualizarChamado", handleVisualizarChamado as EventListener);
+      window.removeEventListener('visualizarChamado', handleVisualizarChamado as EventListener);
     };
   }, [chamados]);
 
-  const urgentTicketsCount = chamados.filter((chamado) => chamado.prioridade === "ALTA").length;
+  const urgentTicketsCount = chamados.filter(chamado => chamado.prioridade === 'ALTA').length;
 
   return (
-    <div className="relative pb-20 mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+    <div className='relative pb-20 mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
       {loadingChamados ? (
-        <div className="flex items-center justify-center min-h-[300px]">
-          <img src="/loading.gif" alt="Carregando..." className="w-16 h-16" />
+        <div className='flex items-center justify-center min-h-[300px]'>
+          <img src='/loading.gif' alt='Carregando...' className='w-16 h-16' />
         </div>
       ) : (
-        <div className="container relative -mt-20 z-10">
+        <div className='container relative -mt-20 z-10'>
           <OverviewCards stats={stats} urgentTicketsCount={urgentTicketsCount} />
           <ChamadosSection
             chamados={chamados}
             chamadosFiltrados={chamadosFiltrados}
             termoBusca={termoBusca}
             onChangeTermoBusca={setTermoBusca}
-            onClearBusca={() => setTermoBusca("")}
+            onClearBusca={() => setTermoBusca('')}
             loadingChamados={loadingChamados}
             onSelectChamado={setSelectedChamado}
             onOpenProposta={setAbrirProposta}
@@ -139,25 +139,14 @@ export default function AdminDashboard({ _user }: { _user: User }) {
       )}
 
       {showCreateUserModal && (
-        <ModalCadastroUsuario
-          onClose={() => setShowCreateUserModal(false)}
-          onSuccess={fetchData}
-        />
+        <ModalCadastroUsuario onClose={() => setShowCreateUserModal(false)} onSuccess={fetchData} />
       )}
 
       {showCreateImovelModal && (
-        <ModalCadastroImovel
-          onClose={() => setShowCreateImovelModal(false)}
-          onSuccess={fetchData}
-        />
+        <ModalCadastroImovel onClose={() => setShowCreateImovelModal(false)} onSuccess={fetchData} />
       )}
 
-      {showUsersModal && (
-        <ModalListaUsuarios
-          onClose={() => setShowUsersModal(false)}
-          onSuccess={fetchData}
-        />
-      )}
+      {showUsersModal && <ModalListaUsuarios onClose={() => setShowUsersModal(false)} onSuccess={fetchData} />}
 
       {selectedChamado && (
         <ModalVisualizarChamado
@@ -176,12 +165,11 @@ export default function AdminDashboard({ _user }: { _user: User }) {
         />
       )}
 
-      <div className="fixed bottom-8 right-8 z-40">
-        <button className="w-16 h-16 bg-[#10A07B] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+      <div className='fixed bottom-8 right-8 z-40'>
+        <button className='w-16 h-16 bg-[#10A07B] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow'>
           <WhatsappIcon />
         </button>
       </div>
     </div>
   );
 }
-

@@ -11,29 +11,20 @@ interface LayoutProps {
   title?: string;
 }
 
-export default function Layout({ 
-  children, 
-  user, 
-  showSidebar = true, 
-  title 
-}: LayoutProps) {
+export default function Layout({ children, user, showSidebar = true, title }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className='min-h-screen bg-gray-50'>
       <Header user={user} title={title} />
-      
-      <div className="flex">
-        {showSidebar && user && (
-          <Sidebar user={user} />
-        )}
-        
+
+      <div className='flex'>
+        {showSidebar && user && <Sidebar user={user} />}
+
         <main className={`flex-1 ${showSidebar && user ? 'ml-64' : ''}`}>
-          <div className="p-6">
-            {children}
-          </div>
+          <div className='p-6'>{children}</div>
         </main>
       </div>
-      
+
       <WhatsAppButton />
     </div>
   );
-} 
+}

@@ -131,28 +131,22 @@ export default function CondyButton({
             'btn-sm': size === 'sm',
             'btn-lg': size === 'lg',
           },
-          className
+          className,
         )}
         {...props}
       >
         {/* Ícone esquerdo */}
-        {leftIcon && !loading && (
-          <img src={leftIcon} alt="" className="w-5 h-5 mr-2" />
-        )}
+        {leftIcon && !loading && <img src={leftIcon} alt='' className='w-5 h-5 mr-2' />}
 
         {/* Loading spinner */}
-        {loading && (
-          <img src="/loading.gif" alt="Carregando" className="w-6 h-6 mr-2" />
-        )}
+        {loading && <img src='/loading.gif' alt='Carregando' className='w-6 h-6 mr-2' />}
 
         {/* Texto do botão */}
         {children}
 
         {/* Ícone direito */}
-        {rightIcon && !loading && (
-          <img src={rightIcon} alt="" className="w-5 h-5 ml-2" />
-        )}
+        {rightIcon && !loading && <img src={rightIcon} alt='' className='w-5 h-5 ml-2' />}
       </button>
     </>
   );
-} 
+}

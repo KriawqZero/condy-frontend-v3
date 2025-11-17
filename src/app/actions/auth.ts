@@ -1,14 +1,14 @@
-"use server";
+'use server';
 
-import { checkCpfCnpj, checkEmail, loginUser } from "@/lib/api";
-import { createSession, destroySession } from "@/lib/session";
-import { redirect } from "next/navigation";
-import { z } from "zod";
+import { checkCpfCnpj, checkEmail, loginUser } from '@/lib/api';
+import { createSession, destroySession } from '@/lib/session';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
 
 // Schemas de validação
 const loginSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  email: z.string().email('Email inválido'),
+  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
 });
 
 // Nota: registerSchema removido por não ser utilizado atualmente
@@ -16,12 +16,12 @@ const loginSchema = z.object({
 // Server Action para login
 export async function loginAction(formData: FormData) {
   await destroySession(); // Garantir que a sessão anterior seja destruída
-  let redirectPath = "/dashboard"; // Default fallback
+  let redirectPath = '/dashboard'; // Default fallback
 
   try {
     const rawData = {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
     };
 
     const validatedData = loginSchema.parse(rawData);
@@ -31,38 +31,38 @@ export async function loginAction(formData: FormData) {
       const response = await loginUser(validatedData);
 
       if (!response || !response.data) {
-        return { success: false, error: "Credenciais inválidas" };
+        return { success: false, error: 'Credenciais inválidas' };
       }
 
       // Login bem sucedido
       await createSession(response.data.token, response.data.user);
 
       // Disponibilizar o token para o cliente (axios no browser)
-      const cookieStore = await import("next/headers").then((m) => m.cookies());
-      cookieStore.set("auth_token", response.data.token, {
+      const cookieStore = await import('next/headers').then(m => m.cookies());
+      cookieStore.set('auth_token', response.data.token, {
         httpOnly: false,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
         maxAge: 60 * 60 * 24 * 7,
       });
       // Determinar rota de redirecionamento
       switch (response.data.user.userType) {
-        case "ADMIN_PLATAFORMA":
-          redirectPath = "/admin";
+        case 'ADMIN_PLATAFORMA':
+          redirectPath = '/admin';
           break;
-        case "SINDICO_RESIDENTE":
-        case "SINDICO_PROFISSIONAL":
-          redirectPath = "/sindico";
+        case 'SINDICO_RESIDENTE':
+        case 'SINDICO_PROFISSIONAL':
+          redirectPath = '/sindico';
           break;
-        case "EMPRESA":
-          redirectPath = "/empresa";
+        case 'EMPRESA':
+          redirectPath = '/empresa';
           break;
-        case "PRESTADOR":
-          redirectPath = "/prestador";
+        case 'PRESTADOR':
+          redirectPath = '/prestador';
           break;
         default:
-          redirectPath = "/dashboard";
+          redirectPath = '/dashboard';
           break;
       }
 
@@ -73,23 +73,23 @@ export async function loginAction(formData: FormData) {
       return {
         success: false,
         status: apiError.status,
-        error: apiError.message || "Credenciais inválidas",
+        error: apiError.message || 'Credenciais inválidas',
       };
     }
   } catch (error: any) {
-    console.error("Login error:", error);
+    console.error('Login error:', error);
 
-    if (error.name === "ZodError") {
+    if (error.name === 'ZodError') {
       return {
         success: false,
-        error: "Dados inválidos",
+        error: 'Dados inválidos',
         fieldErrors: error.errors,
       };
     }
 
     return {
       success: false,
-      error: error.message || "Erro interno do servidor",
+      error: error.message || 'Erro interno do servidor',
     };
   }
 
@@ -144,9 +144,9 @@ export async function registerAction(formData: FormData) {
 // Server Action para logout
 export async function logoutAction() {
   await destroySession();
-  const cookieStore = await import("next/headers").then((m) => m.cookies());
-  cookieStore.delete("auth_token");
-  redirect("/login");
+  const cookieStore = await import('next/headers').then(m => m.cookies());
+  cookieStore.delete('auth_token');
+  redirect('/login');
 }
 
 // Server Action para verificar email

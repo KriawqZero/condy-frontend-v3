@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { createChamadoClient, getChamadoById, getChamados } from "@/lib/api";
-import { Chamado, ResponsePayload } from "@/types";
-import { z } from "zod";
+import { createChamadoClient, getChamadoById, getChamados } from '@/lib/api';
+import { Chamado, ResponsePayload } from '@/types';
+import { z } from 'zod';
 
 /* Schemas de validação
 const ativoManualSchema = z.object({
@@ -18,14 +18,13 @@ const createChamadoSchema = z
   .object({
     descricaoOcorrido: z.string().optional(),
     informacoesAdicionais: z.string().optional(),
-    prioridade: z.enum(["BAIXA", "MEDIA", "ALTA"]),
-    imovelId: z.number().min(1, "ID do imóvel é obrigatório"),
-    escopo: z.enum(["ORCAMENTO", "SERVICO_IMEDIATO"]),
+    prioridade: z.enum(['BAIXA', 'MEDIA', 'ALTA']),
+    imovelId: z.number().min(1, 'ID do imóvel é obrigatório'),
+    escopo: z.enum(['ORCAMENTO', 'SERVICO_IMEDIATO']),
   })
-  .refine((data) => data.imovelId || data.imovelId, {
-    message:
-      "É necessário informar um imóvel existente ou criar um manualmente",
-    path: ["imovelId"],
+  .refine(data => data.imovelId || data.imovelId, {
+    message: 'É necessário informar um imóvel existente ou criar um manualmente',
+    path: ['imovelId'],
   });
 
 /*const updateChamadoSchema = z.object({
@@ -41,49 +40,45 @@ const createChamadoSchema = z
 // Server Action para criar chamado
 export async function createChamadoAction(data: {
   descricaoOcorrido: string;
-  prioridade: "BAIXA" | "MEDIA" | "ALTA";
+  prioridade: 'BAIXA' | 'MEDIA' | 'ALTA';
   imovelId: number;
-  escopo: "SERVICO_IMEDIATO" | "ORCAMENTO";
+  escopo: 'SERVICO_IMEDIATO' | 'ORCAMENTO';
   informacoesAdicionais?: string;
 }): Promise<ResponsePayload<Chamado>> {
   try {
-    console.log("Validando dados do chamado:", data);
+    console.log('Validando dados do chamado:', data);
     const validatedData = createChamadoSchema.parse(data);
-    console.log("Dados validados:", validatedData);
+    console.log('Dados validados:', validatedData);
 
     // Chama a API real
     const response = await createChamadoClient(validatedData);
 
-    console.log("Resposta completa da API:", response);
-    console.log("Dados do chamado (response.data):", response.data);
-    
+    console.log('Resposta completa da API:', response);
+    console.log('Dados do chamado (response.data):', response.data);
+
     // Extrair apenas os dados do chamado da resposta da API
     // A resposta já vem com a estrutura correta: { status: 'success', data: { id, ... } }
     const chamadoData = response.data;
-    
+
     return {
       success: true,
       data: chamadoData,
       message: `Chamado ${
-        chamadoData?.numeroChamado ||
-        chamadoData?.numero_chamado ||
-        "criado"
+        chamadoData?.numeroChamado || chamadoData?.numero_chamado || 'criado'
       } com sucesso! Aguarde o contato por WhatsApp.`,
     };
   } catch (error: any) {
-    if (error.name === "ZodError") {
-      console.error("Erro de validação Zod:", error.errors);
+    if (error.name === 'ZodError') {
+      console.error('Erro de validação Zod:', error.errors);
       return {
         success: false,
-        error:
-          "Dados inválidos: " +
-          error.errors.map((e: any) => e.message).join(", "),
+        error: 'Dados inválidos: ' + error.errors.map((e: any) => e.message).join(', '),
       };
     }
-    console.error("Erro completo ao criar chamado:", error);
+    console.error('Erro completo ao criar chamado:', error);
     return {
       success: false,
-      error: error.message || "Erro interno do servidor",
+      error: error.message || 'Erro interno do servidor',
     };
   }
 }
@@ -96,7 +91,7 @@ export async function getChamadosAction(): Promise<ResponsePayload<Chamado[]>> {
   } catch (error: any) {
     return {
       success: false,
-      error: error.message || "Erro ao buscar chamados",
+      error: error.message || 'Erro ao buscar chamados',
     };
   }
 }
@@ -108,13 +103,13 @@ export async function getChamadoByIdAction(id: string) {
 
     const chamado = response.data;
     if (!chamado) {
-      return { success: false, error: "Chamado não encontrado" };
+      return { success: false, error: 'Chamado não encontrado' };
     }
     return { success: true, data: chamado };
   } catch (error: any) {
     return {
       success: false,
-      error: error.message || "Erro ao buscar chamado",
+      error: error.message || 'Erro ao buscar chamado',
     };
   }
 }

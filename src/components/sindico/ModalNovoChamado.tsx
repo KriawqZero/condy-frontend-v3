@@ -1,12 +1,12 @@
-import { createChamadoAction } from "@/app/actions/chamados";
-import { getImoveisAction } from "@/app/actions/imoveis";
-import { debugAnexosPendentes, getAnexosPendentes, limparAnexosPendentes, updateAnexoChamadoIdClient } from "@/lib/api";
-import { Anexo, Imovel, NovoChamadoData } from "@/types";
-import { Building, MapPin, Plus, X } from "lucide-react";
-import { CloseIcon } from "../icons/CloseIcon";
-import { useEffect, useState } from "react";
-import { CondySelect } from "../forms/CondySelect";
-import { FileUpload } from "../forms/FileUpload";
+import { createChamadoAction } from '@/app/actions/chamados';
+import { getImoveisAction } from '@/app/actions/imoveis';
+import { debugAnexosPendentes, getAnexosPendentes, limparAnexosPendentes, updateAnexoChamadoIdClient } from '@/lib/api';
+import { Anexo, Imovel, NovoChamadoData } from '@/types';
+import { Building, MapPin, Plus, X } from 'lucide-react';
+import { CloseIcon } from '../icons/CloseIcon';
+import { useEffect, useState } from 'react';
+import { CondySelect } from '../forms/CondySelect';
+import { FileUpload } from '../forms/FileUpload';
 
 interface ModalNovoChamadoProps {
   onClose: () => void;
@@ -18,27 +18,24 @@ const handleCloseModal = (onClose: () => void) => {
   // Opcionalmente, limpar anexos pendentes se o usuário cancelar
   // Descomente a linha abaixo se quiser limpar anexos ao cancelar
   // limparAnexosPendentes();
-  
+
   // Restaurar scroll da página quando o modal for fechado manualmente
   document.body.classList.remove('modal-open');
-  
+
   onClose();
 };
 
-export function ModalNovoChamado({
-  onClose,
-  onSuccess,
-}: ModalNovoChamadoProps) {
+export function ModalNovoChamado({ onClose, onSuccess }: ModalNovoChamadoProps) {
   const [etapa, setEtapa] = useState(1);
   const [loading, setLoading] = useState(false);
 
   // Estados para os dados do formulário
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
-  const [imovelSelecionado, setImovelSelecionado] = useState<string>("");
-  const [localInstalacao, setLocalInstalacao] = useState<string>("");
-  const [descricaoOcorrido, setDescricaoOcorrido] = useState<string>("");
-  const [prioridade, setPrioridade] = useState<string>("");
-  const [escopo, setEscopo] = useState<string>("");
+  const [imovelSelecionado, setImovelSelecionado] = useState<string>('');
+  const [localInstalacao, setLocalInstalacao] = useState<string>('');
+  const [descricaoOcorrido, setDescricaoOcorrido] = useState<string>('');
+  const [prioridade, setPrioridade] = useState<string>('');
+  const [escopo, setEscopo] = useState<string>('');
   const [anexos, setAnexos] = useState<Anexo[]>([]);
 
   // Carregar imóveis na inicialização e desabilitar scroll
@@ -46,10 +43,10 @@ export function ModalNovoChamado({
     carregarImoveis();
     // Debug do estado atual dos anexos pendentes
     debugAnexosPendentes();
-    
+
     // Desabilitar scroll da página quando o modal estiver aberto
     document.body.classList.add('modal-open');
-    
+
     // Restaurar scroll quando o modal for fechado
     return () => {
       document.body.classList.remove('modal-open');
@@ -61,41 +58,37 @@ export function ModalNovoChamado({
       const response = await getImoveisAction();
       setImoveis(response.data || []);
     } catch (error) {
-      console.error("Erro ao carregar imóveis:", error);
+      console.error('Erro ao carregar imóveis:', error);
     }
   };
 
   const Etapas = [
-    { numero: "01", ativo: etapa >= 1 },
-    { numero: "02", ativo: etapa >= 2 },
-    { numero: "03", ativo: etapa >= 3 },
+    { numero: '01', ativo: etapa >= 1 },
+    { numero: '02', ativo: etapa >= 2 },
+    { numero: '03', ativo: etapa >= 3 },
   ];
 
   // Ajuste de espaçamento para alinhamento com o design do Figma
 
-  const opcoesImovel = imoveis.map((imovel) => ({
+  const opcoesImovel = imoveis.map(imovel => ({
     value: imovel.id.toString(),
     label: `${imovel.nome}: ${imovel.endereco}, ${imovel.numero} - ${imovel.cidade}/${imovel.uf}`,
   }));
 
-  const opcoesLocalInstalacao = [
-    { value: "torre-a-terreo", label: "Torre A – Térreo" },
-  ];
+  const opcoesLocalInstalacao = [{ value: 'torre-a-terreo', label: 'Torre A – Térreo' }];
 
   const opcoesPrioridade = [
-    { value: "BAIXA", label: "Baixa" },
-    { value: "MEDIA", label: "Média" },
-    { value: "ALTA", label: "Urgente" },
+    { value: 'BAIXA', label: 'Baixa' },
+    { value: 'MEDIA', label: 'Média' },
+    { value: 'ALTA', label: 'Urgente' },
   ];
 
   const opcoesEscopo = [
-    { value: "ORCAMENTO", label: "Solicitar Orçamento" },
-    { value: "SERVICO_IMEDIATO", label: "Serviço Imediato" },
+    { value: 'ORCAMENTO', label: 'Solicitar Orçamento' },
+    { value: 'SERVICO_IMEDIATO', label: 'Serviço Imediato' },
   ];
 
-  const imovelSelecionadoData = imoveis.find(
-    (i) => i.id.toString() === imovelSelecionado
-  );
+  const imovelSelecionadoData = imoveis.find(i => i.id.toString() === imovelSelecionado);
 
   const handleAvancar = async () => {
     if (etapa < 3) {
@@ -114,121 +107,111 @@ export function ModalNovoChamado({
       setLoading(true);
 
       if (!imovelSelecionado || !descricaoOcorrido || !prioridade || !escopo) {
-        alert("Por favor, preencha todos os campos obrigatórios.");
+        alert('Por favor, preencha todos os campos obrigatórios.');
         return;
       }
 
       // Verificar anexos pendentes no cliente (antes da server action)
       const anexosPendentesRaw = getAnexosPendentes();
-      const anexosPendentes = anexosPendentesRaw.filter(
-        (id) => typeof id === 'number' && Number.isFinite(id) && id > 0,
-      );
+      const anexosPendentes = anexosPendentesRaw.filter(id => typeof id === 'number' && Number.isFinite(id) && id > 0);
       if (anexosPendentes.length !== anexosPendentesRaw.length) {
         console.warn('⚠️ IDs de anexo inválidos foram ignorados:', anexosPendentesRaw);
       }
-      console.log("🔍 Cliente - Anexos pendentes encontrados:", anexosPendentes);
+      console.log('🔍 Cliente - Anexos pendentes encontrados:', anexosPendentes);
 
       const chamadoData: NovoChamadoData = {
         descricaoOcorrido,
-        prioridade: prioridade as "BAIXA" | "MEDIA" | "ALTA",
+        prioridade: prioridade as 'BAIXA' | 'MEDIA' | 'ALTA',
         imovelId: parseInt(imovelSelecionado),
-        escopo: escopo as "SERVICO_IMEDIATO" | "ORCAMENTO",
+        escopo: escopo as 'SERVICO_IMEDIATO' | 'ORCAMENTO',
       };
 
       // Criar o chamado primeiro
       const chamadoResponse = await createChamadoAction(chamadoData);
 
-      console.log("📋 Resposta do chamado:", {
+      console.log('📋 Resposta do chamado:', {
         success: chamadoResponse.success,
         data: chamadoResponse.data,
         chamadoId: chamadoResponse.data?.id,
-        anexosPendentes: anexosPendentes.length
+        anexosPendentes: anexosPendentes.length,
       });
 
       // Se o chamado foi criado com sucesso E há anexos pendentes, associá-los no cliente
       if (chamadoResponse.success && chamadoResponse.data?.id && anexosPendentes.length > 0) {
         console.log(`📎 Associando ${anexosPendentes.length} anexos ao chamado ${chamadoResponse.data.id}`);
-        
+
         try {
           // Associar todos os anexos pendentes ao chamado criado
           const resultadosAssociacao = await Promise.allSettled(
-            anexosPendentes.map((anexoId) =>
-              updateAnexoChamadoIdClient(anexoId, Number(chamadoResponse.data?.id)),
-            ),
+            anexosPendentes.map(anexoId => updateAnexoChamadoIdClient(anexoId, Number(chamadoResponse.data?.id))),
           );
-          
+
           const sucessos = resultadosAssociacao.filter(result => result.status === 'fulfilled').length;
           const erros = resultadosAssociacao.filter(result => result.status === 'rejected').length;
-          
+
           console.log(`✅ Anexos associados: ${sucessos} sucessos, ${erros} erros`);
-          
+
           if (erros > 0) {
-            console.warn("⚠️ Alguns anexos não puderam ser associados:", 
-              resultadosAssociacao
-                .filter(result => result.status === 'rejected')
-                .map((result: any) => result.reason)
+            console.warn(
+              '⚠️ Alguns anexos não puderam ser associados:',
+              resultadosAssociacao.filter(result => result.status === 'rejected').map((result: any) => result.reason),
             );
           }
-          
+
           // Limpar anexos pendentes após associação bem-sucedida
           if (sucessos > 0) {
             limparAnexosPendentes();
-            console.log("🧹 Anexos pendentes removidos após associação");
+            console.log('🧹 Anexos pendentes removidos após associação');
           }
-          
         } catch (error) {
-          console.error("❌ Erro ao associar anexos:", error);
+          console.error('❌ Erro ao associar anexos:', error);
           // Não falhar a criação do chamado por erro na associação
         }
       } else if (anexosPendentes.length > 0) {
-        console.warn("⚠️ Havia anexos pendentes mas chamado não foi criado ou sem ID", {
+        console.warn('⚠️ Havia anexos pendentes mas chamado não foi criado ou sem ID', {
           success: chamadoResponse.success,
           hasId: !!chamadoResponse.data?.id,
-          anexosCount: anexosPendentes.length
+          anexosCount: anexosPendentes.length,
         });
       } else {
-        console.log("ℹ️ Nenhum anexo pendente para associar");
+        console.log('ℹ️ Nenhum anexo pendente para associar');
       }
 
       // Restaurar scroll da página quando o chamado for enviado com sucesso
       document.body.classList.remove('modal-open');
-      
+
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error("❌ Erro ao criar chamado:", error);
-      alert("Erro ao criar chamado. Tente novamente.");
+      console.error('❌ Erro ao criar chamado:', error);
+      alert('Erro ao criar chamado. Tente novamente.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-2xl rounded-2xl p-4 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div className='fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4'>
+      <div className='bg-white w-full max-w-2xl rounded-2xl p-4 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto'>
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold font-afacad text-black">
-            Novo chamado
-          </h2>
+        <div className='flex items-center justify-between mb-4 sm:mb-6'>
+          <h2 className='text-xl sm:text-2xl font-bold font-afacad text-black'>Novo chamado</h2>
           <button
-            className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-white rounded-full text-blue-600 border border-blue-600 hover:bg-gray-50 transition-colors"
+            className='w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-white rounded-full text-blue-600 border border-blue-600 hover:bg-gray-50 transition-colors'
             onClick={() => handleCloseModal(onClose)}
           >
-            <CloseIcon size={20} className="sm:hidden" />
-            <CloseIcon size={24} className="hidden sm:block" />
+            <CloseIcon size={20} className='sm:hidden' />
+            <CloseIcon size={24} className='hidden sm:block' />
           </button>
         </div>
 
         {/* Progresso */}
-        <div className="flex items-center justify-center mb-6 px-2 w-full space-x-2 sm:space-x-3 md:space-x-4">
+        <div className='flex items-center justify-center mb-6 px-2 w-full space-x-2 sm:space-x-3 md:space-x-4'>
           {Etapas.map((etapaItem, index) => (
-            <div key={etapaItem.numero} className="flex items-center">
+            <div key={etapaItem.numero} className='flex items-center'>
               <div
                 className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm sm:text-base md:text-lg font-bold transition-all ${
-                  etapaItem.ativo
-                    ? "bg-[#1F45FF] text-white"
-                    : "bg-[#F5F7FF] text-gray-400"
+                  etapaItem.ativo ? 'bg-[#1F45FF] text-white' : 'bg-[#F5F7FF] text-gray-400'
                 }`}
               >
                 {etapaItem.numero}
@@ -236,7 +219,7 @@ export function ModalNovoChamado({
               {index < Etapas.length - 1 && (
                 <div
                   className={`h-1 sm:h-1.5 w-8 sm:w-10 md:w-12 ml-1 sm:ml-2 transition-all ${
-                    etapa > index + 1 ? "bg-[#1F45FF]" : "bg-[#F5F7FF]"
+                    etapa > index + 1 ? 'bg-[#1F45FF]' : 'bg-[#F5F7FF]'
                   }`}
                 />
               )}
@@ -245,85 +228,90 @@ export function ModalNovoChamado({
         </div>
 
         {/* Conteúdo da etapa */}
-        <div className="mb-6 sm:mb-8">
+        <div className='mb-6 sm:mb-8'>
           {etapa === 1 && (
             <div>
-              <h3 className="text-base sm:text-lg font-bold font-afacad text-black mb-1 sm:mb-2">
+              <h3 className='text-base sm:text-lg font-bold font-afacad text-black mb-1 sm:mb-2'>
                 1ª Etapa: Identificação do Condomínio
               </h3>
-              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
-                Selecione o local onde o problema foi identificado para podermos
-                associar corretamente o chamado
+              <p className='text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6'>
+                Selecione o local onde o problema foi identificado para podermos associar corretamente o chamado
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4'>
                 <div>
                   <CondySelect
-                    label="Selecione o condomínio ou empresa"
+                    label='Selecione o condomínio ou empresa'
                     options={opcoesImovel}
                     value={imovelSelecionado}
                     onChange={setImovelSelecionado}
-                    placeholder="Selecione um imóvel"
+                    placeholder='Selecione um imóvel'
                     customIcon={
-                      <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 14.0823C13.7231 14.0823 15.12 12.6855 15.12 10.9623C15.12 9.23922 13.7231 7.84234 12 7.84234C10.2769 7.84234 8.88 9.23922 8.88 10.9623C8.88 12.6855 10.2769 14.0823 12 14.0823Z" stroke="black" strokeWidth="1.5"/>
-                        <path d="M3.61995 9.14234C5.58995 0.482344 18.42 0.492344 20.38 9.15234C21.53 14.2323 18.37 18.5323 15.6 21.1923C13.59 23.1323 10.41 23.1323 8.38995 21.1923C5.62995 18.5323 2.46995 14.2223 3.61995 9.14234Z" stroke="black" strokeWidth="1.5"/>
+                      <svg width='24' height='26' viewBox='0 0 24 26' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                        <path
+                          d='M12 14.0823C13.7231 14.0823 15.12 12.6855 15.12 10.9623C15.12 9.23922 13.7231 7.84234 12 7.84234C10.2769 7.84234 8.88 9.23922 8.88 10.9623C8.88 12.6855 10.2769 14.0823 12 14.0823Z'
+                          stroke='black'
+                          strokeWidth='1.5'
+                        />
+                        <path
+                          d='M3.61995 9.14234C5.58995 0.482344 18.42 0.492344 20.38 9.15234C21.53 14.2323 18.37 18.5323 15.6 21.1923C13.59 23.1323 10.41 23.1323 8.38995 21.1923C5.62995 18.5323 2.46995 14.2223 3.61995 9.14234Z'
+                          stroke='black'
+                          strokeWidth='1.5'
+                        />
                       </svg>
                     }
                   />
                   <div
                     className={`mt-2 w-full flex flex-col items-center justify-center gap-1 px-2 sm:px-3 text-xs sm:text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed ${
-                      imoveis.length === 0 ? "py-3 sm:py-4" : "py-2"
+                      imoveis.length === 0 ? 'py-3 sm:py-4' : 'py-2'
                     }`}
                   >
-                    <div className="flex items-center gap-1 sm:gap-2">
-                      <Plus size={14} className="text-gray-400 sm:hidden" />
-                      <Plus size={16} className="text-gray-400 hidden sm:block" />
-                      <span className="font-medium text-xs sm:text-sm">
-                        {imoveis.length === 0
-                          ? "Nenhum imóvel cadastrado"
-                          : "Cadastrar novo imóvel"}
+                    <div className='flex items-center gap-1 sm:gap-2'>
+                      <Plus size={14} className='text-gray-400 sm:hidden' />
+                      <Plus size={16} className='text-gray-400 hidden sm:block' />
+                      <span className='font-medium text-xs sm:text-sm'>
+                        {imoveis.length === 0 ? 'Nenhum imóvel cadastrado' : 'Cadastrar novo imóvel'}
                       </span>
                     </div>
-                    <span className="text-[10px] sm:text-xs text-gray-400 text-center">
-                      Funcionalidade indisponível. Entre em contato com seu
-                      atendente para cadastrar novos imóveis.
+                    <span className='text-[10px] sm:text-xs text-gray-400 text-center'>
+                      Funcionalidade indisponível. Entre em contato com seu atendente para cadastrar novos imóveis.
                     </span>
                   </div>
                 </div>
 
                 <CondySelect
-                  label="Local da instalação"
+                  label='Local da instalação'
                   options={opcoesLocalInstalacao}
                   value={localInstalacao}
                   onChange={setLocalInstalacao}
-                  placeholder="Selecione o local"
+                  placeholder='Selecione o local'
                   customIcon={
-                    <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 14.0823C13.7231 14.0823 15.12 12.6855 15.12 10.9623C15.12 9.23922 13.7231 7.84234 12 7.84234C10.2769 7.84234 8.88 9.23922 8.88 10.9623C8.88 12.6855 10.2769 14.0823 12 14.0823Z" stroke="black" strokeWidth="1.5"/>
-                      <path d="M3.61995 9.14234C5.58995 0.482344 18.42 0.492344 20.38 9.15234C21.53 14.2323 18.37 18.5323 15.6 21.1923C13.59 23.1323 10.41 23.1323 8.38995 21.1923C5.62995 18.5323 2.46995 14.2223 3.61995 9.14234Z" stroke="black" strokeWidth="1.5"/>
+                    <svg width='24' height='26' viewBox='0 0 24 26' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                      <path
+                        d='M12 14.0823C13.7231 14.0823 15.12 12.6855 15.12 10.9623C15.12 9.23922 13.7231 7.84234 12 7.84234C10.2769 7.84234 8.88 9.23922 8.88 10.9623C8.88 12.6855 10.2769 14.0823 12 14.0823Z'
+                        stroke='black'
+                        strokeWidth='1.5'
+                      />
+                      <path
+                        d='M3.61995 9.14234C5.58995 0.482344 18.42 0.492344 20.38 9.15234C21.53 14.2323 18.37 18.5323 15.6 21.1923C13.59 23.1323 10.41 23.1323 8.38995 21.1923C5.62995 18.5323 2.46995 14.2223 3.61995 9.14234Z'
+                        stroke='black'
+                        strokeWidth='1.5'
+                      />
                     </svg>
                   }
                 />
               </div>
 
               {imovelSelecionadoData && (
-                <div className="mb-3 sm:mb-4">
-                  <label className="block text-xs sm:text-sm font-afacad text-[#1F45FF] mb-1">
-                    Endereço
-                  </label>
-                  <div className="border-2 border-[#1F45FF] rounded-xl px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 flex items-center gap-1 sm:gap-2">
-                    <MapPin size={14} className="text-[#1F45FF] sm:hidden" />
-                    <MapPin size={16} className="text-[#1F45FF] hidden sm:block" />
-                    <span className="text-xs sm:text-sm">
-                      {imovelSelecionadoData.nome}:{" "}
-                      {imovelSelecionadoData.endereco},{" "}
-                      {imovelSelecionadoData.numero} –{" "}
-                      {imovelSelecionadoData.bairro} –{" "}
-                      {imovelSelecionadoData.cidade} |{" "}
-                      {imovelSelecionadoData.uf}
-                      {imovelSelecionadoData.complemento &&
-                        ` - ${imovelSelecionadoData.complemento}`}
+                <div className='mb-3 sm:mb-4'>
+                  <label className='block text-xs sm:text-sm font-afacad text-[#1F45FF] mb-1'>Endereço</label>
+                  <div className='border-2 border-[#1F45FF] rounded-xl px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 flex items-center gap-1 sm:gap-2'>
+                    <MapPin size={14} className='text-[#1F45FF] sm:hidden' />
+                    <MapPin size={16} className='text-[#1F45FF] hidden sm:block' />
+                    <span className='text-xs sm:text-sm'>
+                      {imovelSelecionadoData.nome}: {imovelSelecionadoData.endereco}, {imovelSelecionadoData.numero} –{' '}
+                      {imovelSelecionadoData.bairro} – {imovelSelecionadoData.cidade} | {imovelSelecionadoData.uf}
+                      {imovelSelecionadoData.complemento && ` - ${imovelSelecionadoData.complemento}`}
                     </span>
                   </div>
                 </div>
@@ -335,34 +323,68 @@ export function ModalNovoChamado({
 
           {etapa === 2 && (
             <div>
-              <h3 className="text-base sm:text-lg font-bold font-afacad text-black mb-1 sm:mb-2">
+              <h3 className='text-base sm:text-lg font-bold font-afacad text-black mb-1 sm:mb-2'>
                 2ª Etapa: Descrevendo o problema
               </h3>
-              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
-                Infoque o nível de urgência e se deseja apenas um orçamento ou
-                execução imediata do serviço
+              <p className='text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6'>
+                Infoque o nível de urgência e se deseja apenas um orçamento ou execução imediata do serviço
               </p>
 
-              <div className="mb-4 sm:mb-6">
-                <label className="block text-xs sm:text-sm font-afacad text-[#1F45FF] mb-1">
+              <div className='mb-4 sm:mb-6'>
+                <label className='block text-xs sm:text-sm font-afacad text-[#1F45FF] mb-1'>
                   Informe detalhes sobre o problema *
                 </label>
-                <div className="relative">
-                  <div className="absolute left-3 sm:left-4 top-2 sm:top-3 z-10">
-                    <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M8 2.65234V5.65234" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M16 2.65234V5.65234" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M21 9.15234V17.6523C21 20.6523 19.5 22.6523 16 22.6523H8C4.5 22.6523 3 20.6523 3 17.6523V9.15234C3 6.15234 4.5 4.15234 8 4.15234H16C19.5 4.15234 21 6.15234 21 9.15234Z" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M8 11.6523H16" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M8 16.6523H12" stroke="black" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                <div className='relative'>
+                  <div className='absolute left-3 sm:left-4 top-2 sm:top-3 z-10'>
+                    <svg width='24' height='26' viewBox='0 0 24 26' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                      <path
+                        d='M8 2.65234V5.65234'
+                        stroke='black'
+                        strokeWidth='1.5'
+                        strokeMiterlimit='10'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                      <path
+                        d='M16 2.65234V5.65234'
+                        stroke='black'
+                        strokeWidth='1.5'
+                        strokeMiterlimit='10'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                      <path
+                        d='M21 9.15234V17.6523C21 20.6523 19.5 22.6523 16 22.6523H8C4.5 22.6523 3 20.6523 3 17.6523V9.15234C3 6.15234 4.5 4.15234 8 4.15234H16C19.5 4.15234 21 6.15234 21 9.15234Z'
+                        stroke='black'
+                        strokeWidth='1.5'
+                        strokeMiterlimit='10'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                      <path
+                        d='M8 11.6523H16'
+                        stroke='black'
+                        strokeWidth='1.5'
+                        strokeMiterlimit='10'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                      <path
+                        d='M8 16.6523H12'
+                        stroke='black'
+                        strokeWidth='1.5'
+                        strokeMiterlimit='10'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
                     </svg>
                   </div>
                   <textarea
-                    placeholder="Descreva o ocorrido"
-                    className="w-full border-2 border-[#1F45FF] rounded-xl pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm"
+                    placeholder='Descreva o ocorrido'
+                    className='w-full border-2 border-[#1F45FF] rounded-xl pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm'
                     rows={3}
                     value={descricaoOcorrido}
-                    onChange={(e) => setDescricaoOcorrido(e.target.value)}
+                    onChange={e => setDescricaoOcorrido(e.target.value)}
                   />
                 </div>
               </div>
@@ -373,29 +395,28 @@ export function ModalNovoChamado({
 
           {etapa === 3 && (
             <div>
-              <h3 className="text-base sm:text-lg font-bold font-afacad text-black mb-1 sm:mb-2">
+              <h3 className='text-base sm:text-lg font-bold font-afacad text-black mb-1 sm:mb-2'>
                 3ª Etapa: Prioridade e escopo
               </h3>
-              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
-                Infoque o nível de urgência e se deseja apenas um orçamento ou
-                execução imediata do serviço
+              <p className='text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6'>
+                Infoque o nível de urgência e se deseja apenas um orçamento ou execução imediata do serviço
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4'>
                 <CondySelect
-                  label="Prioridade"
+                  label='Prioridade'
                   options={opcoesPrioridade}
                   value={prioridade}
                   onChange={setPrioridade}
-                  placeholder="Selecione a prioridade"
+                  placeholder='Selecione a prioridade'
                 />
 
                 <CondySelect
-                  label="Tipo de solicitação"
+                  label='Tipo de solicitação'
                   options={opcoesEscopo}
                   value={escopo}
                   onChange={setEscopo}
-                  placeholder="Selecione o tipo"
+                  placeholder='Selecione o tipo'
                 />
               </div>
             </div>
@@ -403,10 +424,10 @@ export function ModalNovoChamado({
         </div>
 
         {/* Navegação */}
-        <div className="flex justify-end gap-4">
+        <div className='flex justify-end gap-4'>
           {etapa > 1 && (
             <button
-              className="bg-[#F4F5FF] text-[#1F45FF] font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow hover:bg-blue-50 transition-colors"
+              className='bg-[#F4F5FF] text-[#1F45FF] font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow hover:bg-blue-50 transition-colors'
               onClick={handleVoltar}
               disabled={loading}
             >
@@ -415,15 +436,11 @@ export function ModalNovoChamado({
           )}
 
           <button
-            className="bg-[#1F45FF] text-white font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow hover:bg-blue-600 transition-colors disabled:opacity-50"
+            className='bg-[#1F45FF] text-white font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow hover:bg-blue-600 transition-colors disabled:opacity-50'
             onClick={handleAvancar}
             disabled={loading}
           >
-            {loading
-              ? "Processando..."
-              : etapa < 3
-              ? "Avançar"
-              : "Enviar chamado"}
+            {loading ? 'Processando...' : etapa < 3 ? 'Avançar' : 'Enviar chamado'}
           </button>
         </div>
       </div>

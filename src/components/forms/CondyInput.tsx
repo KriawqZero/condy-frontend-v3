@@ -126,12 +126,12 @@ export default function CondyInput({
         }
       `}</style>
 
-      <div className="form-group">
-        <div className="input-container">
+      <div className='form-group'>
+        <div className='input-container'>
           {/* Ícone à esquerda */}
           {icon && (
-            <div className="input-icon">
-              <img src={icon} alt="" className="w-5 h-5" />
+            <div className='input-icon'>
+              <img src={icon} alt='' className='w-5 h-5' />
             </div>
           )}
 
@@ -158,34 +158,32 @@ export default function CondyInput({
             })}
           >
             {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
+            {required && <span className='text-red-500 ml-1'>*</span>}
           </label>
 
           {/* Ícone de validação/ação à direita */}
           {isPassword ? (
-            <div className="check-icon cursor-pointer" onClick={onToggleVisibility}>
+            <div className='check-icon cursor-pointer' onClick={onToggleVisibility}>
               <img
                 src={isPasswordVisible ? '/svg/eye_off.svg' : '/svg/eye.svg'}
-                alt="Mostrar/Ocultar senha"
-                className="w-5 h-5"
+                alt='Mostrar/Ocultar senha'
+                className='w-5 h-5'
               />
             </div>
           ) : showValidation && value ? (
-            <div className="check-icon">
+            <div className='check-icon'>
               <img
                 src={isValid ? '/svg/checkmark_success.svg' : '/svg/checkmark_error.svg'}
                 alt={isValid ? 'Sucesso' : 'Erro'}
-                className="w-5 h-5"
+                className='w-5 h-5'
               />
             </div>
           ) : null}
         </div>
 
         {/* Mensagem de erro */}
-        {error && (
-          <p className="text-sm text-red-600 mt-1">{error}</p>
-        )}
+        {error && <p className='text-sm text-red-600 mt-1'>{error}</p>}
       </div>
     </>
   );
-} 
+}
