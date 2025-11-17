@@ -2,7 +2,7 @@
 
 import { getChamados, getImoveis, updateChamado } from '@/lib/api';
 import { apiClient } from '@/lib/api-client';
-import { ResponsePayload, Chamado, User } from '@/types';
+import { ResponsePayload, Chamado, User, UserStatus } from '@/types';
 
 // Action para admin obter todos os chamados (sem restrições)
 export async function getAdminChamadosAction(): Promise<ResponsePayload<Chamado[]>> {
@@ -123,28 +123,17 @@ export async function getAdminUsersAction(): Promise<ResponsePayload<User[]>> {
 }
 
 // Action para admin atualizar usuário
-export async function updateUserAdminAction(
-  id: string,
-  data: {
-    name?: string;
-    email?: string;
-    cpfCnpj?: string;
-    whatsapp?: string;
-    userType?: string;
-    isActive?: boolean;
-  },
-): Promise<ResponsePayload<User>> {
-  try {
-    // TODO: Implementar chamada API real
-    // const response = await updateUserAdmin(id, data);
+type UpdateUserAdminPayload = Partial<Omit<User, 'id'>> & {
+  password?: string;
+  status?: UserStatus;
+  [key: string]: unknown;
+};
 
-    // Mock response por enquanto
+export async function updateUserAdminAction(id: string, data: UpdateUserAdminPayload): Promise<ResponsePayload<User>> {
+  try {
     return {
       success: true,
-      data: {
-        id,
-        ...data,
-      } as any,
+      data: await apiClient.patch<User>(`/auth/${id}`, data),
       message: 'Usuário atualizado com sucesso!',
     };
   } catch (error: any) {
@@ -242,7 +231,7 @@ export async function getSystemStatsAction(): Promise<
         const updated = new Date(c.updatedAt);
         return (updated.getTime() - created.getTime()) / (1000 * 60 * 60); // em horas
       });
-      mediaTempoResolucao = tempos.reduce((acc, tempo) => acc + tempo, 0) / tempos.length;
+      mediaTempoResolucao = tempos.reduce((acc: number, tempo: number) => acc + tempo, 0) / tempos.length;
     }
 
     return {

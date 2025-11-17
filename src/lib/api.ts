@@ -189,7 +189,12 @@ export async function loginUser(credentials: LoginRequest): Promise<AuthResponse
     const response: AxiosResponse<AuthResponse> = await apiClient.post('/auth/login', credentials);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Erro no login');
+    const status = error?.response?.status ?? 500;
+    const message = error?.response?.data?.message || 'Erro no login';
+    // Embutindo o status no erro lançado
+    const err: any = new Error(message);
+    err.status = status;
+    throw err;
   }
 }
 

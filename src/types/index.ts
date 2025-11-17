@@ -1,4 +1,6 @@
 // User Types
+export type UserStatus = 'ATIVO' | 'INATIVO' | 'BLOQUEADO' | 'PENDENTE' | 'FALTA_DOCUMENTOS';
+
 export interface User {
   id: string;
   name: string;
@@ -7,6 +9,7 @@ export interface User {
   whatsapp: string;
   userType: UserType;
   dataNascimento?: string;
+  status?: UserStatus;
 }
 
 export type ResponsePayload<T> = {

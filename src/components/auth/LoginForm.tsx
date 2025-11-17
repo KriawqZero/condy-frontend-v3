@@ -43,6 +43,7 @@ export default function LoginForm() {
       formDataToSend.append('password', formData.senha);
 
       const result = await loginAction(formDataToSend);
+      console.log('result', result);
 
       if (result && !result.success) {
         console.log('result', result);

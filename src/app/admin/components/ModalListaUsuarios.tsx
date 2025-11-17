@@ -2,10 +2,40 @@
 
 import { useEffect, useMemo, useState, ChangeEvent } from 'react';
 import { getAdminUsersAction, updateUserAdminAction } from '@/app/actions/admin';
-import { User, UserType } from '@/types';
-import { Loader2, RefreshCcw, Search, ShieldBan, ShieldCheck, Users, X } from 'lucide-react';
+import { User, UserType, UserStatus } from '@/types';
+import type { LucideIcon } from 'lucide-react';
+import {
+  Clock,
+  FileWarning,
+  Loader2,
+  PauseCircle,
+  RefreshCcw,
+  Search,
+  ShieldBan,
+  ShieldCheck,
+  Users,
+  X,
+} from 'lucide-react';
 
-type UserStatus = 'ATIVO' | 'INATIVO' | 'BLOQUEADO' | 'PENDENTE' | 'FALTA_DOCUMENTOS';
+const STATUS_DETAILS: Record<UserStatus, { label: string; bgClass: string; textClass: string; Icon: LucideIcon }> = {
+  ATIVO: { label: 'Ativo', bgClass: 'bg-green-50', textClass: 'text-green-700', Icon: ShieldCheck },
+  INATIVO: { label: 'Inativo', bgClass: 'bg-gray-100', textClass: 'text-gray-600', Icon: PauseCircle },
+  BLOQUEADO: { label: 'Bloqueado', bgClass: 'bg-red-50', textClass: 'text-red-600', Icon: ShieldBan },
+  PENDENTE: { label: 'Pendente', bgClass: 'bg-yellow-50', textClass: 'text-yellow-700', Icon: Clock },
+  FALTA_DOCUMENTOS: {
+    label: 'Documentação pendente',
+    bgClass: 'bg-amber-50',
+    textClass: 'text-amber-700',
+    Icon: FileWarning,
+  },
+};
+
+const STATUS_ORDER: UserStatus[] = ['ATIVO', 'INATIVO', 'BLOQUEADO', 'PENDENTE', 'FALTA_DOCUMENTOS'];
+
+const statusOptions = STATUS_ORDER.map(value => ({
+  value,
+  label: STATUS_DETAILS[value].label,
+}));
 
 type AdminUserData = User & {
   status?: UserStatus;
@@ -119,9 +149,12 @@ export function ModalListaUsuarios({ onClose, onSuccess }: ModalListaUsuariosPro
       });
 
       if (response.success && response.data) {
-        setUsuarios(prev =>
-          prev.map(usuario => (usuario.id === usuarioEditando.id ? { ...usuario, ...formEdicao } : usuario)),
-        );
+        const usuarioAtualizado: AdminUserData = {
+          ...usuarioEditando,
+          ...response.data,
+        };
+
+        setUsuarios(prev => prev.map(usuario => (usuario.id === usuarioEditando.id ? usuarioAtualizado : usuario)));
         cancelarEdicao();
         onSuccess();
       } else {
@@ -134,29 +167,37 @@ export function ModalListaUsuarios({ onClose, onSuccess }: ModalListaUsuariosPro
     }
   };
 
-  const alternarStatus = async (usuario: AdminUserData) => {
-    /*     setMudandoStatus(usuario.id);
+  const alterarStatus = async (usuario: AdminUserData, novoStatus: UserStatus) => {
+    if (!usuario || usuario.status === novoStatus) {
+      return;
+    }
+
+    setMudandoStatus(usuario.id);
     setError(null);
+
     try {
       const response = await updateUserAdminAction(usuario.id, {
-        status: usuario.status === "ATIVO" ? "INATIVO" as UserStatus : "ATIVO" as UserStatus,
+        status: novoStatus,
       });
 
-      if (response.success) {
-        setUsuarios((prev) =>
-          prev.map((item) =>
-            item.id === usuario.id ? { ...item, status: !usuario.status } : item,
-          ),
-        );
+      if (response.success && response.data) {
+        const statusAtualizado = (response.data.status as UserStatus | undefined) ?? novoStatus;
+        const usuarioAtualizado: AdminUserData = {
+          ...usuario,
+          ...response.data,
+          status: statusAtualizado,
+        };
+
+        setUsuarios(prev => prev.map(item => (item.id === usuario.id ? usuarioAtualizado : item)));
         onSuccess();
       } else {
-        setError(response.error || "Não foi possível atualizar o status do usuário.");
+        setError(response.error || 'Não foi possível atualizar o status do usuário.');
       }
     } catch (err: any) {
-      setError(err.message || "Erro inesperado ao atualizar status.");
+      setError(err.message || 'Erro inesperado ao atualizar status.');
     } finally {
       setMudandoStatus(null);
-    } */
+    }
   };
 
   const recarregar = async () => {
@@ -238,61 +279,64 @@ export function ModalListaUsuarios({ onClose, onSuccess }: ModalListaUsuariosPro
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-gray-100 text-sm font-afacad'>
-                  {usuariosFiltrados.map(usuario => (
-                    <tr key={usuario.id} className='hover:bg-gray-50 transition-colors'>
-                      <td className='px-4 py-3 font-semibold text-gray-900'>{usuario.name}</td>
-                      <td className='px-4 py-3 text-gray-600'>{usuario.email}</td>
-                      <td className='px-4 py-3 text-gray-600'>{usuario.whatsapp || '-'}</td>
-                      <td className='px-4 py-3 text-gray-600'>{usuario.cpfCnpj || '-'}</td>
-                      <td className='px-4 py-3'>
-                        <span className='inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#1F45FF]'>
-                          {usuario.userType.split('_').join(' ').toLowerCase()}
-                        </span>
-                      </td>
-                      <td className='px-4 py-3 text-center'>
-                        {usuario.status === 'ATIVO' ? (
-                          <span className='inline-flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700'>
-                            <ShieldCheck className='h-3 w-3' />
-                            Ativo
+                  {usuariosFiltrados.map(usuario => {
+                    const statusAtual = (usuario.status ?? 'PENDENTE') as UserStatus;
+                    const statusConfig = STATUS_DETAILS[statusAtual];
+                    const StatusIcon = statusConfig.Icon;
+                    const atualizandoStatus = mudandoStatus === usuario.id;
+
+                    return (
+                      <tr key={usuario.id} className='hover:bg-gray-50 transition-colors'>
+                        <td className='px-4 py-3 font-semibold text-gray-900'>{usuario.name}</td>
+                        <td className='px-4 py-3 text-gray-600'>{usuario.email}</td>
+                        <td className='px-4 py-3 text-gray-600'>{usuario.whatsapp || '-'}</td>
+                        <td className='px-4 py-3 text-gray-600'>{usuario.cpfCnpj || '-'}</td>
+                        <td className='px-4 py-3'>
+                          <span className='inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#1F45FF]'>
+                            {usuario.userType.split('_').join(' ').toLowerCase()}
                           </span>
-                        ) : (
-                          <span className='inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600'>
-                            <ShieldBan className='h-3 w-3' />
-                            Inativo
+                        </td>
+                        <td className='px-4 py-3 text-center'>
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${statusConfig.bgClass} ${statusConfig.textClass}`}
+                          >
+                            <StatusIcon className='h-3 w-3' />
+                            {statusConfig.label}
                           </span>
-                        )}
-                      </td>
-                      <td className='px-4 py-3'>
-                        <div className='flex items-center justify-end gap-2'>
-                          <button
-                            type='button'
-                            onClick={() => selecionarUsuario(usuario)}
-                            className='rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors'
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type='button'
-                            onClick={() => alternarStatus(usuario)}
-                            className={`rounded-lg px-3 py-2 text-xs font-semibold text-white transition-colors ${
-                              usuario.status === 'ATIVO'
-                                ? 'bg-red-500 hover:bg-red-600'
-                                : 'bg-green-500 hover:bg-green-600'
-                            }`}
-                            disabled={mudandoStatus === usuario.id}
-                          >
-                            {mudandoStatus === usuario.id ? (
-                              <Loader2 className='h-4 w-4 animate-spin' />
-                            ) : usuario.status === 'ATIVO' ? (
-                              'Desativar'
-                            ) : (
-                              'Ativar'
-                            )}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className='px-4 py-3'>
+                          <div className='flex flex-wrap items-center justify-end gap-2'>
+                            <div className='relative min-w-[190px]'>
+                              <select
+                                value={statusAtual}
+                                onChange={event => alterarStatus(usuario, event.target.value as UserStatus)}
+                                className={`w-full rounded-lg border border-gray-200 bg-white px-3 py-2 pr-10 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1F45FF]/40 ${
+                                  atualizandoStatus ? 'cursor-not-allowed opacity-60' : ''
+                                }`}
+                                disabled={atualizandoStatus}
+                              >
+                                {statusOptions.map(option => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                              {atualizandoStatus && (
+                                <Loader2 className='pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[#1F45FF]' />
+                              )}
+                            </div>
+                            <button
+                              type='button'
+                              onClick={() => selecionarUsuario(usuario)}
+                              className='rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors'
+                            >
+                              Editar
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
